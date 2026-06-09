@@ -1,0 +1,60 @@
+using System;
+using System.Windows.Forms;
+using QuanLyKhoHang.Models;
+using QuanLyKhoHang.Repositories;
+
+namespace QuanLyKhoHang.Forms
+{
+    public partial class FrmKhachHang : Form
+    {
+        private readonly KhachHangRepository _khachHangRepo = new KhachHangRepository();
+        private int _selectedId = 0;
+
+        public FrmKhachHang() { InitializeComponent(); }
+
+        private void FrmKhachHang_Load(object sender, EventArgs e) { LoadData(); }
+
+        private void LoadData() { dgvKhachHang.DataSource = _khachHangRepo.GetAll(); }
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtTen.Text.Trim())) { MessageBox.Show("Vui lòng nhập tên khách hàng!"); return; }
+            _khachHangRepo.Them(new KhachHang { TenKhachHang = txtTen.Text.Trim(), DiaChiKH = txtDiaChi.Text.Trim(), SoDienThoai = txtSDT.Text.Trim(), Email = txtEmail.Text.Trim(), GhiChu = txtGhiChu.Text.Trim() });
+            MessageBox.Show("Thêm thành công!"); ClearInputs(); LoadData();
+        }
+
+        private void dgvKhachHang_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                var row = dgvKhachHang.Rows[e.RowIndex];
+                _selectedId = Convert.ToInt32(row.Cells["Mã KH"].Value);
+                txtTen.Text = row.Cells["Tên Khách Hàng"].Value.ToString();
+                txtDiaChi.Text = row.Cells["Địa Chỉ"].Value.ToString();
+                txtSDT.Text = row.Cells["SĐT"].Value.ToString();
+                txtEmail.Text = row.Cells["Email"].Value.ToString();
+                txtGhiChu.Text = row.Cells["Ghi Chú"].Value.ToString();
+            }
+        }
+
+        private void btnSua_Click(object sender, EventArgs e)
+        {
+            if (_selectedId == 0) return;
+            _khachHangRepo.Sua(new KhachHang { MaKhachHang = _selectedId, TenKhachHang = txtTen.Text.Trim(), DiaChiKH = txtDiaChi.Text.Trim(), SoDienThoai = txtSDT.Text.Trim(), Email = txtEmail.Text.Trim(), GhiChu = txtGhiChu.Text.Trim() });
+            MessageBox.Show("Cập nhật thành công!"); ClearInputs(); LoadData();
+        }
+
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+            if (_selectedId == 0) return;
+            if (MessageBox.Show("Bạn có muốn xóa không?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                _khachHangRepo.Xoa(_selectedId); ClearInputs(); LoadData();
+            }
+        }
+
+        private void btnLamMoi_Click(object sender, EventArgs e) { ClearInputs(); LoadData(); }
+
+        private void ClearInputs() { _selectedId = 0; txtTen.Clear(); txtDiaChi.Clear(); txtSDT.Clear(); txtEmail.Clear(); txtGhiChu.Clear(); }
+    }
+}

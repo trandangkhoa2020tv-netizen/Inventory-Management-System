@@ -1,0 +1,125 @@
+namespace QuanLyKhoHang.Forms
+{
+    partial class FrmHangHoa
+    {
+        private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.Panel pnlTopControls; // Khung bám đỉnh để gom cụm điều khiển
+        private System.Windows.Forms.DataGridView dgvHangHoa;
+        private System.Windows.Forms.TextBox txtTenHang;
+        private System.Windows.Forms.ComboBox cbLoaiHang;
+        private System.Windows.Forms.ComboBox cbNhaCungCap;
+        private System.Windows.Forms.TextBox txtGiaNhap;
+        private System.Windows.Forms.TextBox txtGiaBan;
+        private System.Windows.Forms.TextBox txtSoLuong;
+        private System.Windows.Forms.TextBox txtDVT;
+        private System.Windows.Forms.TextBox txtGhiChu;
+        private System.Windows.Forms.Button btnThem;
+        private System.Windows.Forms.Button btnSua;
+        private System.Windows.Forms.Button btnXoa;
+        private System.Windows.Forms.Button btnLamMoi;
+        private System.Windows.Forms.Label lblTitle;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        private void InitializeComponent()
+        {
+            this.pnlTopControls = new System.Windows.Forms.Panel();
+            this.dgvHangHoa = new System.Windows.Forms.DataGridView();
+            this.txtTenHang = new System.Windows.Forms.TextBox();
+            this.cbLoaiHang = new System.Windows.Forms.ComboBox();
+            this.cbNhaCungCap = new System.Windows.Forms.ComboBox();
+            this.txtGiaNhap = new System.Windows.Forms.TextBox();
+            this.txtGiaBan = new System.Windows.Forms.TextBox();
+            this.txtSoLuong = new System.Windows.Forms.TextBox();
+            this.txtDVT = new System.Windows.Forms.TextBox();
+            this.txtGhiChu = new System.Windows.Forms.TextBox();
+            this.btnThem = new System.Windows.Forms.Button();
+            this.btnSua = new System.Windows.Forms.Button();
+            this.btnXoa = new System.Windows.Forms.Button();
+            this.btnLamMoi = new System.Windows.Forms.Button();
+            this.lblTitle = new System.Windows.Forms.Label();
+            
+            // Khai báo các Label phụ trợ nhanh gọn
+            var lbl1 = new System.Windows.Forms.Label() { Text = "Tên hàng:", Location = new System.Drawing.Point(20, 55), AutoSize = true };
+            var lbl2 = new System.Windows.Forms.Label() { Text = "Loại hàng:", Location = new System.Drawing.Point(20, 95), AutoSize = true };
+            var lbl3 = new System.Windows.Forms.Label() { Text = "Nhà cung cấp:", Location = new System.Drawing.Point(20, 135), AutoSize = true };
+            var lbl4 = new System.Windows.Forms.Label() { Text = "Giá nhập:", Location = new System.Drawing.Point(380, 55), AutoSize = true };
+            var lbl5 = new System.Windows.Forms.Label() { Text = "Giá bán:", Location = new System.Drawing.Point(380, 95), AutoSize = true };
+            var lbl6 = new System.Windows.Forms.Label() { Text = "Số lượng tồn:", Location = new System.Drawing.Point(380, 135), AutoSize = true };
+            var lbl7 = new System.Windows.Forms.Label() { Text = "Đơn vị tính:", Location = new System.Drawing.Point(680, 55), AutoSize = true };
+            var lbl8 = new System.Windows.Forms.Label() { Text = "Ghi chú:", Location = new System.Drawing.Point(680, 95), AutoSize = true };
+
+            ((System.ComponentModel.ISupportInitialize)(this.dgvHangHoa)).BeginInit();
+            this.pnlTopControls.SuspendLayout();
+            this.SuspendLayout();
+
+            // pnlTopControls (Định vị thanh nhập liệu bám đỉnh cố định)
+            this.pnlTopControls.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlTopControls.Height = 230;
+            this.pnlTopControls.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.pnlTopControls.Controls.AddRange(new System.Windows.Forms.Control[] {
+                this.lblTitle, this.txtTenHang, this.cbLoaiHang, this.cbNhaCungCap,
+                this.txtGiaNhap, this.txtGiaBan, this.txtSoLuong, this.txtDVT, this.txtGhiChu,
+                this.btnThem, this.btnSua, this.btnXoa, this.btnLamMoi,
+                lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7, lbl8
+            });
+
+            // lblTitle
+            this.lblTitle.Text = "QUẢN LÝ DANH MỤC HÀNG HÓA";
+            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblTitle.Location = new System.Drawing.Point(20, 12);
+            this.lblTitle.AutoSize = true;
+            this.lblTitle.ForeColor = System.Drawing.Color.DarkBlue;
+
+            // Tọa độ các ô nhập dữ liệu (Inputs Layout)
+            this.txtTenHang.Location = new System.Drawing.Point(130, 52); this.txtTenHang.Size = new System.Drawing.Size(220, 27);
+            this.cbLoaiHang.Location = new System.Drawing.Point(130, 92); this.cbLoaiHang.Size = new System.Drawing.Size(220, 27); this.cbLoaiHang.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbNhaCungCap.Location = new System.Drawing.Point(130, 132); this.cbNhaCungCap.Size = new System.Drawing.Size(220, 27); this.cbNhaCungCap.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            
+            this.txtGiaNhap.Location = new System.Drawing.Point(480, 52); this.txtGiaNhap.Size = new System.Drawing.Size(170, 27);
+            this.txtGiaBan.Location = new System.Drawing.Point(480, 92); this.txtGiaBan.Size = new System.Drawing.Size(170, 27);
+            this.txtSoLuong.Location = new System.Drawing.Point(480, 132); this.txtSoLuong.Size = new System.Drawing.Size(170, 27);
+            
+            // Các trường bên phải cùng nhận thêm Anchor Right để co giãn mượt mà theo lề phải
+            this.txtDVT.Location = new System.Drawing.Point(770, 52); this.txtDVT.Size = new System.Drawing.Size(180, 27);
+            this.txtDVT.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+            this.txtGhiChu.Location = new System.Drawing.Point(770, 92); this.txtGhiChu.Size = new System.Drawing.Size(180, 67); this.txtGhiChu.Multiline = true;
+            this.txtGhiChu.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+
+            // Vị trí phân bổ các nút bấm chức năng (Buttons Layout)
+            this.btnThem.Text = "Thêm"; this.btnThem.Location = new System.Drawing.Point(130, 180); this.btnThem.Size = new System.Drawing.Size(95, 35); this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
+            this.btnSua.Text = "Sửa"; this.btnSua.Location = new System.Drawing.Point(240, 180); this.btnSua.Size = new System.Drawing.Size(95, 35); this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
+            this.btnXoa.Text = "Xóa"; this.btnXoa.Location = new System.Drawing.Point(350, 180); this.btnXoa.Size = new System.Drawing.Size(95, 35); this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
+            this.btnLamMoi.Text = "Làm Mới"; this.btnLamMoi.Location = new System.Drawing.Point(460, 180); this.btnLamMoi.Size = new System.Drawing.Size(95, 35); this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
+
+            // dgvHangHoa (Ép bảng lưới bung rộng chiếm 100% không gian trống còn lại bên dưới)
+            this.dgvHangHoa.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvHangHoa.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvHangHoa.AllowUserToAddRows = false;
+            this.dgvHangHoa.ReadOnly = true;
+            this.dgvHangHoa.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvHangHoa.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvHangHoa_CellClick);
+
+            // FrmHangHoa Form Properties
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1000, 600);
+            this.Controls.Add(this.dgvHangHoa);
+            this.Controls.Add(this.pnlTopControls); // Nạp panel bám lề lên trước bảng để chia cắt layout
+            this.Text = "Quản Lý Hàng Hóa";
+            this.Load += new System.EventHandler(this.FrmHangHoa_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvHangHoa)).EndInit();
+            this.pnlTopControls.ResumeLayout(false);
+            this.pnlTopControls.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+    }
+}
