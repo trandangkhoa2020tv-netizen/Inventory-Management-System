@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Forms;
-using QuanLyKhoHang.Repositories; // Đảm bảo đã có dòng này
+using QuanLyKhoHang.Models;       // THÊM DÒNG NÀY: Để sử dụng lớp lưu vai trò UserSession
+using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -29,18 +30,22 @@ namespace QuanLyKhoHang.Forms
 
             try
             {
-                // 2. SỬA TẠI ĐÂY: Gọi CheckLogin thay vì Authenticate để lấy vai trò (string)
+                // 2. Gọi CheckLogin để lấy vai trò từ Database trả về
                 string vaiTro = _taiKhoanRepository.CheckLogin(username, password);
 
                 // Nếu chuỗi vai trò trả về không rỗng nghĩa là tài khoản đúng
                 if (!string.IsNullOrEmpty(vaiTro))
                 {
+                    // ĐÃ THÊM: Lưu trực tiếp vai trò nhận được từ DB vào bộ nhớ tạm hệ thống
+                    UserSession.VaiTro = vaiTro; 
+                    UserSession.TenTaiKhoan = username;
+
                     MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                     // 3. Mở Form Main
                     FrmMain frmMain = new FrmMain();
                     this.Hide();
-                    frmMain.ShowDialog(); // SỬA TẠI ĐÂY: Đổi FrmMain thành frmMain (chữ f viết thường)
+                    frmMain.ShowDialog(); 
                     this.Close(); 
                 }
                 else

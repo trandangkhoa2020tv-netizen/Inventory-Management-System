@@ -12,16 +12,29 @@ namespace QuanLyKhoHang.Forms
         private readonly LoaiHangRepository _loaiHangRepo = new LoaiHangRepository();
         private readonly NhaCungCapRepository _nccRepo = new NhaCungCapRepository();
         private int _selectedId = 0; // Lưu ID dòng đang chọn để Sửa/Xóa
+        private string _vaiTro = "NhanVien"; // ĐÃ THÊM: Biến lưu vai trò
 
-        public FrmHangHoa()
+        // ĐÃ SỬA: Hàm khởi tạo nhận tham số từ FrmMain truyền xuống
+        public FrmHangHoa(string vaiTro)
         {
             InitializeComponent();
+            this._vaiTro = vaiTro;
         }
 
         private void FrmHangHoa_Load(object sender, EventArgs e)
         {
             LoadDataGrid();
             LoadComboBoxes();
+
+            // ĐÃ THÊM: Phân quyền khóa nút Xóa nếu là Nhân viên
+            if (_vaiTro == "NhanVien")
+            {
+                btnXoa.Enabled = false; // Nhân viên chỉ xem, thêm, sửa danh mục, không được xóa bậy
+            }
+            else
+            {
+                btnXoa.Enabled = true;  // Admin có quyền xóa
+            }
         }
 
         private void LoadDataGrid()
@@ -33,13 +46,11 @@ namespace QuanLyKhoHang.Forms
 
         private void LoadComboBoxes()
         {
-            // Đổ dữ liệu vào ComboBox Loại Hàng
             DataTable dtLoai = _loaiHangRepo.GetAll();
             cbLoaiHang.DataSource = dtLoai;
             cbLoaiHang.DisplayMember = "Tên Loại Hàng";
             cbLoaiHang.ValueMember = "Mã Loại";
 
-            // Đổ dữ liệu vào ComboBox Nhà Cung Cấp
             DataTable dtNcc = _nccRepo.GetAll();
             cbNhaCungCap.DataSource = dtNcc;
             cbNhaCungCap.DisplayMember = "Tên Nhà Cung Cấp";

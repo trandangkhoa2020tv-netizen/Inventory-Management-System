@@ -11,6 +11,8 @@ namespace QuanLyKhoHang.Forms
         private System.Windows.Forms.Button btnNhanVien;
         private System.Windows.Forms.Button btnNhapKho;
         private System.Windows.Forms.Button btnXuatKho;
+        private System.Windows.Forms.Button btnUserMenu;
+        private System.Windows.Forms.ContextMenuStrip cmsUser;
 
         protected override void Dispose(bool disposing)
         {
@@ -84,6 +86,33 @@ namespace QuanLyKhoHang.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1200, 700);
+            // 1. Khởi tạo menu thả xuống (ContextMenuStrip)
+            this.cmsUser = new System.Windows.Forms.ContextMenuStrip();
+            var menuTaiKhoan = new System.Windows.Forms.ToolStripMenuItem() { Enabled = false }; // Chỉ hiển thị, không cho bấm
+            var menuChucVu = new System.Windows.Forms.ToolStripMenuItem() { Enabled = false };
+            var menuDangXuat = new System.Windows.Forms.ToolStripMenuItem() { Text = "Đăng xuất tài khoản", ForeColor = System.Drawing.Color.Red };
+
+            // Đăng ký sự kiện click nút Đăng xuất
+            menuDangXuat.Click += new System.EventHandler(this.menuDangXuat_Click);
+            this.cmsUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { menuTaiKhoan, menuChucVu, new System.Windows.Forms.ToolStripSeparator(), menuDangXuat });
+
+            // 2. Khởi tạo nút bấm User nằm bên góc phải (Đè lên pnlTop hoặc thanh menu của bạn)
+            this.btnUserMenu = new System.Windows.Forms.Button();
+            this.btnUserMenu.Text = "👤 Đang tải..."; // Sẽ cập nhật bằng code logic sau
+            this.btnUserMenu.Size = new System.Drawing.Size(180, 40);
+            this.btnUserMenu.Location = new System.Drawing.Point(this.Width - 200, 10); // Đặt tạm vị trí góc phải
+            this.btnUserMenu.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right); // ÉP CỐ ĐỊNH GÓC PHẢI
+            this.btnUserMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnUserMenu.FlatAppearance.BorderSize = 0;
+            this.btnUserMenu.BackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+            this.btnUserMenu.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnUserMenu.Cursor = System.Windows.Forms.Cursors.Hand;
+
+            // Bấm vào nút thì xổ menu ra ngay dưới chân nút
+            this.btnUserMenu.Click += (s, e) => { this.cmsUser.Show(this.btnUserMenu, new System.Drawing.Point(0, this.btnUserMenu.Height)); };
+
+            // Nhét nút này vào vùng điều hướng trên đỉnh của bạn (Nếu bạn có pnlTop thì sửa thành this.pnlTop.Controls.Add)
+            this.Controls.Add(this.btnUserMenu);
             this.Controls.Add(this.pnlContent);
             this.Controls.Add(this.pnlHeader);
             this.Name = "FrmMain";

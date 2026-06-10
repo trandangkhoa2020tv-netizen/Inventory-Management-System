@@ -53,5 +53,32 @@ namespace QuanLyKhoHang.Repositories
             };
             return _dbHelper.ExecuteNonQuery(sql, parameters);
         }
+
+        // ======================================================================
+        // ĐÃ THÊM: ĐỒNG BỘ CHỨC NĂNG TRA CỨU LỊCH SỬ VÀ GOM DANH MỤC IN BÁO CÁO
+
+        // 1. Trả về lịch sử danh sách phiếu nhập đổ lên lưới dưới
+        public DataTable GetAllPhieuNhap()
+        {
+            return GetAll(); 
+        }
+
+        // 2. Gom trọn gói toàn bộ sản phẩm thuộc mã phiếu nhập được chọn để xuất file
+        public DataTable GetChiTietTheoMaPhieu(int maPhieu)
+        {
+            string sql = @"SELECT hh.ten_hanghoa AS ""Tên Mặt Hàng"", 
+                           ct.so_luong AS ""Số Lượng"", 
+                           ct.don_gia_nhap AS ""Đơn Giá"", 
+                           ct.thanh_tien AS ""Thành Tiền""
+                           FROM chitietphieunhap ct
+                           JOIN hanghoa hh ON ct.ma_hanghoa = hh.ma_hanghoa
+                           WHERE ct.ma_phieunhap = @maphieu";
+
+            NpgsqlParameter[] parameters = {
+                new NpgsqlParameter("@maphieu", maPhieu)
+            };
+
+            return _dbHelper.ExecuteQuery(sql, parameters);
+        }
     }
 }

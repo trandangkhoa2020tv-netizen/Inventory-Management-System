@@ -93,11 +93,30 @@ namespace QuanLyKhoHang.Forms
             this.txtGhiChu.Location = new System.Drawing.Point(770, 92); this.txtGhiChu.Size = new System.Drawing.Size(180, 67); this.txtGhiChu.Multiline = true;
             this.txtGhiChu.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
 
-            // Vị trí phân bổ các nút bấm chức năng (Buttons Layout)
-            this.btnThem.Text = "Thêm"; this.btnThem.Location = new System.Drawing.Point(130, 180); this.btnThem.Size = new System.Drawing.Size(95, 35); this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
-            this.btnSua.Text = "Sửa"; this.btnSua.Location = new System.Drawing.Point(240, 180); this.btnSua.Size = new System.Drawing.Size(95, 35); this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
-            this.btnXoa.Text = "Xóa"; this.btnXoa.Location = new System.Drawing.Point(350, 180); this.btnXoa.Size = new System.Drawing.Size(95, 35); this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
-            this.btnLamMoi.Text = "Làm Mới"; this.btnLamMoi.Location = new System.Drawing.Point(460, 180); this.btnLamMoi.Size = new System.Drawing.Size(95, 35); this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
+            // ======================================================================
+            // ĐÃ SỬA: ĐƯA CỤM NÚT BẤM VỀ PHONG CÁCH CỔ ĐIỂN GIỐNG KHÁCH HÀNG BAN ĐẦU
+
+            this.btnThem.Text = "Thêm"; 
+            this.btnThem.Location = new System.Drawing.Point(130, 180); 
+            this.btnThem.Size = new System.Drawing.Size(95, 35); 
+            this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
+
+            this.btnSua.Text = "Sửa"; 
+            this.btnSua.Location = new System.Drawing.Point(240, 180); 
+            this.btnSua.Size = new System.Drawing.Size(95, 35); 
+            this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
+
+            this.btnXoa.Text = "Xóa"; 
+            this.btnXoa.Location = new System.Drawing.Point(350, 180); 
+            this.btnXoa.Size = new System.Drawing.Size(95, 35); 
+            this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
+
+            this.btnLamMoi.Text = "Làm Mới"; 
+            this.btnLamMoi.Location = new System.Drawing.Point(460, 180); 
+            this.btnLamMoi.Size = new System.Drawing.Size(95, 35); 
+            this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
+
+            // ======================================================================
 
             // dgvHangHoa (Ép bảng lưới bung rộng chiếm 100% không gian trống còn lại bên dưới)
             this.dgvHangHoa.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -107,19 +126,41 @@ namespace QuanLyKhoHang.Forms
             this.dgvHangHoa.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvHangHoa.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvHangHoa_CellClick);
 
+            // ======================================================================
+            // GIỮ NGUYỄN: ĐỊNH DẠNG DẤU CHẤM PHÂN CÁCH HÀNG NGHÌN THEO VÙNG VI-VN
+            var cultureVN = new System.Globalization.CultureInfo("vi-VN");
+
+            this.dgvHangHoa.DataBindingComplete += (s, e) => {
+                if (this.dgvHangHoa.Columns["Giá Nhập"] != null) {
+                    this.dgvHangHoa.Columns["Giá Nhập"].DefaultCellStyle.FormatProvider = cultureVN;
+                    this.dgvHangHoa.Columns["Giá Nhập"].DefaultCellStyle.Format = "N0";
+                    this.dgvHangHoa.Columns["Giá Nhập"].DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+                }
+                if (this.dgvHangHoa.Columns["Giá Bán"] != null) {
+                    this.dgvHangHoa.Columns["Giá Bán"].DefaultCellStyle.FormatProvider = cultureVN;
+                    this.dgvHangHoa.Columns["Giá Bán"].DefaultCellStyle.Format = "N0";
+                    this.dgvHangHoa.Columns["Giá Bán"].DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+                }
+                if (this.dgvHangHoa.Columns["Tôn Kho"] != null) {
+                    this.dgvHangHoa.Columns["Tôn Kho"].DefaultCellStyle.FormatProvider = cultureVN;
+                    this.dgvHangHoa.Columns["Tôn Kho"].DefaultCellStyle.Format = "N0";
+                    this.dgvHangHoa.Columns["Tôn Kho"].DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+                }
+            };
+            // ======================================================================
+
             // FrmHangHoa Form Properties
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1000, 600);
             this.Controls.Add(this.dgvHangHoa);
-            this.Controls.Add(this.pnlTopControls); // Nạp panel bám lề lên trước bảng để chia cắt layout
+            this.Controls.Add(this.pnlTopControls); 
             this.Text = "Quản Lý Hàng Hóa";
             this.Load += new System.EventHandler(this.FrmHangHoa_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvHangHoa)).EndInit();
             this.pnlTopControls.ResumeLayout(false);
             this.pnlTopControls.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
         }
     }
 }

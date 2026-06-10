@@ -53,5 +53,33 @@ namespace QuanLyKhoHang.Repositories
             };
             return _dbHelper.ExecuteNonQuery(sql, parameters);
         }
+
+        // ======================================================================
+        // ĐÃ THÊM: 2 HÀM DƯỚI ĐÂY ĐỂ PHỤC VỤ HIỂN THỊ LỊCH SỬ VÀ XUẤT FILE ĐỒ AN
+
+        // 1. Hàm trả về lịch sử danh sách phiếu cho FrmXuatKho gọi đến
+        public DataTable GetAllPhieuXuat()
+        {
+            return GetAll(); // Tận dụng luôn hàm GetAll() siêu chuẩn bạn đã viết ở trên
+        }
+
+        // 2. Hàm gom trọn gói chi tiết mặt hàng của 1 phiếu (Dùng cho in Excel / PDF)
+        public DataTable GetChiTietTheoMaPhieu(int maPhieu)
+        {
+            // Sử dụng JOIN để lấy thẳng Tên mặt hàng dựa theo mã hàng, đặt tên cột có dấu để ra Excel đẹp mắt
+            string sql = @"SELECT hh.ten_hanghoa AS ""Tên Mặt Hàng"", 
+                           ct.so_luong AS ""Số Lượng"", 
+                           ct.don_gia_xuat AS ""Đơn Giá"", 
+                           ct.thanh_tien AS ""Thành Tiền""
+                           FROM chitietphieuxuat ct
+                           JOIN hanghoa hh ON ct.ma_hanghoa = hh.ma_hanghoa
+                           WHERE ct.ma_phieuxuat = @maphieu";
+
+            NpgsqlParameter[] parameters = {
+                new NpgsqlParameter("@maphieu", maPhieu)
+            };
+
+            return _dbHelper.ExecuteQuery(sql, parameters);
+        }
     }
 }

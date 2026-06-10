@@ -9,10 +9,29 @@ namespace QuanLyKhoHang.Forms
     {
         private readonly KhachHangRepository _khachHangRepo = new KhachHangRepository();
         private int _selectedId = 0;
+        private string _vaiTro = "NhanVien"; // ĐÃ THÊM: Biến lưu vai trò
 
-        public FrmKhachHang() { InitializeComponent(); }
+        // ĐÃ SỬA: Hàm khởi tạo nhận tham số vai trò truyền vào từ FrmMain
+        public FrmKhachHang(string vaiTro) 
+        { 
+            InitializeComponent(); 
+            this._vaiTro = vaiTro;
+        }
 
-        private void FrmKhachHang_Load(object sender, EventArgs e) { LoadData(); }
+        private void FrmKhachHang_Load(object sender, EventArgs e) 
+        { 
+            LoadData(); 
+
+            // ĐÃ THÊM: Khóa chức năng Xóa khách hàng đối với Nhân viên
+            if (_vaiTro == "NhanVien")
+            {
+                btnXoa.Enabled = false; // Nhân viên không được quyền xóa khách hàng
+            }
+            else
+            {
+                btnXoa.Enabled = true;  // Admin toàn quyền
+            }
+        }
 
         private void LoadData() { dgvKhachHang.DataSource = _khachHangRepo.GetAll(); }
 

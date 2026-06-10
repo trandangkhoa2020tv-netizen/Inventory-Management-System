@@ -10,6 +10,7 @@ namespace QuanLyKhoHang.Forms
         private readonly NhanVienRepository _nhanVienRepo = new NhanVienRepository();
         private int _selectedId = 0;
 
+        // Giữ nguyên hàm khởi tạo mặc định không tham số vì nút mở form này đã bị nhân viên ẩn đi ở Menu chính rồi
         public FrmNhanVien() { InitializeComponent(); }
 
         private void FrmNhanVien_Load(object sender, EventArgs e) { LoadData(); }
