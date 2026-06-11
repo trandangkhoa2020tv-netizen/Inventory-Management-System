@@ -19,6 +19,7 @@ namespace QuanLyKhoHang.Forms
         private System.Windows.Forms.Label lblTongTien;
         private System.Windows.Forms.Label lblLichSuTitle; 
         private System.Windows.Forms.TextBox txtGhiChuPhieu; // Định danh ô nhập ghi chú thủ công
+         private System.Windows.Forms.TextBox txtTimKiem; // Định danh ô tìm kiếm thủ công
 
         protected override void Dispose(bool disposing)
         {
@@ -89,7 +90,7 @@ namespace QuanLyKhoHang.Forms
             this.btnThemMon.Text = "Thêm hàng"; 
             this.btnThemMon.Location = new System.Drawing.Point(790, 32); 
             this.btnThemMon.Size = new System.Drawing.Size(120, 33); 
-            this.btnThemMon.BackColor = System.Drawing.Color.Green;
+            this.btnThemMon.BackColor = System.Drawing.Color.MediumSeaGreen;
             this.btnThemMon.ForeColor = System.Drawing.Color.White;
             this.btnThemMon.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left);
             this.btnThemMon.Click += new System.EventHandler(this.btnThemMon_Click);
@@ -188,6 +189,33 @@ namespace QuanLyKhoHang.Forms
             this.pnlTop.PerformLayout();
             this.pnlBottom.ResumeLayout(false);
             this.ResumeLayout(false);
+
+            // ----------------------------------------------------------------------
+            // CẬP NHẬT: ĐẨY Ô TÌM KIẾM XUỐNG GÓC PHẢI THANH TIÊU ĐỀ LỊCH SỬ (ĐẸP NHẤT)
+
+            // Cấu hình nhãn "Tìm nhanh phiếu:" (Y=242 để khớp vào thanh tiêu đề màu xám)
+            var lblTimKiem = new System.Windows.Forms.Label();
+            lblTimKiem.Text = "Tìm nhanh phiếu:";
+            lblTimKiem.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            lblTimKiem.ForeColor = System.Drawing.Color.DarkBlue;
+            lblTimKiem.AutoSize = true;
+            lblTimKiem.Location = new System.Drawing.Point(960, 242); 
+
+            // Cấu hình TextBox txtTimKiem (Y=239 thẳng hàng với nhãn, X=710 đẩy sát về bên phải)
+            this.txtTimKiem = new System.Windows.Forms.TextBox();
+            this.txtTimKiem.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.txtTimKiem.Location = new System.Drawing.Point(1110, 239);
+            this.txtTimKiem.Size = new System.Drawing.Size(240, 26);
+            this.txtTimKiem.TextChanged += new System.EventHandler(this.txtTimKiem_TextChanged);
+
+            // QUAN TRỌNG: Nạp 2 control này trực tiếp vào FORM nền (this.Controls) chứ không cho vào Group nữa
+            this.Controls.Add(lblTimKiem);
+            this.Controls.Add(this.txtTimKiem);
+
+            // Ép đưa lên lớp trên cùng để thanh xám không đè mất ô tìm kiếm
+            lblTimKiem.BringToFront();
+            this.txtTimKiem.BringToFront();
+            // -----------------------
         }
     }
 }

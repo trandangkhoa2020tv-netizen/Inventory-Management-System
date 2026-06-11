@@ -58,12 +58,12 @@ namespace QuanLyKhoHang.Forms
             if (cbHangHoa.SelectedValue == null || string.IsNullOrEmpty(txtSoLuong.Text) || string.IsNullOrEmpty(txtDonGia.Text)) return;
             
             int maHang = Convert.ToInt32(cbHangHoa.SelectedValue);
-            string tenHang = cbHangHoa.Text;
+            string textHang = cbHangHoa.Text;
             int soLuong = Convert.ToInt32(txtSoLuong.Text);
             decimal donGia = Convert.ToDecimal(txtDonGia.Text);
             decimal thanhTien = soLuong * donGia;
 
-            _dtChiTietLocal.Rows.Add(maHang, tenHang, soLuong, donGia, thanhTien);
+            _dtChiTietLocal.Rows.Add(maHang, textHang, soLuong, donGia, thanhTien);
             TinhTongTien();
             txtSoLuong.Clear(); txtDonGia.Clear();
         }
@@ -95,8 +95,9 @@ namespace QuanLyKhoHang.Forms
             try
             {
                 DataTable dtChiTietPhieu = _pnRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
+                
+                // ĐÃ SỬA: Xoá bỏ MessageBox thừa gán cứng ở đây để file ExportExcel tự quản lý thông báo chuẩn
                 QuanLyKhoHang.Reports.ExportExcel.ToExcel(dtChiTietPhieu, $"Bao_Cao_Phieu_Nhap_So_{_maPhieuDuocChon}");
-                MessageBox.Show($"Đã xuất file báo cáo Excel cho phiếu nhập số {_maPhieuDuocChon} thành công!", "Thành công");
             }
             catch (Exception ex)
             {
@@ -115,12 +116,35 @@ namespace QuanLyKhoHang.Forms
             try
             {
                 DataTable dtChiTietPhieu = _pnRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
+                
+                // ĐÃ SỬA: Xoá bỏ MessageBox thừa trùng lặp để hàm ExportPdf tự kiểm soát logic Cancel/Save
                 QuanLyKhoHang.Reports.ExportPdf.ToPdf(dtChiTietPhieu, $"Hoa_Don_Phieu_Nhap_So_{_maPhieuDuocChon}");
-                MessageBox.Show($"Đã xuất file hóa đơn PDF cho phiếu nhập số {_maPhieuDuocChon} thành công!", "Thành công");
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi bóc tách in hóa đơn PDF: " + ex.Message, "Lỗi");
+            }
+        }
+
+        private void txtTimKiem_TextChanged(object sender, EventArgs e)
+        {
+            System.Data.DataTable dt = dgvLichSuPhieu.DataSource as System.Data.DataTable;
+
+            if (dt != null)
+            {
+                string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''"); 
+
+                if (string.IsNullOrEmpty(tuKhoa))
+                {
+                    dt.DefaultView.RowFilter = "";
+                }
+                else
+                {
+                    // ĐÃ SỬA: Bỏ lọc theo cột [Ghi Chú] giúp tìm kiếm nhanh, chính xác thông tin thực tế
+                    dt.DefaultView.RowFilter = $"[Nhà Cung Cấp] LIKE '%{tuKhoa}%' " +
+                                               $"OR [Nhân Viên Lập] LIKE '%{tuKhoa}%' " +
+                                               $"OR Convert([Mã Phiếu], 'System.String') LIKE '%{tuKhoa}%'";
+                }
             }
         }
 
@@ -130,10 +154,8 @@ namespace QuanLyKhoHang.Forms
 
             try
             {
-                // ĐÃ SỬA: Lấy chính xác chuỗi ghi chú động do người dùng gõ tay từ TextBox
                 string ghiChuThucTe = string.IsNullOrWhiteSpace(txtGhiChuPhieu.Text) ? "" : txtGhiChuPhieu.Text;
 
-                // ĐÃ SỬA: Gán ghiChuThucTe vào thực thể Phiếu Nhập thay vì chữ "Nhập kho phần mềm"
                 PhieuNhap pn = new PhieuNhap { 
                     MaNhaCungCap = Convert.ToInt32(cbNCC.SelectedValue), 
                     MaNhanVien = Convert.ToInt32(cbNhanVien.SelectedValue), 
@@ -156,14 +178,9 @@ namespace QuanLyKhoHang.Forms
 
                 MessageBox.Show("Lưu phiếu nhập kho và cập nhật số lượng tồn thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 
-                // Giải phóng bảng tạm nhập hàng nửa trên
                 _dtChiTietLocal.Rows.Clear(); 
                 TinhTongTien();
-
-                // ĐÃ THÊM: Làm sạch ô TextBox ghi chú bằng tay sau khi lưu thành công dữ liệu
                 txtGhiChuPhieu.Clear();
-
-                // Làm mới bảng lịch sử
                 HienThiLichSuPhieu();
                 _maPhieuDuocChon = 0; 
             }

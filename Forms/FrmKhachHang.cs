@@ -2,6 +2,7 @@ using System;
 using System.Windows.Forms;
 using QuanLyKhoHang.Models;
 using QuanLyKhoHang.Repositories;
+using System.Data;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -71,6 +72,34 @@ namespace QuanLyKhoHang.Forms
                 _khachHangRepo.Xoa(_selectedId); ClearInputs(); LoadData();
             }
         }
+
+        private void txtTimKiem_TextChanged(object sender, EventArgs e)
+{
+    // Lấy bảng dữ liệu DataTable từ lưới dgvKhachHang
+    System.Data.DataTable dt = dgvKhachHang.DataSource as System.Data.DataTable;
+
+    if (dt != null)
+    {
+        // Loại bỏ dấu nháy đơn để tránh lỗi logic bộ lọc
+        string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''"); 
+
+        if (string.IsNullOrEmpty(tuKhoa))
+        {
+            // Nếu ô tìm kiếm trống, hiển thị lại toàn bộ danh sách gốc
+            dt.DefaultView.RowFilter = "";
+        }
+        else
+        {
+            // ĐÃ SỬA: Ép kiểu cột [Mã KH] và [SĐT] sang String để tìm kiếm tương đối bằng LIKE
+            dt.DefaultView.RowFilter = $"[Tên Khách Hàng] LIKE '%{tuKhoa}%' " +
+                                       $"OR [Địa Chỉ] LIKE '%{tuKhoa}%' " +
+                                       $"OR [Email] LIKE '%{tuKhoa}%' " +
+                                       $"OR [Ghi Chú] LIKE '%{tuKhoa}%' " +
+                                       $"OR [SĐT] LIKE '%{tuKhoa}%' " + 
+                                       $"OR Convert([Mã KH], 'System.String') LIKE '%{tuKhoa}%'";
+            }
+        }
+    }
 
         private void btnLamMoi_Click(object sender, EventArgs e) { ClearInputs(); LoadData(); }
 

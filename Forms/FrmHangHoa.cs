@@ -173,6 +173,32 @@ namespace QuanLyKhoHang.Forms
             LoadDataGrid();
         }
 
+        // thêm chức năng tìm kiếm theo tên hàng hóa    
+        private void txtTimKiem_TextChanged(object sender, EventArgs e)
+        {
+        // Lấy bảng dữ liệu DataTable đang gán làm nguồn cho DataGridView
+        // Lưu ý: Nếu trong hàm Load Khoa gán dgvHangHoa.DataSource = _hhRepo.GetAll(), 
+        // thì Khoa cần ép kiểu nó về DataTable như dòng dưới:
+        DataTable dt = dgvHangHoa.DataSource as DataTable;
+
+        if (dt != null)
+        {
+            string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''"); // Loại bỏ dấu nháy đơn để tránh lỗi SQL logic
+
+            if (string.IsNullOrEmpty(tuKhoa))
+            {
+                // Nếu ô tìm kiếm trống, hiển thị lại toàn bộ dữ liệu gốc
+                dt.DefaultView.RowFilter = "";
+            }
+            else
+            {
+                // Xây dựng chuỗi điều kiện lọc: Tìm kiếm theo Tên hàng hoá HOẶC Loại hàng HOẶC Nhà cung cấp
+                // Sử dụng từ khóa LIKE kết hợp dấu % để tìm kiếm tương đối (chứa từ khóa)
+                dt.DefaultView.RowFilter = $"[Tên Hàng Hóa] LIKE '%{tuKhoa}%' OR [Loại Hàng] LIKE '%{tuKhoa}%' OR [Nhà Cung Cấp] LIKE '%{tuKhoa}%'";
+            }
+        }
+    }
+
         private void ClearInputs()
         {
             _selectedId = 0;

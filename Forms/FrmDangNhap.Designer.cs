@@ -31,10 +31,11 @@
             this.btnExit = new System.Windows.Forms.Button();
             this.SuspendLayout();
             
-            // lblTitle (Tiêu đề chữ đậm, màu xanh đen công nghệ)
+            // ======================================================================
+            // lblTitle (ĐÃ SỬA: Đổi sang màu xanh công nghệ đồng bộ với Dashboard)
             this.lblTitle.AutoSize = true;
             this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
-            this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(44, 62, 80);
+            this.lblTitle.ForeColor = System.Drawing.Color.FromArgb(0, 114, 198); // Mã màu xanh thương hiệu
             this.lblTitle.Location = new System.Drawing.Point(110, 25);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(180, 37);
@@ -44,14 +45,14 @@
             // lblUsername
             this.lblUsername.AutoSize = true;
             this.lblUsername.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblUsername.ForeColor = System.Drawing.Color.FromArgb(127, 140, 141);
+            this.lblUsername.ForeColor = System.Drawing.Color.FromArgb(100, 110, 120); // Màu xám đen hiện đại, rõ chữ hơn
             this.lblUsername.Location = new System.Drawing.Point(40, 90);
             this.lblUsername.Name = "lblUsername";
             this.lblUsername.Size = new System.Drawing.Size(119, 21);
             this.lblUsername.TabIndex = 1;
             this.lblUsername.Text = "Tên tài khoản:";
             
-            // txtUsername (Tăng nhẹ chiều cao và font để dễ nhìn hơn)
+            // txtUsername
             this.txtUsername.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtUsername.Location = new System.Drawing.Point(165, 86);
             this.txtUsername.Name = "txtUsername";
@@ -61,7 +62,7 @@
             // lblPassword
             this.lblPassword.AutoSize = true;
             this.lblPassword.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            this.lblPassword.ForeColor = System.Drawing.Color.FromArgb(127, 140, 141);
+            this.lblPassword.ForeColor = System.Drawing.Color.FromArgb(100, 110, 120);
             this.lblPassword.Location = new System.Drawing.Point(40, 140);
             this.lblPassword.Name = "lblPassword";
             this.lblPassword.Size = new System.Drawing.Size(88, 21);
@@ -72,12 +73,13 @@
             this.txtPassword.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtPassword.Location = new System.Drawing.Point(165, 136);
             this.txtPassword.Name = "txtPassword";
-            this.txtPassword.PasswordChar = '●'; // Đổi sang dấu chấm tròn nhìn hiện đại hơn dấu hoa thị cổ điển
+            this.txtPassword.PasswordChar = '●'; 
             this.txtPassword.Size = new System.Drawing.Size(195, 30);
             this.txtPassword.TabIndex = 4;
             
-            // btnLogin (Nút phẳng màu xanh ngọc trẻ trung, ẩn viền phèn)
-            this.btnLogin.BackColor = System.Drawing.Color.FromArgb(46, 204, 113);
+            // ======================================================================
+            // btnLogin (ĐÃ SỬA: Đổi từ xanh lá sang màu xanh công nghệ đồng bộ hệ thống)
+            this.btnLogin.BackColor = System.Drawing.Color.FromArgb(0, 114, 198);
             this.btnLogin.FlatAppearance.BorderSize = 0;
             this.btnLogin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogin.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
@@ -91,12 +93,13 @@
             this.btnLogin.UseVisualStyleBackColor = false;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
             
-            // btnExit (Nút phẳng màu xám bạc tinh tế, làm nền cho nút Đăng nhập nổi lên)
-            this.btnExit.BackColor = System.Drawing.Color.FromArgb(149, 165, 166);
+            // ======================================================================
+            // btnExit (ĐÃ SỬA: Đổi màu xám cũ sang màu xám Slate cao cấp, tinh tế hơn)
+            this.btnExit.BackColor = System.Drawing.Color.FromArgb(210, 215, 225); // Màu xám phẳng nhạt rất sang
             this.btnExit.FlatAppearance.BorderSize = 0;
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnExit.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-            this.btnExit.ForeColor = System.Drawing.Color.White;
+            this.btnExit.ForeColor = System.Drawing.Color.FromArgb(60, 70, 80); // Chữ xám đậm tương phản tốt
             this.btnExit.Location = new System.Drawing.Point(285, 190);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(75, 38);
@@ -106,11 +109,12 @@
             this.btnExit.UseVisualStyleBackColor = false;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             
-            // FrmDangNhap tổng quát
+            // ======================================================================
+            // FrmDangNhap tổng quát (ĐÃ SỬA: Nền form màu trắng sáng sạch sẽ chuẩn SaaS)
             this.AcceptButton = this.btnLogin; 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(245, 246, 250); // Nền form màu xám trắng dịu mắt
+            this.BackColor = System.Drawing.Color.White; // Đổi sang màu trắng phẳng sạch sẽ
             this.ClientSize = new System.Drawing.Size(400, 260);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnLogin);

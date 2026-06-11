@@ -23,11 +23,12 @@ namespace QuanLyKhoHang.Reports
                 sfd.Filter = "PDF Document (*.pdf)|*.pdf";
                 sfd.FileName = titleHeader.Replace(" ", "_") + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
+                // BƯỚC QUAN TRỌNG: Chỉ thực hiện khi người dùng bấm nút "Save"
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
-                        // Chỉ rõ iTextSharp.text.Document để không bị nhầm lẫn
+                        // Khởi tạo và ghi file PDF
                         iTextSharp.text.Document document = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 15f, 15f, 20f, 20f);
                         iTextSharp.text.pdf.PdfWriter.GetInstance(document, new FileStream(sfd.FileName, FileMode.Create));
                         
@@ -36,7 +37,6 @@ namespace QuanLyKhoHang.Reports
                         string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", "Arial.ttf");
                         iTextSharp.text.pdf.BaseFont bf = iTextSharp.text.pdf.BaseFont.CreateFont(fontPath, iTextSharp.text.pdf.BaseFont.IDENTITY_H, iTextSharp.text.pdf.BaseFont.EMBEDDED);
                         
-                        // Định nghĩa chính xác tuyệt đối Font và BaseColor của iTextSharp
                         iTextSharp.text.Font fontTitle = new iTextSharp.text.Font(bf, 16, iTextSharp.text.Font.BOLD, iTextSharp.text.BaseColor.Blue);
                         iTextSharp.text.Font fontHeader = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.BOLD, iTextSharp.text.BaseColor.White);
                         iTextSharp.text.Font fontBody = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.NORMAL, iTextSharp.text.BaseColor.Black);
@@ -71,8 +71,11 @@ namespace QuanLyKhoHang.Reports
                         }
 
                         document.Add(table);
+                        
+                        // Đóng document để lưu file xuống ổ cứng thực tế
                         document.Close();
 
+                        // THÔNG BÁO PHẢI NẰM TRONG NGOẶC NHỌN CỦA TRẠNG THÁI DIALOGRESULT.OK
                         MessageBox.Show("Xuất file PDF thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -80,6 +83,7 @@ namespace QuanLyKhoHang.Reports
                         MessageBox.Show($"Lỗi khi xuất file PDF: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+                // Nếu lọt ra ngoài này (người dùng bấm Cancel), hàm kết thúc luôn, không hiện MessageBox bậy bạ nữa!
             }
         }
     }

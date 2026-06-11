@@ -52,22 +52,65 @@ namespace QuanLyKhoHang.Forms
                 MessageBox.Show("Không thể nạp danh sách lịch sử phiếu xuất: " + ex.Message, "Lỗi");
             }
         }
-
+    // ======================================================================
+    // 🔎 LUỒNG KIỂM TRA KIỂM SOÁT TỒ   N
         private void btnThemMon_Click(object sender, EventArgs e)
         {
             if (cbHangHoa.SelectedValue == null || string.IsNullOrEmpty(txtSoLuong.Text) || string.IsNullOrEmpty(txtDonGia.Text)) return;
 
             int maHang = Convert.ToInt32(cbHangHoa.SelectedValue);
             string tenHang = cbHangHoa.Text;
-            int soLuong = Convert.ToInt32(txtSoLuong.Text);
+            int soLuongMuonThem = Convert.ToInt32(txtSoLuong.Text);
             decimal donGia = Convert.ToDecimal(txtDonGia.Text);
-            decimal thanhTien = soLuong * donGia;
 
-            _dtChiTietLocal.Rows.Add(maHang, tenHang, soLuong, donGia, thanhTien);
+            if (soLuongMuonThem <= 0)
+            {
+                MessageBox.Show("Số lượng xuất kho phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // ======================================================================
+            // 🔎 LUỒNG KIỂM TRA KIỂM SOÁT TỒN KHO - KHÔNG CHO XUẤT ÂM
+            
+            // 1. Lấy thông tin mặt hàng thực tế từ Database để xem số lượng tồn hiện tại
+            var hangHoaHienTai = _hhRepo.GetAll().AsEnumerable().FirstOrDefault(r => Convert.ToInt32(r["Mã Hàng"]) == maHang);
+            if (hangHoaHienTai == null)
+            {
+                MessageBox.Show("Không tìm thấy thông tin mặt hàng này trong hệ thống!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            int tonKhoThucTe = Convert.ToInt32(hangHoaHienTai["Tồn Kho"]);
+
+            // 2. Tính tổng số lượng của mặt hàng này ĐÃ ĐƯỢC THÊM vào danh sách tạm trước đó (nếu có)
+            int soLuongDaThemTrongLuoi = 0;
+            foreach (DataRow r in _dtChiTietLocal.Rows)
+            {
+                if (Convert.ToInt32(r["MaHang"]) == maHang)
+                {
+                    soLuongDaThemTrongLuoi += Convert.ToInt32(r["Số Lượng"]);
+                }
+            }
+
+            // 3. So sánh tổng số lượng muốn xuất với số lượng tồn kho thực tế
+            if (soLuongDaThemTrongLuoi + soLuongMuonThem > tonKhoThucTe)
+            {
+                int soLuongConLaiCoTheXuat = tonKhoThucTe - soLuongDaThemTrongLuoi;
+                MessageBox.Show($"Không thể xuất hàng! Mặt hàng '{tenHang}' hiện tại chỉ còn tồn {tonKhoThucTe} sản phẩm.\n" +
+                                $"Trong danh sách tạm đã chuẩn bị xuất {soLuongDaThemTrongLuoi} sản phẩm.\n" +
+                                $"Bạn chỉ có thể thêm tối đa {soLuongConLaiCoTheXuat} sản phẩm nữa cho mặt hàng này!", 
+                                "Cảnh báo hết hàng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return; // Chặn đứng luồng không cho nạp vào bảng tạm
+            }
+            // ======================================================================
+
+            // Nếu kiểm tra hợp lệ thì mới tiến hành tính tiền và nạp vào lưới
+            decimal thanhTien = soLuongMuonThem * donGia;
+            _dtChiTietLocal.Rows.Add(maHang, tenHang, soLuongMuonThem, donGia, thanhTien);
             TinhTongTien();
+            
             txtSoLuong.Clear(); txtDonGia.Clear();
         }
-
         private void TinhTongTien()
         {
             _tongTienPhieu = 0;
@@ -84,6 +127,28 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        private void txtTimKiem_TextChanged(object sender, EventArgs e)
+        {
+            DataTable dt = dgvLichSuPhieu.DataSource as DataTable;
+
+            if (dt != null)
+            {
+                string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''"); 
+
+                if (string.IsNullOrEmpty(tuKhoa))
+                {
+                    dt.DefaultView.RowFilter = "";
+                }
+                else
+                {
+                    // ĐÃ SỬA: Loại bỏ cột [Ghi Chú] để tối ưu hóa tốc độ tìm kiếm tinh gọn thực tế
+                    dt.DefaultView.RowFilter = $"[Khách Hàng] LIKE '%{tuKhoa}%' " +
+                                               $"OR [Nhân Viên Lập] LIKE '%{tuKhoa}%' " +
+                                               $"OR Convert([Mã Phiếu], 'System.String') LIKE '%{tuKhoa}%'";
+                }
+            }
+        }
+
         private void btnExcel_Click(object sender, EventArgs e)
         {
             if (_maPhieuDuocChon == 0)
@@ -95,8 +160,9 @@ namespace QuanLyKhoHang.Forms
             try
             {
                 DataTable dtChiTietPhieu = _pxRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
+                
+                // ĐÃ SỬA: Chỉ gọi hàm xử lý, xoá bỏ hoàn toàn dòng MessageBox thừa thãi ở cuối hàm này
                 QuanLyKhoHang.Reports.ExportExcel.ToExcel(dtChiTietPhieu, $"Bao_Cao_Phieu_Xuat_So_{_maPhieuDuocChon}");
-                MessageBox.Show($"Đã xuất file báo cáo Excel cho phiếu xuất số {_maPhieuDuocChon} thành công!", "Thành công");
             }
             catch (Exception ex)
             {
@@ -115,8 +181,9 @@ namespace QuanLyKhoHang.Forms
             try
             {
                 DataTable dtChiTietPhieu = _pxRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
+                
+                // ĐÃ SỬA: Chỉ gọi hàm xử lý, xoá bỏ dòng thông báo trùng lặp để hàm ExportPdf tự quản lý thông báo
                 QuanLyKhoHang.Reports.ExportPdf.ToPdf(dtChiTietPhieu, $"Hoa_Don_Phieu_Xuat_So_{_maPhieuDuocChon}");
-                MessageBox.Show($"Đã xuất file hóa đơn PDF cho phiếu xuất số {_maPhieuDuocChon} thành công!", "Thành công");
             }
             catch (Exception ex)
             {
@@ -130,10 +197,8 @@ namespace QuanLyKhoHang.Forms
 
             try
             {
-                // ĐÃ SỬA: Lấy chính xác chuỗi ghi chú động từ TextBox do người dùng tự gõ
                 string ghiChuThucTe = string.IsNullOrWhiteSpace(txtGhiChuPhieu.Text) ? "" : txtGhiChuPhieu.Text;
 
-                // ĐÃ SỬA: Truyền trực tiếp chuỗi biến ghiChuThucTe thay thế cho chữ gán cứng ban đầu
                 PhieuXuat px = new PhieuXuat { 
                     MaKhachHang = Convert.ToInt32(cbKhachHang.SelectedValue), 
                     MaNhanVien = Convert.ToInt32(cbNhanVien.SelectedValue), 
@@ -159,10 +224,7 @@ namespace QuanLyKhoHang.Forms
                 
                 _dtChiTietLocal.Rows.Clear(); 
                 TinhTongTien();
-
-                // ĐÃ THÊM: Làm sạch dữ liệu chữ cũ trên TextBox ghi chú sau khi ghi thành công phiếu
                 txtGhiChuPhieu.Clear();
-
                 HienThiLichSuPhieu(); 
                 _maPhieuDuocChon = 0; 
             }
