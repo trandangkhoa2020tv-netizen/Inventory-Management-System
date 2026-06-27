@@ -4,18 +4,23 @@ using Npgsql;
 
 namespace QuanLyKhoHang.Data
 {
+    /// <summary>
+    /// Lớp tiện ích truy cập database cấp thấp.
+    /// Các repository dùng lớp này để chạy SQL có tham số và nhận kết quả dạng DataTable/object.
+    /// </summary>
     public class DatabaseHelper
     {
-        // Thay đổi Password bằng mật khẩu PostgreSQL thực tế của bạn
-        private readonly string _connectionString = "Host=localhost;Port=5432;Database=quanlyhanghoa;Username=postgres;Password=1234";
-
-        // Hàm 1: Lấy kết nối
+        /// <summary>
+        /// Tạo kết nối PostgreSQL dùng chung theo Config/appsettings.json.
+        /// </summary>
         public NpgsqlConnection GetConnection()
         {
-            return new NpgsqlConnection(_connectionString);
+            return DbConnection.GetConnection();
         }
 
-        // Hàm 2: Dùng cho các câu lệnh INSERT, UPDATE, DELETE
+        /// <summary>
+        /// Chạy INSERT, UPDATE, DELETE và trả về số dòng bị ảnh hưởng.
+        /// </summary>
         public int ExecuteNonQuery(string sql, NpgsqlParameter[] parameters = null)
         {
             using (var conn = GetConnection())
@@ -27,12 +32,15 @@ namespace QuanLyKhoHang.Data
                     {
                         cmd.Parameters.AddRange(parameters);
                     }
+
                     return cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        // Hàm 3: Dùng cho các câu lệnh SELECT trả về bảng dữ liệu (DataTable)
+        /// <summary>
+        /// Chạy SELECT và trả về DataTable để bind vào DataGridView hoặc chuyển thành JSON cho API.
+        /// </summary>
         public DataTable ExecuteQuery(string sql, NpgsqlParameter[] parameters = null)
         {
             DataTable dt = new DataTable();
@@ -45,16 +53,20 @@ namespace QuanLyKhoHang.Data
                     {
                         cmd.Parameters.AddRange(parameters);
                     }
+
                     using (var adapter = new NpgsqlDataAdapter(cmd))
                     {
                         adapter.Fill(dt);
                     }
                 }
             }
+
             return dt;
         }
 
-        // Hàm 4: Dùng cho các câu lệnh SELECT trả về 1 giá trị duy nhất (như COUNT, SUM)
+        /// <summary>
+        /// Chạy câu SQL trả về một giá trị duy nhất như COUNT, SUM hoặc RETURNING id.
+        /// </summary>
         public object ExecuteScalar(string sql, NpgsqlParameter[] parameters = null)
         {
             using (var conn = GetConnection())
@@ -66,6 +78,7 @@ namespace QuanLyKhoHang.Data
                     {
                         cmd.Parameters.AddRange(parameters);
                     }
+
                     return cmd.ExecuteScalar();
                 }
             }

@@ -2,3 +2,10 @@ bin/
 obj/
 .vs/
 *.user
+*.suo
+
+.buildcheck*/
+.agents/
+
+*.db
+*.sqlite

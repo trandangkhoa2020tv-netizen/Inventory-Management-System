@@ -1,46 +1,81 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
+using System.Linq;
 using System.Windows.Forms;
 using QuanLyKhoHang.Models;
 using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
+    /// <summary>
+    /// Form lập phiếu xuất kho.
+    /// Người dùng chọn khách hàng, nhân viên, thêm danh sách hàng xuất, hệ thống kiểm tra tồn kho rồi lưu phiếu.
+    /// </summary>
     public partial class FrmXuatKho : Form
     {
         private readonly PhieuXuatRepository _pxRepo = new PhieuXuatRepository();
         private readonly KhachHangRepository _khRepo = new KhachHangRepository();
         private readonly NhanVienRepository _nvRepo = new NhanVienRepository();
         private readonly HangHoaRepository _hhRepo = new HangHoaRepository();
-        
-        private DataTable _dtChiTietLocal; 
-        private decimal _tongTienPhieu = 0;
-        private string _vaiTro = "NhanVien";
-        private int _maPhieuDuocChon = 0; 
 
-        public FrmXuatKho(string vaiTro) 
-        { 
-            InitializeComponent(); 
-            this._vaiTro = vaiTro;
+        private DataTable _dtChiTietLocal;
+        private decimal _tongTienPhieu;
+
+        // Vai trò được truyền từ FrmMain. Hiện form chưa khóa thao tác theo vai trò, nhưng vẫn giữ để mở rộng.
+        private readonly string _vaiTro;
+
+        // Mã phiếu đang chọn ở bảng lịch sử, dùng khi xuất Excel/PDF.
+        private int _maPhieuDuocChon;
+
+        public FrmXuatKho(string vaiTro)
+        {
+            InitializeComponent();
+            _vaiTro = vaiTro;
         }
 
+        /// <summary>
+        /// Nạp dữ liệu combobox, tạo bảng chi tiết tạm và nạp lịch sử phiếu xuất.
+        /// </summary>
         private void FrmXuatKho_Load(object sender, EventArgs e)
         {
-            cbKhachHang.DataSource = _khRepo.GetAll(); cbKhachHang.DisplayMember = "Tên Khách Hàng"; cbKhachHang.ValueMember = "Mã KH";
-            cbNhanVien.DataSource = _nvRepo.GetAll(); cbNhanVien.DisplayMember = "Tên Nhân Viên"; cbNhanVien.ValueMember = "Mã NV";
-            cbHangHoa.DataSource = _hhRepo.GetAll(); cbHangHoa.DisplayMember = "Tên Hàng Hóa"; cbHangHoa.ValueMember = "Mã Hàng";
+            BindCombo(cbKhachHang, _khRepo.GetAll(), 1, 0);
+            BindCombo(cbNhanVien, _nvRepo.GetAll(), 1, 0);
+            BindCombo(cbHangHoa, _hhRepo.GetAll(), 1, 0);
 
-            _dtChiTietLocal = new DataTable();
-            _dtChiTietLocal.Columns.Add("MaHang", typeof(int));
-            _dtChiTietLocal.Columns.Add("Tên Mặt Hàng", typeof(string));
-            _dtChiTietLocal.Columns.Add("Số Lượng", typeof(int));
-            _dtChiTietLocal.Columns.Add("Đơn Giá", typeof(decimal));
-            _dtChiTietLocal.Columns.Add("Thành Tiền", typeof(decimal));
+            _dtChiTietLocal = TaoBangChiTietTam();
             dgvChiTiet.DataSource = _dtChiTietLocal;
-
             HienThiLichSuPhieu();
         }
 
+        /// <summary>
+        /// Gắn DataTable vào ComboBox theo chỉ số cột hiển thị và cột giá trị.
+        /// </summary>
+        private static void BindCombo(ComboBox comboBox, DataTable dataSource, int displayColumnIndex, int valueColumnIndex)
+        {
+            comboBox.DataSource = dataSource;
+            comboBox.DisplayMember = dataSource.Columns[displayColumnIndex].ColumnName;
+            comboBox.ValueMember = dataSource.Columns[valueColumnIndex].ColumnName;
+        }
+
+        /// <summary>
+        /// Tạo bảng tạm lưu các mặt hàng người dùng đã thêm vào phiếu nhưng chưa lưu database.
+        /// </summary>
+        private static DataTable TaoBangChiTietTam()
+        {
+            DataTable table = new DataTable();
+            table.Columns.Add("MaHang", typeof(int));
+            table.Columns.Add("TenHang", typeof(string));
+            table.Columns.Add("SoLuong", typeof(int));
+            table.Columns.Add("DonGia", typeof(decimal));
+            table.Columns.Add("ThanhTien", typeof(decimal));
+            return table;
+        }
+
+        /// <summary>
+        /// Nạp lịch sử phiếu xuất từ database lên lưới bên dưới.
+        /// </summary>
         private void HienThiLichSuPhieu()
         {
             try
@@ -49,186 +84,210 @@ namespace QuanLyKhoHang.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Không thể nạp danh sách lịch sử phiếu xuất: " + ex.Message, "Lỗi");
+                MessageBox.Show("Khong the nap lich su phieu xuat: " + ex.Message, "Loi");
             }
         }
-    // ======================================================================
-    // 🔎 LUỒNG KIỂM TRA KIỂM SOÁT TỒ   N
+
+        /// <summary>
+        /// Thêm một mặt hàng vào bảng chi tiết tạm.
+        /// Trước khi thêm sẽ kiểm tra số lượng muốn xuất không vượt tồn kho hiện tại.
+        /// </summary>
         private void btnThemMon_Click(object sender, EventArgs e)
         {
-            if (cbHangHoa.SelectedValue == null || string.IsNullOrEmpty(txtSoLuong.Text) || string.IsNullOrEmpty(txtDonGia.Text)) return;
+            if (cbHangHoa.SelectedValue == null)
+            {
+                return;
+            }
+
+            if (!int.TryParse(txtSoLuong.Text.Trim(), out int soLuongMuonThem) || soLuongMuonThem <= 0)
+            {
+                MessageBox.Show("So luong xuat phai la so nguyen lon hon 0.", "Canh bao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtSoLuong.Focus();
+                return;
+            }
+
+            if (!decimal.TryParse(txtDonGia.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, out decimal donGia) || donGia < 0)
+            {
+                MessageBox.Show("Don gia xuat khong hop le.", "Canh bao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDonGia.Focus();
+                return;
+            }
 
             int maHang = Convert.ToInt32(cbHangHoa.SelectedValue);
-            string tenHang = cbHangHoa.Text;
-            int soLuongMuonThem = Convert.ToInt32(txtSoLuong.Text);
-            decimal donGia = Convert.ToDecimal(txtDonGia.Text);
+            int tonKho = LayTonKho(maHang);
+            int daThem = _dtChiTietLocal.AsEnumerable()
+                .Where(row => Convert.ToInt32(row["MaHang"]) == maHang)
+                .Sum(row => Convert.ToInt32(row["SoLuong"]));
 
-            if (soLuongMuonThem <= 0)
+            if (daThem + soLuongMuonThem > tonKho)
             {
-                MessageBox.Show("Số lượng xuất kho phải lớn hơn 0!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Khong du ton kho. Ton hien tai: {tonKho}, da them vao phieu: {daThem}.", "Canh bao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // ======================================================================
-            // 🔎 LUỒNG KIỂM TRA KIỂM SOÁT TỒN KHO - KHÔNG CHO XUẤT ÂM
-            
-            // 1. Lấy thông tin mặt hàng thực tế từ Database để xem số lượng tồn hiện tại
-            var hangHoaHienTai = _hhRepo.GetAll().AsEnumerable().FirstOrDefault(r => Convert.ToInt32(r["Mã Hàng"]) == maHang);
-            if (hangHoaHienTai == null)
-            {
-                MessageBox.Show("Không tìm thấy thông tin mặt hàng này trong hệ thống!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            int tonKhoThucTe = Convert.ToInt32(hangHoaHienTai["Tồn Kho"]);
-
-            // 2. Tính tổng số lượng của mặt hàng này ĐÃ ĐƯỢC THÊM vào danh sách tạm trước đó (nếu có)
-            int soLuongDaThemTrongLuoi = 0;
-            foreach (DataRow r in _dtChiTietLocal.Rows)
-            {
-                if (Convert.ToInt32(r["MaHang"]) == maHang)
-                {
-                    soLuongDaThemTrongLuoi += Convert.ToInt32(r["Số Lượng"]);
-                }
-            }
-
-            // 3. So sánh tổng số lượng muốn xuất với số lượng tồn kho thực tế
-            if (soLuongDaThemTrongLuoi + soLuongMuonThem > tonKhoThucTe)
-            {
-                int soLuongConLaiCoTheXuat = tonKhoThucTe - soLuongDaThemTrongLuoi;
-                MessageBox.Show($"Không thể xuất hàng! Mặt hàng '{tenHang}' hiện tại chỉ còn tồn {tonKhoThucTe} sản phẩm.\n" +
-                                $"Trong danh sách tạm đã chuẩn bị xuất {soLuongDaThemTrongLuoi} sản phẩm.\n" +
-                                $"Bạn chỉ có thể thêm tối đa {soLuongConLaiCoTheXuat} sản phẩm nữa cho mặt hàng này!", 
-                                "Cảnh báo hết hàng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return; // Chặn đứng luồng không cho nạp vào bảng tạm
-            }
-            // ======================================================================
-
-            // Nếu kiểm tra hợp lệ thì mới tiến hành tính tiền và nạp vào lưới
             decimal thanhTien = soLuongMuonThem * donGia;
-            _dtChiTietLocal.Rows.Add(maHang, tenHang, soLuongMuonThem, donGia, thanhTien);
+            _dtChiTietLocal.Rows.Add(maHang, cbHangHoa.Text, soLuongMuonThem, donGia, thanhTien);
             TinhTongTien();
-            
-            txtSoLuong.Clear(); txtDonGia.Clear();
+            txtSoLuong.Clear();
+            txtDonGia.Clear();
         }
+
+        /// <summary>
+        /// Lấy số lượng tồn hiện tại của một mã hàng từ danh sách hàng hóa.
+        /// </summary>
+        private int LayTonKho(int maHang)
+        {
+            DataRow row = _hhRepo.GetAll().AsEnumerable()
+                .FirstOrDefault(item => Convert.ToInt32(item[0]) == maHang);
+
+            if (row == null)
+            {
+                throw new InvalidOperationException("Khong tim thay hang hoa trong he thong.");
+            }
+
+            return Convert.ToInt32(row[6]);
+        }
+
+        /// <summary>
+        /// Tính lại tổng tiền phiếu từ các dòng trong bảng chi tiết tạm.
+        /// </summary>
         private void TinhTongTien()
         {
             _tongTienPhieu = 0;
-            foreach (DataRow r in _dtChiTietLocal.Rows) _tongTienPhieu += Convert.ToDecimal(r["Thành Tiền"]);
-            lblTongTien.Text = string.Format(new System.Globalization.CultureInfo("vi-VN"), "TỔNG TIỀN: {0:N0} VNĐ", _tongTienPhieu);
+            foreach (DataRow row in _dtChiTietLocal.Rows)
+            {
+                _tongTienPhieu += Convert.ToDecimal(row["ThanhTien"]);
+            }
+
+            lblTongTien.Text = string.Format(new CultureInfo("vi-VN"), "TONG TIEN: {0:N0} VND", _tongTienPhieu);
         }
 
+        /// <summary>
+        /// Ghi nhận mã phiếu xuất đang chọn để dùng khi xuất file.
+        /// </summary>
         private void dgvLichSuPhieu_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
-                DataGridViewRow row = dgvLichSuPhieu.Rows[e.RowIndex];
-                _maPhieuDuocChon = Convert.ToInt32(row.Cells["Mã Phiếu"].Value);
+                _maPhieuDuocChon = Convert.ToInt32(dgvLichSuPhieu.Rows[e.RowIndex].Cells[0].Value);
             }
         }
 
+        /// <summary>
+        /// Tìm kiếm nhanh trên lịch sử phiếu xuất.
+        /// </summary>
         private void txtTimKiem_TextChanged(object sender, EventArgs e)
         {
-            DataTable dt = dgvLichSuPhieu.DataSource as DataTable;
-
-            if (dt != null)
+            if (dgvLichSuPhieu.DataSource is DataTable table)
             {
-                string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''"); 
-
-                if (string.IsNullOrEmpty(tuKhoa))
-                {
-                    dt.DefaultView.RowFilter = "";
-                }
-                else
-                {
-                    // ĐÃ SỬA: Loại bỏ cột [Ghi Chú] để tối ưu hóa tốc độ tìm kiếm tinh gọn thực tế
-                    dt.DefaultView.RowFilter = $"[Khách Hàng] LIKE '%{tuKhoa}%' " +
-                                               $"OR [Nhân Viên Lập] LIKE '%{tuKhoa}%' " +
-                                               $"OR Convert([Mã Phiếu], 'System.String') LIKE '%{tuKhoa}%'";
-                }
+                table.DefaultView.RowFilter = BuildFilter(table, txtTimKiem.Text.Trim());
             }
         }
 
+        /// <summary>
+        /// Tạo chuỗi lọc DataView theo mã phiếu, khách hàng hoặc nhân viên lập.
+        /// </summary>
+        private static string BuildFilter(DataTable table, string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return string.Empty;
+            }
+
+            string value = keyword.Replace("'", "''");
+            string maPhieu = table.Columns[0].ColumnName;
+            string doiTac = table.Columns[1].ColumnName;
+            string nhanVien = table.Columns[2].ColumnName;
+            return $"Convert([{maPhieu}], 'System.String') LIKE '%{value}%' OR [{doiTac}] LIKE '%{value}%' OR [{nhanVien}] LIKE '%{value}%'";
+        }
+
+        /// <summary>
+        /// Xuất chi tiết phiếu xuất đang chọn ra Excel.
+        /// </summary>
         private void btnExcel_Click(object sender, EventArgs e)
         {
-            if (_maPhieuDuocChon == 0)
-            {
-                MessageBox.Show("Vui lòng click chọn một phiếu xuất từ bảng lịch sử bên dưới trước khi bấm xuất file!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            try
-            {
-                DataTable dtChiTietPhieu = _pxRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
-                
-                // ĐÃ SỬA: Chỉ gọi hàm xử lý, xoá bỏ hoàn toàn dòng MessageBox thừa thãi ở cuối hàm này
-                QuanLyKhoHang.Reports.ExportExcel.ToExcel(dtChiTietPhieu, $"Bao_Cao_Phieu_Xuat_So_{_maPhieuDuocChon}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi bóc tách xuất dữ liệu Excel: " + ex.Message, "Lỗi");
-            }
+            XuatFile((data, title) => QuanLyKhoHang.Reports.ExportExcel.ToExcel(data, title), "Bao_Cao_Phieu_Xuat");
         }
 
+        /// <summary>
+        /// Xuất chi tiết phiếu xuất đang chọn ra PDF.
+        /// </summary>
         private void btnPdf_Click(object sender, EventArgs e)
         {
+            XuatFile((data, title) => QuanLyKhoHang.Reports.ExportPdf.ToPdf(data, title), "Hoa_Don_Phieu_Xuat");
+        }
+
+        /// <summary>
+        /// Hàm dùng chung cho xuất Excel/PDF.
+        /// Lấy chi tiết phiếu theo mã đang chọn rồi gọi delegate xuất file tương ứng.
+        /// </summary>
+        private void XuatFile(Action<DataTable, string> exportAction, string filePrefix)
+        {
             if (_maPhieuDuocChon == 0)
             {
-                MessageBox.Show("Vui lòng click chọn một phiếu xuất từ bảng lịch sử bên dưới trước khi bấm in hóa đơn!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui long chon mot phieu xuat truoc khi xuat file.", "Thong bao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                DataTable dtChiTietPhieu = _pxRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
-                
-                // ĐÃ SỬA: Chỉ gọi hàm xử lý, xoá bỏ dòng thông báo trùng lặp để hàm ExportPdf tự quản lý thông báo
-                QuanLyKhoHang.Reports.ExportPdf.ToPdf(dtChiTietPhieu, $"Hoa_Don_Phieu_Xuat_So_{_maPhieuDuocChon}");
+                DataTable chiTietPhieu = _pxRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
+                exportAction(chiTietPhieu, $"{filePrefix}_So_{_maPhieuDuocChon}");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi bóc tách xuất hóa đơn PDF: " + ex.Message, "Lỗi");
+                MessageBox.Show("Loi xuat file: " + ex.Message, "Loi");
             }
         }
 
+        /// <summary>
+        /// Lưu phiếu xuất bằng transaction trong repository.
+        /// Repository sẽ kiểm tra và trừ tồn kho, nếu thiếu tồn sẽ rollback toàn bộ.
+        /// </summary>
         private void btnLuuPhieu_Click(object sender, EventArgs e)
         {
-            if (_dtChiTietLocal.Rows.Count == 0) { MessageBox.Show("Chưa chọn mặt hàng xuất!"); return; }
+            if (_dtChiTietLocal.Rows.Count == 0)
+            {
+                MessageBox.Show("Chua co mat hang nao trong phieu xuat.", "Canh bao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             try
             {
-                string ghiChuThucTe = string.IsNullOrWhiteSpace(txtGhiChuPhieu.Text) ? "" : txtGhiChuPhieu.Text;
-
-                PhieuXuat px = new PhieuXuat { 
-                    MaKhachHang = Convert.ToInt32(cbKhachHang.SelectedValue), 
-                    MaNhanVien = Convert.ToInt32(cbNhanVien.SelectedValue), 
-                    NgayXuat = DateTime.Now,
-                    TongTien = _tongTienPhieu, 
-                    GhiChu = ghiChuThucTe 
-                };
-                
-                int maPxVuaTao = _pxRepo.ThemPhieuXuat(px);
-
-                foreach (DataRow r in _dtChiTietLocal.Rows)
+                PhieuXuat phieuXuat = new PhieuXuat
                 {
-                    _pxRepo.ThemChiTiet(new ChiTietPhieuXuat {
-                        MaPhieuXuat = maPxVuaTao,
-                        MaHangHoa = Convert.ToInt32(r["MaHang"]),
-                        SoLuong = Convert.ToInt32(r["Số Lượng"]),
-                        DonGiaXuat = Convert.ToDecimal(r["Đơn Giá"]),
-                        ThanhTien = Convert.ToDecimal(r["Thành Tiền"])
+                    MaKhachHang = Convert.ToInt32(cbKhachHang.SelectedValue),
+                    MaNhanVien = Convert.ToInt32(cbNhanVien.SelectedValue),
+                    NgayXuat = DateTime.Now,
+                    TongTien = _tongTienPhieu,
+                    GhiChu = txtGhiChuPhieu.Text.Trim()
+                };
+
+                List<ChiTietPhieuXuat> chiTietList = new List<ChiTietPhieuXuat>();
+                foreach (DataRow row in _dtChiTietLocal.Rows)
+                {
+                    chiTietList.Add(new ChiTietPhieuXuat
+                    {
+                        MaHangHoa = Convert.ToInt32(row["MaHang"]),
+                        SoLuong = Convert.ToInt32(row["SoLuong"]),
+                        DonGiaXuat = Convert.ToDecimal(row["DonGia"]),
+                        ThanhTien = Convert.ToDecimal(row["ThanhTien"])
                     });
                 }
 
-                MessageBox.Show("Lưu phiếu xuất kho và tự động khấu trừ hàng tồn kho thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                
-                _dtChiTietLocal.Rows.Clear(); 
+                _pxRepo.LuuPhieuXuat(phieuXuat, chiTietList);
+
+                MessageBox.Show("Da luu phieu xuat va cap nhat ton kho.", "Thong bao", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _dtChiTietLocal.Rows.Clear();
                 TinhTongTien();
                 txtGhiChuPhieu.Clear();
-                HienThiLichSuPhieu(); 
-                _maPhieuDuocChon = 0; 
+                _maPhieuDuocChon = 0;
+                HienThiLichSuPhieu();
             }
-            catch (Exception ex) { MessageBox.Show("Lỗi lưu trữ: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Loi luu phieu xuat: " + ex.Message, "Loi");
+            }
         }
     }
 }

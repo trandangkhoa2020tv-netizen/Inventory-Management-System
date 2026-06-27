@@ -1,37 +1,77 @@
-USE QuanLyKhoHang;
-GO
+-- ============================================================
+-- Du lieu mau cho PostgreSQL.
+-- Chay sau create_tables.sql.
+-- File nay khong dung ON CONFLICT de tranh mot so extension SQL gạch đỏ sai dialect.
+-- ============================================================
 
-INSERT INTO LoaiHang (TenLoaiHang, GhiChu) VALUES (N'Điện Tử', N'Các sản phẩm điện tử');
-INSERT INTO LoaiHang (TenLoaiHang, GhiChu) VALUES (N'Quần Áo', N'Các loại quần áo');
-INSERT INTO LoaiHang (TenLoaiHang, GhiChu) VALUES (N'Thực Phẩm', N'Các loại thực phẩm');
-GO
+INSERT INTO loaihang (ma_loaihang, ten_loaihang, ghi_chu)
+SELECT 1, 'Dien tu', 'Hang dien tu va thiet bi cong nghe'
+WHERE NOT EXISTS (SELECT 1 FROM loaihang WHERE ma_loaihang = 1);
 
-INSERT INTO NhaCungCap (TenNhaCungCap, DiaChiNCC, SoDienThoai, Email, GhiChu)
-VALUES (N'Công ty A', N'123 Đường ABC', N'0123456789', N'a@company.com', N'Nhà cung cấp 1');
-INSERT INTO NhaCungCap (TenNhaCungCap, DiaChiNCC, SoDienThoai, Email, GhiChu)
-VALUES (N'Công ty B', N'456 Đường DEF', N'0987654321', N'b@company.com', N'Nhà cung cấp 2');
-GO
+INSERT INTO loaihang (ma_loaihang, ten_loaihang, ghi_chu)
+SELECT 2, 'Quan ao', 'Hang thoi trang'
+WHERE NOT EXISTS (SELECT 1 FROM loaihang WHERE ma_loaihang = 2);
 
-INSERT INTO HangHoa (TenHangHoa, MaLoaiHang, MaNhaCungCap, GiaNhap, GiaBan, SoLuongTon, DonViTinh, GhiChu)
-VALUES (N'Laptop Dell', 1, 1, 5000000, 6000000, 10, N'Cái', N'Laptop hiệu Dell');
-INSERT INTO HangHoa (TenHangHoa, MaLoaiHang, MaNhaCungCap, GiaNhap, GiaBan, SoLuongTon, DonViTinh, GhiChu)
-VALUES (N'Áo Thun Nam', 2, 2, 50000, 80000, 50, N'Cái', N'Áo thun');
-GO
+INSERT INTO loaihang (ma_loaihang, ten_loaihang, ghi_chu)
+SELECT 3, 'Thuc pham', 'Hang tieu dung thuc pham'
+WHERE NOT EXISTS (SELECT 1 FROM loaihang WHERE ma_loaihang = 3);
 
-INSERT INTO KhachHang (TenKhachHang, DiaChiKH, SoDienThoai, Email, GhiChu)
-VALUES (N'Nguyễn Văn A', N'789 Đường GHI', N'0111111111', N'nguyenvana@gmail.com', N'Khách hàng 1');
-INSERT INTO KhachHang (TenKhachHang, DiaChiKH, SoDienThoai, Email, GhiChu)
-VALUES (N'Trần Thị B', N'101 Đường JKL', N'0222222222', N'tranthib@gmail.com', N'Khách hàng 2');
-GO
+INSERT INTO nhacungcap (ma_nhacungcap, ten_nhacungcap, dia_chi_ncc, so_dien_thoai, email, ghi_chu)
+SELECT 1, 'Cong ty A', '123 Duong ABC', '0123456789', 'a@company.com', 'Nha cung cap dien tu'
+WHERE NOT EXISTS (SELECT 1 FROM nhacungcap WHERE ma_nhacungcap = 1);
 
-INSERT INTO NhanVien (TenNhanVien, DiaChiNV, SoDienThoai, Email, NgaySinh, ChucVu, GhiChu)
-VALUES (N'Lê Văn C', N'202 Đường MNO', N'0333333333', N'levanc@gmail.com', '1990-01-15', N'Nhân Viên Bán Hàng', N'NV 1');
-INSERT INTO NhanVien (TenNhanVien, DiaChiNV, SoDienThoai, Email, NgaySinh, ChucVu, GhiChu)
-VALUES (N'Phạm Thị D', N'303 Đường PQR', N'0444444444', N'phamthid@gmail.com', '1995-05-20', N'Kho Thủ Kho', N'NV 2');
-GO
+INSERT INTO nhacungcap (ma_nhacungcap, ten_nhacungcap, dia_chi_ncc, so_dien_thoai, email, ghi_chu)
+SELECT 2, 'Cong ty B', '456 Duong DEF', '0987654321', 'b@company.com', 'Nha cung cap thoi trang'
+WHERE NOT EXISTS (SELECT 1 FROM nhacungcap WHERE ma_nhacungcap = 2);
 
-INSERT INTO TaiKhoan (MaNhanVien, TenTaiKhoan, MatKhau, VaiTro, TrangThai)
-VALUES (1, 'levanc', '123456', N'Nhân Viên', 1);
-INSERT INTO TaiKhoan (MaNhanVien, TenTaiKhoan, MatKhau, VaiTro, TrangThai)
-VALUES (2, 'phamthid', '123456', N'Kho Thủ', 1);
-GO
+INSERT INTO khachhang (ma_khachhang, ten_khachhang, dia_chi_kh, so_dien_thoai, email, ghi_chu)
+SELECT 1, 'Nguyen Van A', '789 Duong GHI', '0111111111', 'nguyenvana@example.com', 'Khach hang le'
+WHERE NOT EXISTS (SELECT 1 FROM khachhang WHERE ma_khachhang = 1);
+
+INSERT INTO khachhang (ma_khachhang, ten_khachhang, dia_chi_kh, so_dien_thoai, email, ghi_chu)
+SELECT 2, 'Tran Thi B', '101 Duong JKL', '0222222222', 'tranthib@example.com', 'Khach hang than thiet'
+WHERE NOT EXISTS (SELECT 1 FROM khachhang WHERE ma_khachhang = 2);
+
+INSERT INTO nhanvien (ma_nhanvien, ten_nhanvien, dia_chi_nv, so_dien_thoai, email, ngay_sinh, chuc_vu, ghi_chu)
+SELECT 1, 'Quan tri vien', 'Van phong', '0900000001', 'admin@example.com', DATE '1990-01-01', 'Admin', 'Tai khoan quan tri'
+WHERE NOT EXISTS (SELECT 1 FROM nhanvien WHERE ma_nhanvien = 1);
+
+INSERT INTO nhanvien (ma_nhanvien, ten_nhanvien, dia_chi_nv, so_dien_thoai, email, ngay_sinh, chuc_vu, ghi_chu)
+SELECT 2, 'Nhan vien kho', 'Kho hang', '0900000002', 'kho@example.com', DATE '1995-05-20', 'Thu kho', 'Phu trach nhap kho'
+WHERE NOT EXISTS (SELECT 1 FROM nhanvien WHERE ma_nhanvien = 2);
+
+INSERT INTO nhanvien (ma_nhanvien, ten_nhanvien, dia_chi_nv, so_dien_thoai, email, ngay_sinh, chuc_vu, ghi_chu)
+SELECT 3, 'Nhan vien ban hang', 'Quay ban hang', '0900000003', 'banhang@example.com', DATE '1996-06-15', 'Ban hang', 'Phu trach xuat kho'
+WHERE NOT EXISTS (SELECT 1 FROM nhanvien WHERE ma_nhanvien = 3);
+
+INSERT INTO hanghoa (ma_hanghoa, ten_hanghoa, ma_loaihang, ma_nhacungcap, gia_nhap, gia_ban, so_luong_ton, don_vi_tinh, ghi_chu)
+SELECT 1, 'Laptop Dell', 1, 1, 5000000, 6500000, 10, 'Cai', 'Laptop van phong'
+WHERE NOT EXISTS (SELECT 1 FROM hanghoa WHERE ma_hanghoa = 1);
+
+INSERT INTO hanghoa (ma_hanghoa, ten_hanghoa, ma_loaihang, ma_nhacungcap, gia_nhap, gia_ban, so_luong_ton, don_vi_tinh, ghi_chu)
+SELECT 2, 'Ao thun nam', 2, 2, 50000, 80000, 50, 'Cai', 'Ao thun co ban'
+WHERE NOT EXISTS (SELECT 1 FROM hanghoa WHERE ma_hanghoa = 2);
+
+INSERT INTO hanghoa (ma_hanghoa, ten_hanghoa, ma_loaihang, ma_nhacungcap, gia_nhap, gia_ban, so_luong_ton, don_vi_tinh, ghi_chu)
+SELECT 3, 'Mi goi', 3, 1, 3000, 5000, 200, 'Goi', 'Thuc pham nhanh'
+WHERE NOT EXISTS (SELECT 1 FROM hanghoa WHERE ma_hanghoa = 3);
+
+INSERT INTO taikhoan (ma_taikhoan, ma_nhanvien, ten_taikhoan, mat_khau, vai_tro, trang_thai)
+SELECT 1, 1, 'admin', 'admin123', 'Admin', true
+WHERE NOT EXISTS (SELECT 1 FROM taikhoan WHERE ma_taikhoan = 1);
+
+INSERT INTO taikhoan (ma_taikhoan, ma_nhanvien, ten_taikhoan, mat_khau, vai_tro, trang_thai)
+SELECT 2, 2, 'nhanvienkho', '123456', 'NhanVien', true
+WHERE NOT EXISTS (SELECT 1 FROM taikhoan WHERE ma_taikhoan = 2);
+
+INSERT INTO taikhoan (ma_taikhoan, ma_nhanvien, ten_taikhoan, mat_khau, vai_tro, trang_thai)
+SELECT 3, 3, 'nhanvienbanhang', '123456', 'NhanVien', true
+WHERE NOT EXISTS (SELECT 1 FROM taikhoan WHERE ma_taikhoan = 3);
+
+-- Dong bo lai sequence sau khi chen ma co dinh.
+SELECT setval(pg_get_serial_sequence('loaihang', 'ma_loaihang'), COALESCE((SELECT MAX(ma_loaihang) FROM loaihang), 1), true);
+SELECT setval(pg_get_serial_sequence('nhacungcap', 'ma_nhacungcap'), COALESCE((SELECT MAX(ma_nhacungcap) FROM nhacungcap), 1), true);
+SELECT setval(pg_get_serial_sequence('khachhang', 'ma_khachhang'), COALESCE((SELECT MAX(ma_khachhang) FROM khachhang), 1), true);
+SELECT setval(pg_get_serial_sequence('nhanvien', 'ma_nhanvien'), COALESCE((SELECT MAX(ma_nhanvien) FROM nhanvien), 1), true);
+SELECT setval(pg_get_serial_sequence('hanghoa', 'ma_hanghoa'), COALESCE((SELECT MAX(ma_hanghoa) FROM hanghoa), 1), true);
+SELECT setval(pg_get_serial_sequence('taikhoan', 'ma_taikhoan'), COALESCE((SELECT MAX(ma_taikhoan) FROM taikhoan), 1), true);

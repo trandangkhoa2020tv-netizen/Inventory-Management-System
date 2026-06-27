@@ -5,10 +5,15 @@ using System.Windows.Forms;
 
 namespace QuanLyKhoHang.Reports
 {
+    /// <summary>
+    /// Chức năng xuất dữ liệu dạng bảng ra file PDF.
+    /// Lớp này dùng iTextSharp để tạo tài liệu A4, tiêu đề và bảng chi tiết phiếu.
+    /// </summary>
     public class ExportPdf
     {
         /// <summary>
-        /// Xuất dữ liệu từ DataTable ra file báo cáo PDF (.pdf)
+        /// Nhận DataTable cần in và tiêu đề báo cáo.
+        /// Dữ liệu được ghi ra file PDF tại vị trí người dùng chọn.
         /// </summary>
         public static void ToPdf(DataTable dt, string titleHeader)
         {
@@ -23,29 +28,31 @@ namespace QuanLyKhoHang.Reports
                 sfd.Filter = "PDF Document (*.pdf)|*.pdf";
                 sfd.FileName = titleHeader.Replace(" ", "_") + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-                // BƯỚC QUAN TRỌNG: Chỉ thực hiện khi người dùng bấm nút "Save"
+                // Chỉ tạo file khi người dùng xác nhận vị trí lưu.
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
-                        // Khởi tạo và ghi file PDF
                         iTextSharp.text.Document document = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 15f, 15f, 20f, 20f);
                         iTextSharp.text.pdf.PdfWriter.GetInstance(document, new FileStream(sfd.FileName, FileMode.Create));
-                        
+
                         document.Open();
 
+                        // Dùng Arial để PDF hiển thị được tiếng Việt nếu dữ liệu có dấu.
                         string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts", "Arial.ttf");
                         iTextSharp.text.pdf.BaseFont bf = iTextSharp.text.pdf.BaseFont.CreateFont(fontPath, iTextSharp.text.pdf.BaseFont.IDENTITY_H, iTextSharp.text.pdf.BaseFont.EMBEDDED);
-                        
+
                         iTextSharp.text.Font fontTitle = new iTextSharp.text.Font(bf, 16, iTextSharp.text.Font.BOLD, iTextSharp.text.BaseColor.Blue);
                         iTextSharp.text.Font fontHeader = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.BOLD, iTextSharp.text.BaseColor.White);
                         iTextSharp.text.Font fontBody = new iTextSharp.text.Font(bf, 10, iTextSharp.text.Font.NORMAL, iTextSharp.text.BaseColor.Black);
 
+                        // Tiêu đề báo cáo đặt ở giữa trang.
                         iTextSharp.text.Paragraph prgTitle = new iTextSharp.text.Paragraph(titleHeader.ToUpper(), fontTitle);
                         prgTitle.Alignment = iTextSharp.text.Element.ALIGN_CENTER;
                         prgTitle.SpacingAfter = 20;
                         document.Add(prgTitle);
 
+                        // Tạo bảng có số cột bằng DataTable.
                         iTextSharp.text.pdf.PdfPTable table = new iTextSharp.text.pdf.PdfPTable(dt.Columns.Count);
                         table.WidthPercentage = 100;
 
@@ -71,11 +78,8 @@ namespace QuanLyKhoHang.Reports
                         }
 
                         document.Add(table);
-                        
-                        // Đóng document để lưu file xuống ổ cứng thực tế
                         document.Close();
 
-                        // THÔNG BÁO PHẢI NẰM TRONG NGOẶC NHỌN CỦA TRẠNG THÁI DIALOGRESULT.OK
                         MessageBox.Show("Xuất file PDF thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
@@ -83,7 +87,6 @@ namespace QuanLyKhoHang.Reports
                         MessageBox.Show($"Lỗi khi xuất file PDF: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-                // Nếu lọt ra ngoài này (người dùng bấm Cancel), hàm kết thúc luôn, không hiện MessageBox bậy bạ nữa!
             }
         }
     }

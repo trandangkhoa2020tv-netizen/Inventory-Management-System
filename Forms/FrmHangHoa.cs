@@ -6,57 +6,69 @@ using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
+    /// <summary>
+    /// Form quản lý danh mục hàng hóa.
+    /// Người dùng có thể xem, thêm, sửa, xóa và tìm kiếm hàng hóa trong kho.
+    /// </summary>
     public partial class FrmHangHoa : Form
     {
         private readonly HangHoaRepository _hangHoaRepo = new HangHoaRepository();
         private readonly LoaiHangRepository _loaiHangRepo = new LoaiHangRepository();
         private readonly NhaCungCapRepository _nccRepo = new NhaCungCapRepository();
-        private int _selectedId = 0; // Lưu ID dòng đang chọn để Sửa/Xóa
-        private string _vaiTro = "NhanVien"; // ĐÃ THÊM: Biến lưu vai trò
 
-        // ĐÃ SỬA: Hàm khởi tạo nhận tham số từ FrmMain truyền xuống
+        // Mã hàng đang được chọn trên DataGridView. Giá trị 0 nghĩa là chưa chọn dòng nào.
+        private int _selectedId = 0;
+
+        // Vai trò được truyền từ FrmMain để khóa/mở quyền thao tác.
+        private readonly string _vaiTro;
+
         public FrmHangHoa(string vaiTro)
         {
             InitializeComponent();
-            this._vaiTro = vaiTro;
+            _vaiTro = vaiTro;
         }
 
+        /// <summary>
+        /// Khi form mở: nạp dữ liệu hàng hóa, nạp combobox loại hàng/nhà cung cấp và áp dụng phân quyền.
+        /// </summary>
         private void FrmHangHoa_Load(object sender, EventArgs e)
         {
             LoadDataGrid();
             LoadComboBoxes();
-
-            // ĐÃ THÊM: Phân quyền khóa nút Xóa nếu là Nhân viên
-            if (_vaiTro == "NhanVien")
-            {
-                btnXoa.Enabled = false; // Nhân viên chỉ xem, thêm, sửa danh mục, không được xóa bậy
-            }
-            else
-            {
-                btnXoa.Enabled = true;  // Admin có quyền xóa
-            }
+            btnXoa.Enabled = _vaiTro != "NhanVien";
         }
 
+        /// <summary>
+        /// Nạp danh sách hàng hóa vào lưới.
+        /// </summary>
         private void LoadDataGrid()
         {
             dgvHangHoa.DataSource = _hangHoaRepo.GetAll();
-            if (dgvHangHoa.Columns["Mã Hàng"] != null)
-                dgvHangHoa.Columns["Mã Hàng"].Width = 70;
+            if (dgvHangHoa.Columns.Count > 0)
+            {
+                dgvHangHoa.Columns[0].Width = 70;
+            }
         }
 
+        /// <summary>
+        /// Nạp danh sách loại hàng và nhà cung cấp vào combobox.
+        /// </summary>
         private void LoadComboBoxes()
         {
             DataTable dtLoai = _loaiHangRepo.GetAll();
             cbLoaiHang.DataSource = dtLoai;
-            cbLoaiHang.DisplayMember = "Tên Loại Hàng";
-            cbLoaiHang.ValueMember = "Mã Loại";
+            cbLoaiHang.DisplayMember = dtLoai.Columns[1].ColumnName;
+            cbLoaiHang.ValueMember = dtLoai.Columns[0].ColumnName;
 
             DataTable dtNcc = _nccRepo.GetAll();
             cbNhaCungCap.DataSource = dtNcc;
-            cbNhaCungCap.DisplayMember = "Tên Nhà Cung Cấp";
-            cbNhaCungCap.ValueMember = "Mã NCC";
+            cbNhaCungCap.DisplayMember = dtNcc.Columns[1].ColumnName;
+            cbNhaCungCap.ValueMember = dtNcc.Columns[0].ColumnName;
         }
 
+        /// <summary>
+        /// Thêm hàng hóa mới từ dữ liệu người dùng nhập trên form.
+        /// </summary>
         private void btnThem_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtTenHang.Text.Trim()))
@@ -67,47 +79,42 @@ namespace QuanLyKhoHang.Forms
 
             try
             {
-                HangHoa hh = new HangHoa
-                {
-                    TenHangHoa = txtTenHang.Text.Trim(),
-                    MaLoaiHang = Convert.ToInt32(cbLoaiHang.SelectedValue),
-                    MaNhaCungCap = Convert.ToInt32(cbNhaCungCap.SelectedValue),
-                    GiaNhap = string.IsNullOrEmpty(txtGiaNhap.Text) ? 0 : Convert.ToDecimal(txtGiaNhap.Text),
-                    GiaBan = string.IsNullOrEmpty(txtGiaBan.Text) ? 0 : Convert.ToDecimal(txtGiaBan.Text),
-                    SoLuongTon = string.IsNullOrEmpty(txtSoLuong.Text) ? 0 : Convert.ToInt32(txtSoLuong.Text),
-                    DonViTinh = txtDVT.Text.Trim(),
-                    GhiChu = txtGhiChu.Text.Trim()
-                };
-
-                _hangHoaRepo.Them(hh);
+                _hangHoaRepo.Them(BuildHangHoaFromInput());
                 MessageBox.Show("Thêm mới hàng hóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearInputs();
                 LoadDataGrid();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi thêm hàng hóa: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        /// <summary>
+        /// Khi chọn một dòng trên lưới, đổ dữ liệu dòng đó lên các ô nhập để người dùng sửa/xóa.
+        /// </summary>
         private void dgvHangHoa_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0)
             {
-                DataGridViewRow row = dgvHangHoa.Rows[e.RowIndex];
-                _selectedId = Convert.ToInt32(row.Cells["Mã Hàng"].Value);
-                txtTenHang.Text = row.Cells["Tên Hàng Hóa"].Value.ToString();
-                txtGiaNhap.Text = row.Cells["Giá Nhập"].Value.ToString();
-                txtGiaBan.Text = row.Cells["Giá Bán"].Value.ToString();
-                txtSoLuong.Text = row.Cells["Tồn Kho"].Value.ToString();
-                txtDVT.Text = row.Cells["ĐVT"].Value.ToString();
-                txtGhiChu.Text = row.Cells["Ghi Chú"].Value.ToString();
-
-                cbLoaiHang.Text = row.Cells["Loại Hàng"].Value.ToString();
-                cbNhaCungCap.Text = row.Cells["Nhà Cung Cấp"].Value.ToString();
+                return;
             }
+
+            DataGridViewRow row = dgvHangHoa.Rows[e.RowIndex];
+            _selectedId = Convert.ToInt32(row.Cells[0].Value);
+            txtTenHang.Text = row.Cells[1].Value?.ToString();
+            cbLoaiHang.Text = row.Cells[2].Value?.ToString();
+            cbNhaCungCap.Text = row.Cells[3].Value?.ToString();
+            txtGiaNhap.Text = row.Cells[4].Value?.ToString();
+            txtGiaBan.Text = row.Cells[5].Value?.ToString();
+            txtSoLuong.Text = row.Cells[6].Value?.ToString();
+            txtDVT.Text = row.Cells[7].Value?.ToString();
+            txtGhiChu.Text = row.Cells[8].Value?.ToString();
         }
 
+        /// <summary>
+        /// Cập nhật hàng hóa đang được chọn.
+        /// </summary>
         private void btnSua_Click(object sender, EventArgs e)
         {
             if (_selectedId == 0)
@@ -118,19 +125,8 @@ namespace QuanLyKhoHang.Forms
 
             try
             {
-                HangHoa hh = new HangHoa
-                {
-                    MaHangHoa = _selectedId,
-                    TenHangHoa = txtTenHang.Text.Trim(),
-                    MaLoaiHang = Convert.ToInt32(cbLoaiHang.SelectedValue),
-                    MaNhaCungCap = Convert.ToInt32(cbNhaCungCap.SelectedValue),
-                    GiaNhap = Convert.ToDecimal(txtGiaNhap.Text),
-                    GiaBan = Convert.ToDecimal(txtGiaBan.Text),
-                    SoLuongTon = Convert.ToInt32(txtSoLuong.Text),
-                    DonViTinh = txtDVT.Text.Trim(),
-                    GhiChu = txtGhiChu.Text.Trim()
-                };
-
+                HangHoa hh = BuildHangHoaFromInput();
+                hh.MaHangHoa = _selectedId;
                 _hangHoaRepo.Sua(hh);
                 MessageBox.Show("Cập nhật hàng hóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearInputs();
@@ -138,10 +134,13 @@ namespace QuanLyKhoHang.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi cập nhật hàng hóa: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        /// <summary>
+        /// Xóa hàng hóa đang chọn. Nếu hàng đã có trong phiếu nhập/xuất, database sẽ không cho xóa.
+        /// </summary>
         private void btnXoa_Click(object sender, EventArgs e)
         {
             if (_selectedId == 0)
@@ -151,54 +150,77 @@ namespace QuanLyKhoHang.Forms
             }
 
             DialogResult confirm = MessageBox.Show("Bạn có chắc chắn muốn xóa mặt hàng này khỏi danh mục?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (confirm == DialogResult.Yes)
+            if (confirm != DialogResult.Yes)
             {
-                try
-                {
-                    _hangHoaRepo.Xoa(_selectedId);
-                    MessageBox.Show("Xóa hàng hóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ClearInputs();
-                    LoadDataGrid();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Không thể xóa hàng hóa này (Mặt hàng này đang nằm trong phiếu nhập/xuất)!\nChi tiết: {ex.Message}", "Lỗi ràng buộc", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                return;
+            }
+
+            try
+            {
+                _hangHoaRepo.Xoa(_selectedId);
+                MessageBox.Show("Xóa hàng hóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearInputs();
+                LoadDataGrid();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Không thể xóa hàng hóa này vì đang được dùng trong chứng từ.\nChi tiết: {ex.Message}", "Lỗi ràng buộc", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        /// <summary>
+        /// Làm mới dữ liệu và xóa trạng thái chọn hiện tại.
+        /// </summary>
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
             ClearInputs();
             LoadDataGrid();
         }
 
-        // thêm chức năng tìm kiếm theo tên hàng hóa    
+        /// <summary>
+        /// Tìm kiếm nhanh theo tên hàng, loại hàng hoặc nhà cung cấp trên dữ liệu đang hiển thị.
+        /// </summary>
         private void txtTimKiem_TextChanged(object sender, EventArgs e)
         {
-        // Lấy bảng dữ liệu DataTable đang gán làm nguồn cho DataGridView
-        // Lưu ý: Nếu trong hàm Load Khoa gán dgvHangHoa.DataSource = _hhRepo.GetAll(), 
-        // thì Khoa cần ép kiểu nó về DataTable như dòng dưới:
-        DataTable dt = dgvHangHoa.DataSource as DataTable;
+            if (dgvHangHoa.DataSource is not DataTable dt)
+            {
+                return;
+            }
 
-        if (dt != null)
-        {
-            string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''"); // Loại bỏ dấu nháy đơn để tránh lỗi SQL logic
-
+            string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''");
             if (string.IsNullOrEmpty(tuKhoa))
             {
-                // Nếu ô tìm kiếm trống, hiển thị lại toàn bộ dữ liệu gốc
-                dt.DefaultView.RowFilter = "";
+                dt.DefaultView.RowFilter = string.Empty;
+                return;
             }
-            else
-            {
-                // Xây dựng chuỗi điều kiện lọc: Tìm kiếm theo Tên hàng hoá HOẶC Loại hàng HOẶC Nhà cung cấp
-                // Sử dụng từ khóa LIKE kết hợp dấu % để tìm kiếm tương đối (chứa từ khóa)
-                dt.DefaultView.RowFilter = $"[Tên Hàng Hóa] LIKE '%{tuKhoa}%' OR [Loại Hàng] LIKE '%{tuKhoa}%' OR [Nhà Cung Cấp] LIKE '%{tuKhoa}%'";
-            }
-        }
-    }
 
+            string tenHang = dt.Columns[1].ColumnName;
+            string loaiHang = dt.Columns[2].ColumnName;
+            string nhaCungCap = dt.Columns[3].ColumnName;
+            dt.DefaultView.RowFilter = $"[{tenHang}] LIKE '%{tuKhoa}%' OR [{loaiHang}] LIKE '%{tuKhoa}%' OR [{nhaCungCap}] LIKE '%{tuKhoa}%'";
+        }
+
+        /// <summary>
+        /// Gom dữ liệu từ các ô nhập thành model HangHoa để gửi xuống repository.
+        /// </summary>
+        private HangHoa BuildHangHoaFromInput()
+        {
+            return new HangHoa
+            {
+                TenHangHoa = txtTenHang.Text.Trim(),
+                MaLoaiHang = Convert.ToInt32(cbLoaiHang.SelectedValue),
+                MaNhaCungCap = Convert.ToInt32(cbNhaCungCap.SelectedValue),
+                GiaNhap = string.IsNullOrWhiteSpace(txtGiaNhap.Text) ? 0 : Convert.ToDecimal(txtGiaNhap.Text),
+                GiaBan = string.IsNullOrWhiteSpace(txtGiaBan.Text) ? 0 : Convert.ToDecimal(txtGiaBan.Text),
+                SoLuongTon = string.IsNullOrWhiteSpace(txtSoLuong.Text) ? 0 : Convert.ToInt32(txtSoLuong.Text),
+                DonViTinh = txtDVT.Text.Trim(),
+                GhiChu = txtGhiChu.Text.Trim()
+            };
+        }
+
+        /// <summary>
+        /// Xóa nội dung các ô nhập và đưa form về trạng thái chưa chọn dòng nào.
+        /// </summary>
         private void ClearInputs()
         {
             _selectedId = 0;
