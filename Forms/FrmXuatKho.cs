@@ -32,6 +32,7 @@ namespace QuanLyKhoHang.Forms
         public FrmXuatKho(string vaiTro)
         {
             InitializeComponent();
+            UiTheme.Apply(this);
             _vaiTro = vaiTro;
         }
 
@@ -206,7 +207,22 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void btnExcel_Click(object sender, EventArgs e)
         {
-            XuatFile((data, title) => QuanLyKhoHang.Reports.ExportExcel.ToExcel(data, title), "Bao_Cao_Phieu_Xuat");
+            if (_maPhieuDuocChon == 0)
+            {
+                MessageBox.Show("Vui long chon mot phieu xuat truoc khi xuat file.", "Thong bao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                DataTable thongTinPhieu = _pxRepo.GetThongTinPhieuXuat(_maPhieuDuocChon);
+                DataTable chiTietPhieu = _pxRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
+                QuanLyKhoHang.Reports.ExportExcel.ToPhieuXuatExcel(thongTinPhieu, chiTietPhieu, $"Bao_Cao_Phieu_Xuat_So_{_maPhieuDuocChon}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Loi xuat file Excel: " + ex.Message, "Loi");
+            }
         }
 
         /// <summary>
@@ -214,7 +230,22 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void btnPdf_Click(object sender, EventArgs e)
         {
-            XuatFile((data, title) => QuanLyKhoHang.Reports.ExportPdf.ToPdf(data, title), "Hoa_Don_Phieu_Xuat");
+            if (_maPhieuDuocChon == 0)
+            {
+                MessageBox.Show("Vui long chon mot phieu xuat truoc khi xuat file.", "Thong bao", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                DataTable thongTinPhieu = _pxRepo.GetThongTinPhieuXuat(_maPhieuDuocChon);
+                DataTable chiTietPhieu = _pxRepo.GetChiTietTheoMaPhieu(_maPhieuDuocChon);
+                QuanLyKhoHang.Reports.ExportPdf.ToPhieuXuatPdf(thongTinPhieu, chiTietPhieu, $"Hoa_Don_Phieu_Xuat_So_{_maPhieuDuocChon}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Loi xuat file PDF: " + ex.Message, "Loi");
+            }
         }
 
         /// <summary>

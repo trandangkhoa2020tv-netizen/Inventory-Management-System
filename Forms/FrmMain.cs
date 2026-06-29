@@ -16,6 +16,7 @@ namespace QuanLyKhoHang.Forms
         public FrmMain()
         {
             InitializeComponent();
+            UiTheme.Apply(this);
             WindowState = FormWindowState.Maximized;
         }
 

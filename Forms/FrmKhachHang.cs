@@ -20,6 +20,7 @@ namespace QuanLyKhoHang.Forms
         public FrmKhachHang(string vaiTro)
         {
             InitializeComponent();
+            UiTheme.Apply(this);
             _vaiTro = vaiTro;
         }
 
@@ -51,10 +52,17 @@ namespace QuanLyKhoHang.Forms
                 return;
             }
 
-            _khachHangRepo.Them(BuildKhachHangFromInput());
-            MessageBox.Show("Thêm thành công!");
-            ClearInputs();
-            LoadData();
+            try
+            {
+                _khachHangRepo.Them(BuildKhachHangFromInput());
+                MessageBox.Show("Thêm khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearInputs();
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi thêm khách hàng: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>
@@ -86,12 +94,19 @@ namespace QuanLyKhoHang.Forms
                 return;
             }
 
-            KhachHang kh = BuildKhachHangFromInput();
-            kh.MaKhachHang = _selectedId;
-            _khachHangRepo.Sua(kh);
-            MessageBox.Show("Cập nhật thành công!");
-            ClearInputs();
-            LoadData();
+            try
+            {
+                KhachHang kh = BuildKhachHangFromInput();
+                kh.MaKhachHang = _selectedId;
+                _khachHangRepo.Sua(kh);
+                MessageBox.Show("Cập nhật khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearInputs();
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật khách hàng: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>

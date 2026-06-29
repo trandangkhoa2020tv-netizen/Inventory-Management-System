@@ -16,6 +16,7 @@ namespace QuanLyKhoHang.Forms
         public FrmDangNhap()
         {
             InitializeComponent();
+            UiTheme.Apply(this);
             _taiKhoanRepository = new TaiKhoanRepository();
         }
 

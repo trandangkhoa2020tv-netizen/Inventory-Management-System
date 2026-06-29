@@ -81,7 +81,7 @@ namespace QuanLyKhoHang.Forms
             groupPhieu.Controls.AddRange(new System.Windows.Forms.Control[] { l1, l2, this.cbKhachHang, this.cbNhanVien, lGhiChu, this.txtGhiChuPhieu });
 
             var l3 = new System.Windows.Forms.Label() { Text = "Mặt hàng:", Location = new System.Drawing.Point(15, 38), AutoSize = true };
-            var l4 = new System.Windows.Forms.Label() { Text = "Số lượng:", Location = new System.Drawing.Point(360, 38), AutoSize = true };
+            var l4 = new System.Windows.Forms.Label() { Text = "Số lượng:", Location = new System.Drawing.Point(357, 38), AutoSize = true };
             var l5 = new System.Windows.Forms.Label() { Text = "Đơn giá xuất:", Location = new System.Drawing.Point(540, 38), AutoSize = true };
             this.cbHangHoa.Location = new System.Drawing.Point(90, 35); this.cbHangHoa.Size = new System.Drawing.Size(240, 27); this.cbHangHoa.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.txtSoLuong.Location = new System.Drawing.Point(430, 35); this.txtSoLuong.Size = new System.Drawing.Size(90, 27);

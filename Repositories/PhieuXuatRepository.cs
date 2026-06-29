@@ -82,11 +82,37 @@ namespace QuanLyKhoHang.Repositories
         {
             string sql = @"SELECT hh.ten_hanghoa AS ""Tên Mặt Hàng"",
                            ct.so_luong AS ""Số Lượng"",
+                           hh.don_vi_tinh AS ""Đơn Vị"",
                            ct.don_gia_xuat AS ""Đơn Giá"",
                            ct.thanh_tien AS ""Thành Tiền""
                            FROM chitietphieuxuat ct
                            JOIN hanghoa hh ON ct.ma_hanghoa = hh.ma_hanghoa
                            WHERE ct.ma_phieuxuat = @maphieu";
+
+            NpgsqlParameter[] parameters = {
+                new NpgsqlParameter("@maphieu", maPhieu)
+            };
+
+            return _dbHelper.ExecuteQuery(sql, parameters);
+        }
+
+        /// <summary>
+        /// Lấy thông tin chung của một phiếu xuất để in hóa đơn/PDF.
+        /// </summary>
+        public DataTable GetThongTinPhieuXuat(int maPhieu)
+        {
+            string sql = @"SELECT p.ma_phieuxuat AS ""Mã Phiếu"",
+                           k.ten_khachhang AS ""Khách Hàng"",
+                           k.so_dien_thoai AS ""Số Điện Thoại"",
+                           k.dia_chi_kh AS ""Địa Chỉ"",
+                           nv.ten_nhanvien AS ""Nhân Viên Lập"",
+                           p.ngay_xuat AS ""Ngày Xuất"",
+                           p.tong_tien AS ""Tổng Tiền"",
+                           p.ghi_chu AS ""Ghi Chú""
+                           FROM phieuxuat p
+                           JOIN khachhang k ON p.ma_khachhang = k.ma_khachhang
+                           JOIN nhanvien nv ON p.ma_nhanvien = nv.ma_nhanvien
+                           WHERE p.ma_phieuxuat = @maphieu";
 
             NpgsqlParameter[] parameters = {
                 new NpgsqlParameter("@maphieu", maPhieu)

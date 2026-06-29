@@ -88,11 +88,10 @@ namespace QuanLyKhoHang.Forms
             this.txtGiaBan.Location = new System.Drawing.Point(480, 92); this.txtGiaBan.Size = new System.Drawing.Size(170, 27);
             this.txtSoLuong.Location = new System.Drawing.Point(480, 132); this.txtSoLuong.Size = new System.Drawing.Size(170, 27);
             
-            // Các trường bên phải cùng nhận thêm Anchor Right để co giãn mượt mà theo lề phải
+            // Giữ kích thước cố định để ô Đơn vị tính và Ghi chú không kéo dài theo màn hình.
             this.txtDVT.Location = new System.Drawing.Point(770, 52); this.txtDVT.Size = new System.Drawing.Size(180, 27);
-            this.txtDVT.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
             this.txtGhiChu.Location = new System.Drawing.Point(770, 92); this.txtGhiChu.Size = new System.Drawing.Size(180, 67); this.txtGhiChu.Multiline = true;
-            this.txtGhiChu.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+            this.txtGhiChu.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 
             // ======================================================================
             // ĐÃ SỬA: ĐƯA CỤM NÚT BẤM VỀ PHONG CÁCH CỔ ĐIỂN GIỐNG KHÁCH HÀNG BAN ĐẦU

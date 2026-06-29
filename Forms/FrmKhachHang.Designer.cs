@@ -63,19 +63,19 @@ namespace QuanLyKhoHang.Forms
             this.txtEmail.Location = new System.Drawing.Point(500, 92); this.txtEmail.Size = new System.Drawing.Size(180, 27);
             
             this.txtGhiChu.Location = new System.Drawing.Point(770, 52); this.txtGhiChu.Size = new System.Drawing.Size(180, 67); this.txtGhiChu.Multiline = true;
-            this.txtGhiChu.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+            this.txtGhiChu.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 
             // KÍCH HOẠT ĐẦY ĐỦ CÁC SỰ KIỆN CLICK CHO NÚT BẤM
-            this.btnThem.Text = "Thêm"; this.btnThem.Location = new System.Drawing.Point(140, 140); this.btnThem.Size = new System.Drawing.Size(85, 35);
+            this.btnThem.Text = "Thêm"; this.btnThem.Location = new System.Drawing.Point(140, 140); this.btnThem.Size = new System.Drawing.Size(95, 35);
             this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
 
-            this.btnSua.Text = "Sửa"; this.btnSua.Location = new System.Drawing.Point(240, 140); this.btnSua.Size = new System.Drawing.Size(85, 35);
+            this.btnSua.Text = "Sửa"; this.btnSua.Location = new System.Drawing.Point(250, 140); this.btnSua.Size = new System.Drawing.Size(95, 35);
             this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
 
-            this.btnXoa.Text = "Xóa"; this.btnXoa.Location = new System.Drawing.Point(340, 140); this.btnXoa.Size = new System.Drawing.Size(85, 35);
+            this.btnXoa.Text = "Xóa"; this.btnXoa.Location = new System.Drawing.Point(360, 140); this.btnXoa.Size = new System.Drawing.Size(95, 35);
             this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
 
-            this.btnLamMoi.Text = "Làm Mới"; this.btnLamMoi.Location = new System.Drawing.Point(440, 140); this.btnLamMoi.Size = new System.Drawing.Size(85, 35);
+            this.btnLamMoi.Text = "Làm Mới"; this.btnLamMoi.Location = new System.Drawing.Point(470, 140); this.btnLamMoi.Size = new System.Drawing.Size(95, 35);
             this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
 
             // dgvKhachHang (KÍCH HOẠT CELLCLICK ĐỂ CHỌN DÒNG DỮ LIỆU)

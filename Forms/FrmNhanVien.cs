@@ -19,6 +19,7 @@ namespace QuanLyKhoHang.Forms
         public FrmNhanVien()
         {
             InitializeComponent();
+            UiTheme.Apply(this);
         }
 
         /// <summary>
@@ -48,10 +49,17 @@ namespace QuanLyKhoHang.Forms
                 return;
             }
 
-            _nhanVienRepo.Them(BuildNhanVienFromInput());
-            MessageBox.Show("Thêm thành công!");
-            ClearInputs();
-            LoadData();
+            try
+            {
+                _nhanVienRepo.Them(BuildNhanVienFromInput());
+                MessageBox.Show("Thêm nhân viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearInputs();
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi thêm nhân viên: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>
@@ -84,12 +92,19 @@ namespace QuanLyKhoHang.Forms
                 return;
             }
 
-            NhanVien nv = BuildNhanVienFromInput();
-            nv.MaNhanVien = _selectedId;
-            _nhanVienRepo.Sua(nv);
-            MessageBox.Show("Cập nhật thành công!");
-            ClearInputs();
-            LoadData();
+            try
+            {
+                NhanVien nv = BuildNhanVienFromInput();
+                nv.MaNhanVien = _selectedId;
+                _nhanVienRepo.Sua(nv);
+                MessageBox.Show("Cập nhật nhân viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearInputs();
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi cập nhật nhân viên: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>
