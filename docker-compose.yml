@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: quan-ly-kho-hang-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: quanlyhanghoa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql:ro
+      - ./sql/sample_data.sql:/docker-entrypoint-initdb.d/02_sample_data.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d quanlyhanghoa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:

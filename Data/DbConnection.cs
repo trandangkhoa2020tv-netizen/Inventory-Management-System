@@ -53,28 +53,45 @@ namespace QuanLyKhoHang.Data
         {
             try
             {
+                string host = "localhost";
+                int port = 5432;
+                string database = "quanlyhanghoa";
+                string username = "postgres";
+                string password = "1234";
+
                 string configPath = Path.Combine(AppContext.BaseDirectory, "Config", "appsettings.json");
                 if (!File.Exists(configPath))
                 {
                     configPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
                 }
 
-                if (!File.Exists(configPath))
+                if (File.Exists(configPath))
                 {
-                    return DefaultConnectionString;
+                    using FileStream stream = File.OpenRead(configPath);
+                    using JsonDocument document = JsonDocument.Parse(stream);
+                    JsonElement db = document.RootElement.GetProperty("DatabaseSettings");
+
+                    host = GetString(db, "Host", host);
+                    port = GetInt(db, "Port", port);
+                    database = GetString(db, "Database", database);
+                    username = GetString(db, "Username", username);
+                    password = GetString(db, "Password", password);
                 }
 
-                using FileStream stream = File.OpenRead(configPath);
-                using JsonDocument document = JsonDocument.Parse(stream);
-                JsonElement db = document.RootElement.GetProperty("DatabaseSettings");
+                host = GetEnvironmentString("QLKH_DB_HOST", host);
+                port = GetEnvironmentInt("QLKH_DB_PORT", port);
+                database = GetEnvironmentString("QLKH_DB_NAME", database);
+                username = GetEnvironmentString("QLKH_DB_USER", username);
+                password = GetEnvironmentString("QLKH_DB_PASSWORD", password);
 
-                string host = GetString(db, "Host", "localhost");
-                int port = GetInt(db, "Port", 5432);
-                string database = GetString(db, "Database", "quanlyhanghoa");
-                string username = GetString(db, "Username", "postgres");
-                string password = GetString(db, "Password", "1234");
-
-                return $"Host={host};Port={port};Database={database};Username={username};Password={password}";
+                return new NpgsqlConnectionStringBuilder
+                {
+                    Host = host,
+                    Port = port,
+                    Database = database,
+                    Username = username,
+                    Password = password
+                }.ConnectionString;
             }
             catch
             {
@@ -100,6 +117,18 @@ namespace QuanLyKhoHang.Data
             return parent.TryGetProperty(propertyName, out JsonElement value) && value.TryGetInt32(out int result)
                 ? result
                 : fallback;
+        }
+
+        private static string GetEnvironmentString(string variableName, string fallback)
+        {
+            string value = Environment.GetEnvironmentVariable(variableName);
+            return string.IsNullOrWhiteSpace(value) ? fallback : value;
+        }
+
+        private static int GetEnvironmentInt(string variableName, int fallback)
+        {
+            string value = Environment.GetEnvironmentVariable(variableName);
+            return int.TryParse(value, out int result) ? result : fallback;
         }
     }
 }

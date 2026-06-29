@@ -15,7 +15,7 @@ namespace QuanLyKhoHang.Models
         /// <summary>Tên đăng nhập.</summary>
         public string TenTaiKhoan { get; set; } = string.Empty;
 
-        /// <summary>Mật khẩu đăng nhập. Dự án hiện đang lưu dạng text theo dữ liệu mẫu.</summary>
+        /// <summary>Mật khẩu đăng nhập. Database mới nên lưu PBKDF2, code vẫn hỗ trợ SHA-256/text cũ để tương thích.</summary>
         public string MatKhau { get; set; } = string.Empty;
 
         /// <summary>Vai trò phân quyền, ví dụ Admin hoặc NhanVien.</summary>

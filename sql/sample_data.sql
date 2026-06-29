@@ -57,15 +57,15 @@ SELECT 3, 'Mi goi', 3, 1, 3000, 5000, 200, 'Goi', 'Thuc pham nhanh'
 WHERE NOT EXISTS (SELECT 1 FROM hanghoa WHERE ma_hanghoa = 3);
 
 INSERT INTO taikhoan (ma_taikhoan, ma_nhanvien, ten_taikhoan, mat_khau, vai_tro, trang_thai)
-SELECT 1, 1, 'admin', 'admin123', 'Admin', true
+SELECT 1, 1, 'admin', 'pbkdf2$100000$cWxraC1hZG1pbi1zYWx0LXYx$lOctHBqPmdhFZLUgAMvE2r5aknrFc/20Khp5yLTyr+s=', 'Admin', true
 WHERE NOT EXISTS (SELECT 1 FROM taikhoan WHERE ma_taikhoan = 1);
 
 INSERT INTO taikhoan (ma_taikhoan, ma_nhanvien, ten_taikhoan, mat_khau, vai_tro, trang_thai)
-SELECT 2, 2, 'nhanvienkho', '123456', 'NhanVien', true
+SELECT 2, 2, 'nhanvienkho', 'pbkdf2$100000$cWxraC1zdGFmZi1zYWx0LXYx$dS8VgTfJ0gRv1mu5WUKd36fm95MT4+wSG9lI5rlplZk=', 'NhanVien', true
 WHERE NOT EXISTS (SELECT 1 FROM taikhoan WHERE ma_taikhoan = 2);
 
 INSERT INTO taikhoan (ma_taikhoan, ma_nhanvien, ten_taikhoan, mat_khau, vai_tro, trang_thai)
-SELECT 3, 3, 'nhanvienbanhang', '123456', 'NhanVien', true
+SELECT 3, 3, 'nhanvienbanhang', 'pbkdf2$100000$cWxraC1zdGFmZi1zYWx0LXYx$dS8VgTfJ0gRv1mu5WUKd36fm95MT4+wSG9lI5rlplZk=', 'NhanVien', true
 WHERE NOT EXISTS (SELECT 1 FROM taikhoan WHERE ma_taikhoan = 3);
 
 -- Dong bo lai sequence sau khi chen ma co dinh.

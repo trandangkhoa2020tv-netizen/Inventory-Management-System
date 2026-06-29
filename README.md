@@ -175,6 +175,7 @@ Script database:
 - `create_tables.sql`: tạo schema PostgreSQL.
 - `sample_data.sql`: thêm dữ liệu mẫu và tài khoản mẫu.
 - `migrate_add_trang_thai.sql`: thêm cột `trang_thai` cho database cũ nếu thiếu.
+- `migrate_hash_sample_passwords.sql`: đổi mật khẩu mẫu từ text/SHA-256 sang PBKDF2 cho database cũ.
 
 ## Cấu hình
 
@@ -208,7 +209,27 @@ Ví dụ:
 - `ApiSettings.Enabled`: bật/tắt API nội bộ.
 - `ApiSettings.Url`: địa chỉ API lắng nghe.
 
+Có thể dùng `Config/appsettings.example.json` làm mẫu khi tạo cấu hình cho máy khác.
+
+Các biến môi trường sau sẽ ghi đè cấu hình database trong file:
+
+```text
+QLKH_DB_HOST
+QLKH_DB_PORT
+QLKH_DB_NAME
+QLKH_DB_USER
+QLKH_DB_PASSWORD
+```
+
 ## Khởi tạo database
+
+Cách nhanh bằng Docker:
+
+```powershell
+docker compose up -d postgres
+```
+
+Container PostgreSQL sẽ tự chạy `sql/create_tables.sql` và `sql/sample_data.sql` trong lần khởi tạo volume đầu tiên.
 
 1. Tạo database PostgreSQL:
 
@@ -236,6 +257,12 @@ Nếu database cũ báo lỗi thiếu cột `trang_thai`, chạy thêm:
 sql/migrate_add_trang_thai.sql
 ```
 
+Nếu database cũ đang dùng mật khẩu mẫu dạng text, có thể chạy thêm:
+
+```text
+sql/migrate_hash_sample_passwords.sql
+```
+
 Hoặc chạy trực tiếp:
 
 ```sql
@@ -246,7 +273,7 @@ ADD COLUMN IF NOT EXISTS trang_thai boolean NOT NULL DEFAULT true;
 ## Tài khoản mẫu
 
 ```text
-admin / 123456
+admin / admin123
 nhanvienkho / 123456
 nhanvienbanhang / 123456
 ```
