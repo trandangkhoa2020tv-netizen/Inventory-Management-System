@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
+using Npgsql;
 using QuanLyKhoHang.Models;
 using QuanLyKhoHang.Repositories;
 
@@ -100,14 +101,39 @@ namespace QuanLyKhoHang.Forms
         {
             if (_selectedId == 0)
             {
+                MessageBox.Show("Vui lòng chọn một khách hàng từ bảng để xóa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (MessageBox.Show("Bạn có muốn xóa không?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            DialogResult confirm = MessageBox.Show(
+                "Bạn có chắc chắn muốn xóa khách hàng này khỏi danh mục?",
+                "Xác nhận",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes)
+            {
+                return;
+            }
+
+            try
             {
                 _khachHangRepo.Xoa(_selectedId);
+                MessageBox.Show("Xóa khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearInputs();
                 LoadData();
+            }
+            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.ForeignKeyViolation)
+            {
+                MessageBox.Show(
+                    "Không thể xóa khách hàng này vì đã có phiếu xuất liên quan.\nBạn nên giữ khách hàng để bảo toàn lịch sử chứng từ.",
+                    "Không thể xóa",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi xóa khách hàng: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
