@@ -1,0 +1,29 @@
+# escape=`
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0-windowsservercore-ltsc2022 AS build
+
+SHELL ["powershell", "-NoLogo", "-NoProfile", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+WORKDIR C:\src
+
+COPY QuanLyKhoHang.csproj .\
+RUN dotnet restore .\QuanLyKhoHang.csproj
+
+COPY . .\
+
+ARG CONFIGURATION=Release
+ARG RUNTIME=win-x64
+
+RUN dotnet publish .\QuanLyKhoHang.csproj `
+    -c $env:CONFIGURATION `
+    -r $env:RUNTIME `
+    --self-contained false `
+    -o C:\app\publish `
+    /p:UseAppHost=true
+
+FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS artifacts
+
+WORKDIR C:\app
+COPY --from=build C:\app\publish .\
+
+CMD ["cmd", "/c", "dir", "C:\\app"]
