@@ -1,5 +1,31 @@
 # QuanLyKhoHang
 
+## Docker build
+
+Dự án là WinForms target `net10.0-windows`, vì vậy `Dockerfile.build` dùng để build/publish artifact trên Windows container, không dùng để chạy giao diện GUI trong container.
+
+Yêu cầu Docker Desktop đang ở chế độ Windows containers.
+
+Build image chứa bản publish:
+
+```powershell
+docker build -f Dockerfile.build -t quan-ly-kho-hang:build .
+```
+
+Lấy thư mục publish ra máy host:
+
+```powershell
+docker create --name qlkh-build quan-ly-kho-hang:build
+docker cp qlkh-build:C:\app .\publish
+docker rm qlkh-build
+```
+
+Nếu muốn đổi runtime:
+
+```powershell
+docker build -f Dockerfile.build --build-arg RUNTIME=win-x64 -t quan-ly-kho-hang:build .
+```
+
 Ứng dụng quản lý kho hàng viết bằng C# WinForms, dùng PostgreSQL để lưu dữ liệu và có API HTTP nội bộ để tích hợp hoặc kiểm thử dữ liệu bằng JSON.
 
 ## Mục tiêu chương trình
