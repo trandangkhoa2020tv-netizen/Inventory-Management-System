@@ -273,7 +273,7 @@ ADD COLUMN IF NOT EXISTS trang_thai boolean NOT NULL DEFAULT true;
 ## Tài khoản mẫu
 
 ```text
-admin / admin123
+admin / 123456
 nhanvienkho / 123456
 nhanvienbanhang / 123456
 ```

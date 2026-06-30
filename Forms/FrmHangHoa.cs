@@ -36,7 +36,7 @@ namespace QuanLyKhoHang.Forms
         {
             LoadDataGrid();
             LoadComboBoxes();
-            btnXoa.Enabled = _vaiTro != "NhanVien";
+            btnXoa.Enabled = _vaiTro != "NhanVien"; /// nhan vien không được xóa hàng hóa chi co admin moi co quyen xoa
         }
 
         /// <summary>
