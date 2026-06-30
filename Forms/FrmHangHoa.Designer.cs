@@ -18,6 +18,15 @@ namespace QuanLyKhoHang.Forms
         private System.Windows.Forms.Button btnXoa;
         private System.Windows.Forms.Button btnLamMoi;
         private System.Windows.Forms.Label lblTitle;
+        private System.Windows.Forms.Label lblTenHang;
+        private System.Windows.Forms.Label lblLoaiHang;
+        private System.Windows.Forms.Label lblNhaCungCap;
+        private System.Windows.Forms.Label lblGiaNhap;
+        private System.Windows.Forms.Label lblGiaBan;
+        private System.Windows.Forms.Label lblSoLuongTon;
+        private System.Windows.Forms.Label lblDonViTinh;
+        private System.Windows.Forms.Label lblGhiChu;
+        private System.Windows.Forms.Label lblTimKiem;
         private System.Windows.Forms.TextBox txtTimKiem;
 
         protected override void Dispose(bool disposing)
@@ -46,16 +55,15 @@ namespace QuanLyKhoHang.Forms
             this.btnXoa = new System.Windows.Forms.Button();
             this.btnLamMoi = new System.Windows.Forms.Button();
             this.lblTitle = new System.Windows.Forms.Label();
-            
-            // Khai báo các Label phụ trợ nhanh gọn
-            var lbl1 = new System.Windows.Forms.Label() { Text = "Tên hàng:", Location = new System.Drawing.Point(20, 55), AutoSize = true };
-            var lbl2 = new System.Windows.Forms.Label() { Text = "Loại hàng:", Location = new System.Drawing.Point(20, 95), AutoSize = true };
-            var lbl3 = new System.Windows.Forms.Label() { Text = "Nhà cung cấp:", Location = new System.Drawing.Point(20, 135), AutoSize = true };
-            var lbl4 = new System.Windows.Forms.Label() { Text = "Giá nhập:", Location = new System.Drawing.Point(380, 55), AutoSize = true };
-            var lbl5 = new System.Windows.Forms.Label() { Text = "Giá bán:", Location = new System.Drawing.Point(380, 95), AutoSize = true };
-            var lbl6 = new System.Windows.Forms.Label() { Text = "Số lượng tồn:", Location = new System.Drawing.Point(380, 135), AutoSize = true };
-            var lbl7 = new System.Windows.Forms.Label() { Text = "Đơn vị tính:", Location = new System.Drawing.Point(680, 55), AutoSize = true };
-            var lbl8 = new System.Windows.Forms.Label() { Text = "Ghi chú:", Location = new System.Drawing.Point(680, 95), AutoSize = true };
+            this.lblTenHang = new System.Windows.Forms.Label();
+            this.lblLoaiHang = new System.Windows.Forms.Label();
+            this.lblNhaCungCap = new System.Windows.Forms.Label();
+            this.lblGiaNhap = new System.Windows.Forms.Label();
+            this.lblGiaBan = new System.Windows.Forms.Label();
+            this.lblSoLuongTon = new System.Windows.Forms.Label();
+            this.lblDonViTinh = new System.Windows.Forms.Label();
+            this.lblGhiChu = new System.Windows.Forms.Label();
+            this.lblTimKiem = new System.Windows.Forms.Label();
 
             ((System.ComponentModel.ISupportInitialize)(this.dgvHangHoa)).BeginInit();
             this.pnlTopControls.SuspendLayout();
@@ -69,7 +77,9 @@ namespace QuanLyKhoHang.Forms
                 this.lblTitle, this.txtTenHang, this.cbLoaiHang, this.cbNhaCungCap,
                 this.txtGiaNhap, this.txtGiaBan, this.txtSoLuong, this.txtDVT, this.txtGhiChu,
                 this.btnThem, this.btnSua, this.btnXoa, this.btnLamMoi,
-                lbl1, lbl2, lbl3, lbl4, lbl5, lbl6, lbl7, lbl8
+                this.lblTenHang, this.lblLoaiHang, this.lblNhaCungCap, this.lblGiaNhap,
+                this.lblGiaBan, this.lblSoLuongTon, this.lblDonViTinh, this.lblGhiChu,
+                this.lblTimKiem
             });
 
             // lblTitle
@@ -78,6 +88,38 @@ namespace QuanLyKhoHang.Forms
             this.lblTitle.Location = new System.Drawing.Point(20, 12);
             this.lblTitle.AutoSize = true;
             this.lblTitle.ForeColor = System.Drawing.Color.DarkBlue;
+
+            this.lblTenHang.Text = "Tên hàng:";
+            this.lblTenHang.Location = new System.Drawing.Point(20, 55);
+            this.lblTenHang.AutoSize = true;
+
+            this.lblLoaiHang.Text = "Loại hàng:";
+            this.lblLoaiHang.Location = new System.Drawing.Point(20, 95);
+            this.lblLoaiHang.AutoSize = true;
+
+            this.lblNhaCungCap.Text = "Nhà cung cấp:";
+            this.lblNhaCungCap.Location = new System.Drawing.Point(20, 135);
+            this.lblNhaCungCap.AutoSize = true;
+
+            this.lblGiaNhap.Text = "Giá nhập:";
+            this.lblGiaNhap.Location = new System.Drawing.Point(380, 55);
+            this.lblGiaNhap.AutoSize = true;
+
+            this.lblGiaBan.Text = "Giá bán:";
+            this.lblGiaBan.Location = new System.Drawing.Point(380, 95);
+            this.lblGiaBan.AutoSize = true;
+
+            this.lblSoLuongTon.Text = "Số lượng tồn:";
+            this.lblSoLuongTon.Location = new System.Drawing.Point(380, 135);
+            this.lblSoLuongTon.AutoSize = true;
+
+            this.lblDonViTinh.Text = "Đơn vị tính:";
+            this.lblDonViTinh.Location = new System.Drawing.Point(680, 55);
+            this.lblDonViTinh.AutoSize = true;
+
+            this.lblGhiChu.Text = "Ghi chú:";
+            this.lblGhiChu.Location = new System.Drawing.Point(680, 95);
+            this.lblGhiChu.AutoSize = true;
 
             // Tọa độ các ô nhập dữ liệu (Inputs Layout)
             this.txtTenHang.Location = new System.Drawing.Point(130, 52); this.txtTenHang.Size = new System.Drawing.Size(220, 27);
@@ -121,13 +163,12 @@ namespace QuanLyKhoHang.Forms
             // thêm TextBox tìm kiếm nhanh ở góc trên bên phải
             // 2. Dán đoạn cấu hình này vào trong InitializeComponent(), ngay trên đoạn cấu hình dgvHangHoa:
            // 1. Cấu hình Nhãn "Tìm kiếm nhanh:"
-            var lblTimKiem = new System.Windows.Forms.Label();
-            lblTimKiem.Text = "Tìm kiếm nhanh:";
-            lblTimKiem.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            lblTimKiem.ForeColor = System.Drawing.Color.DarkBlue;
-            lblTimKiem.AutoSize = true;
+            this.lblTimKiem.Text = "Tìm kiếm nhanh:";
+            this.lblTimKiem.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.lblTimKiem.ForeColor = System.Drawing.Color.DarkBlue;
+            this.lblTimKiem.AutoSize = true;
             // Tọa độ mới: Cách cụm nút bấm bên trái một khoảng vừa vặn, không bị đè chữ
-            lblTimKiem.Location = new System.Drawing.Point(565, 186); 
+            this.lblTimKiem.Location = new System.Drawing.Point(565, 186); 
 
             // 2. Cấu hình Ô TextBox txtTimKiem
             this.txtTimKiem = new System.Windows.Forms.TextBox();
@@ -139,7 +180,6 @@ namespace QuanLyKhoHang.Forms
 
             // ======================================================================
             // QUAN TRỌNG: PHẢI CÓ 2 DÒNG NÀY ĐỂ NẠP CONTROL VÀO PANEL (TRÁNH BỊ ẨN)
-            this.pnlTopControls.Controls.Add(lblTimKiem);
             this.pnlTopControls.Controls.Add(this.txtTimKiem);
             // ======================================================================
             // dgvHangHoa (Ép bảng lưới bung rộng chiếm 100% không gian trống còn lại bên dưới)
@@ -150,28 +190,7 @@ namespace QuanLyKhoHang.Forms
             this.dgvHangHoa.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvHangHoa.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvHangHoa_CellClick);
 
-            // ======================================================================
-            // GIỮ NGUYỄN: ĐỊNH DẠNG DẤU CHẤM PHÂN CÁCH HÀNG NGHÌN THEO VÙNG VI-VN
-            var cultureVN = new System.Globalization.CultureInfo("vi-VN");
-
-            this.dgvHangHoa.DataBindingComplete += (s, e) => {
-                if (this.dgvHangHoa.Columns["Giá Nhập"] != null) {
-                    this.dgvHangHoa.Columns["Giá Nhập"].DefaultCellStyle.FormatProvider = cultureVN;
-                    this.dgvHangHoa.Columns["Giá Nhập"].DefaultCellStyle.Format = "N0";
-                    this.dgvHangHoa.Columns["Giá Nhập"].DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-                }
-                if (this.dgvHangHoa.Columns["Giá Bán"] != null) {
-                    this.dgvHangHoa.Columns["Giá Bán"].DefaultCellStyle.FormatProvider = cultureVN;
-                    this.dgvHangHoa.Columns["Giá Bán"].DefaultCellStyle.Format = "N0";
-                    this.dgvHangHoa.Columns["Giá Bán"].DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-                }
-                if (this.dgvHangHoa.Columns["Tôn Kho"] != null) {
-                    this.dgvHangHoa.Columns["Tôn Kho"].DefaultCellStyle.FormatProvider = cultureVN;
-                    this.dgvHangHoa.Columns["Tôn Kho"].DefaultCellStyle.Format = "N0";
-                    this.dgvHangHoa.Columns["Tôn Kho"].DefaultCellStyle.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-                }
-            };
-            // ======================================================================
+            this.dgvHangHoa.DataBindingComplete += new System.Windows.Forms.DataGridViewBindingCompleteEventHandler(this.dgvHangHoa_DataBindingComplete);
 
             // FrmHangHoa Form Properties
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);

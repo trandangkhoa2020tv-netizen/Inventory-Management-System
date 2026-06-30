@@ -148,7 +148,7 @@ namespace QuanLyKhoHang.Forms
             this.btnUserMenu = new System.Windows.Forms.Button();
             this.btnUserMenu.Text = "👤 Tài khoản: admin"; 
             this.btnUserMenu.Size = new System.Drawing.Size(185, 38);
-            this.btnUserMenu.Location = new System.Drawing.Point(this.Width - 210, 11); // Giữ nguyên neo góc phải chuẩn mực
+            this.btnUserMenu.Location = new System.Drawing.Point(990, 11); // Giữ nguyên neo góc phải chuẩn mực
             this.btnUserMenu.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right); 
             this.btnUserMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnUserMenu.FlatAppearance.BorderSize = 0;
@@ -157,7 +157,7 @@ namespace QuanLyKhoHang.Forms
             this.btnUserMenu.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
             this.btnUserMenu.Cursor = System.Windows.Forms.Cursors.Hand;
 
-            this.btnUserMenu.Click += (s, e) => { this.cmsUser.Show(this.btnUserMenu, new System.Drawing.Point(0, this.btnUserMenu.Height)); };
+            this.btnUserMenu.Click += new System.EventHandler(this.btnUserMenu_Click);
 
             // Nạp các control vào Form chính (Giữ nguyên thứ tự nạp gốc, tránh đảo lộn hiển thị)
             this.Controls.Add(this.btnUserMenu);

@@ -31,7 +31,6 @@ namespace QuanLyKhoHang.Forms
         public FrmNhapKho(string vaiTro)
         {
             InitializeComponent();
-            UiTheme.Apply(this);
             _vaiTro = vaiTro;
         }
 
@@ -87,6 +86,30 @@ namespace QuanLyKhoHang.Forms
             {
                 MessageBox.Show("Khong the nap lich su phieu nhap: " + ex.Message, "Loi");
             }
+        }
+
+        private void dgvChiTiet_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            ApplyNumberColumnFormat(dgvChiTiet, 3);
+            ApplyNumberColumnFormat(dgvChiTiet, 4);
+        }
+
+        private void dgvLichSuPhieu_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            ApplyNumberColumnFormat(dgvLichSuPhieu, 4);
+        }
+
+        private static void ApplyNumberColumnFormat(DataGridView grid, int columnIndex)
+        {
+            if (grid.Columns.Count <= columnIndex)
+            {
+                return;
+            }
+
+            DataGridViewCellStyle style = grid.Columns[columnIndex].DefaultCellStyle;
+            style.FormatProvider = CultureInfo.GetCultureInfo("vi-VN");
+            style.Format = "N0";
+            style.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Globalization;
 using System.Windows.Forms;
 using QuanLyKhoHang.Models;
 using QuanLyKhoHang.Repositories;
@@ -25,7 +26,6 @@ namespace QuanLyKhoHang.Forms
         public FrmHangHoa(string vaiTro)
         {
             InitializeComponent();
-            UiTheme.Apply(this);
             _vaiTro = vaiTro;
         }
 
@@ -49,6 +49,26 @@ namespace QuanLyKhoHang.Forms
             {
                 dgvHangHoa.Columns[0].Width = 70;
             }
+        }
+
+        private void dgvHangHoa_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            ApplyNumberColumnFormat(4);
+            ApplyNumberColumnFormat(5);
+            ApplyNumberColumnFormat(6);
+        }
+
+        private void ApplyNumberColumnFormat(int columnIndex)
+        {
+            if (dgvHangHoa.Columns.Count <= columnIndex)
+            {
+                return;
+            }
+
+            DataGridViewCellStyle style = dgvHangHoa.Columns[columnIndex].DefaultCellStyle;
+            style.FormatProvider = CultureInfo.GetCultureInfo("vi-VN");
+            style.Format = "N0";
+            style.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
 
         /// <summary>

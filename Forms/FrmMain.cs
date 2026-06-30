@@ -16,7 +16,6 @@ namespace QuanLyKhoHang.Forms
         public FrmMain()
         {
             InitializeComponent();
-            UiTheme.Apply(this);
             WindowState = FormWindowState.Maximized;
         }
 
@@ -101,6 +100,11 @@ namespace QuanLyKhoHang.Forms
 
                 Close();
             }
+        }
+
+        private void btnUserMenu_Click(object sender, EventArgs e)
+        {
+            cmsUser.Show(btnUserMenu, new System.Drawing.Point(0, btnUserMenu.Height));
         }
 
         /// <summary>Mở form quản lý hàng hóa.</summary>
