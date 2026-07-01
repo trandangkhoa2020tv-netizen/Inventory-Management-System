@@ -19,6 +19,7 @@ namespace QuanLyKhoHang.Forms
         public FrmNhanVien()
         {
             InitializeComponent();
+            UiTheme.Apply(this);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using QuanLyKhoHang.Models;
 
@@ -12,6 +13,9 @@ namespace QuanLyKhoHang.Forms
     {
         // Form con hiện tại đang được nhúng trong panel nội dung.
         private Form activeForm = null;
+        private readonly Color activeMenuBackColor = Color.FromArgb(30, 112, 235);
+        private readonly Color inactiveMenuBackColor = Color.White;
+        private readonly Color inactiveMenuTextColor = Color.FromArgb(43, 54, 73);
 
         public FrmMain()
         {
@@ -54,7 +58,7 @@ namespace QuanLyKhoHang.Forms
                 btnXuatKho.Visible = true;
             }
 
-            btnUserMenu.Text = $"Tài khoản: {UserSession.TenTaiKhoan}";
+            btnUserMenu.Text = UserSession.TenTaiKhoan;
             cmsUser.Items[0].Text = $"Tài khoản: {UserSession.TenTaiKhoan}";
             cmsUser.Items[1].Text = $"Quyền hạn: {UserSession.VaiTro}";
 
@@ -107,33 +111,48 @@ namespace QuanLyKhoHang.Forms
             cmsUser.Show(btnUserMenu, new System.Drawing.Point(0, btnUserMenu.Height));
         }
 
+        private void SetActiveMenu(Button activeButton)
+        {
+            Button[] menuButtons = { btnHangHoa, btnKhachHang, btnNhanVien, btnNhapKho, btnXuatKho };
+            foreach (Button button in menuButtons)
+            {
+                button.BackColor = button == activeButton ? activeMenuBackColor : inactiveMenuBackColor;
+                button.ForeColor = button == activeButton ? Color.White : inactiveMenuTextColor;
+            }
+        }
+
         /// <summary>Mở form quản lý hàng hóa.</summary>
         private void btnHangHoa_Click(object sender, EventArgs e)
         {
+            SetActiveMenu(btnHangHoa);
             OpenChildForm(new FrmHangHoa(UserSession.VaiTro));
         }
 
         /// <summary>Mở form quản lý khách hàng.</summary>
         private void btnKhachHang_Click(object sender, EventArgs e)
         {
+            SetActiveMenu(btnKhachHang);
             OpenChildForm(new FrmKhachHang(UserSession.VaiTro));
         }
 
         /// <summary>Mở form quản lý nhân viên.</summary>
         private void btnNhanVien_Click(object sender, EventArgs e)
         {
+            SetActiveMenu(btnNhanVien);
             OpenChildForm(new FrmNhanVien());
         }
 
         /// <summary>Mở form lập phiếu nhập kho.</summary>
         private void btnNhapKho_Click(object sender, EventArgs e)
         {
+            SetActiveMenu(btnNhapKho);
             OpenChildForm(new FrmNhapKho(UserSession.VaiTro));
         }
 
         /// <summary>Mở form lập phiếu xuất kho.</summary>
         private void btnXuatKho_Click(object sender, EventArgs e)
         {
+            SetActiveMenu(btnXuatKho);
             OpenChildForm(new FrmXuatKho(UserSession.VaiTro));
         }
     }

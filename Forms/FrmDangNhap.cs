@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using QuanLyKhoHang.Models;
 using QuanLyKhoHang.Repositories;
@@ -16,7 +17,50 @@ namespace QuanLyKhoHang.Forms
         public FrmDangNhap()
         {
             InitializeComponent();
+            ApplyLoginTheme();
             _taiKhoanRepository = new TaiKhoanRepository();
+        }
+
+        private void ApplyLoginTheme()
+        {
+            BackColor = Color.FromArgb(248, 250, 252);
+            Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+            StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+
+            pnlCard.BackColor = Color.White;
+            pnlCard.BorderStyle = BorderStyle.FixedSingle;
+
+            lblTitle.ForeColor = Color.FromArgb(37, 99, 235);
+            lblTitle.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            lblSubtitle.ForeColor = Color.FromArgb(100, 116, 139);
+            lblSubtitle.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+
+            StyleTextBox(txtUsername);
+            StyleTextBox(txtPassword);
+
+            btnLogin.FlatStyle = FlatStyle.Flat;
+            btnLogin.FlatAppearance.BorderSize = 0;
+            btnLogin.BackColor = Color.FromArgb(37, 99, 235);
+            btnLogin.ForeColor = Color.White;
+            btnLogin.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnLogin.Cursor = Cursors.Hand;
+
+            btnExit.FlatStyle = FlatStyle.Flat;
+            btnExit.FlatAppearance.BorderSize = 0;
+            btnExit.BackColor = Color.FromArgb(229, 231, 235);
+            btnExit.ForeColor = Color.FromArgb(51, 65, 85);
+            btnExit.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnExit.Cursor = Cursors.Hand;
+        }
+
+        private static void StyleTextBox(TextBox textBox)
+        {
+            textBox.BorderStyle = BorderStyle.FixedSingle;
+            textBox.BackColor = Color.White;
+            textBox.ForeColor = Color.FromArgb(15, 23, 42);
+            textBox.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
         }
 
         /// <summary>

@@ -32,6 +32,7 @@ namespace QuanLyKhoHang.Forms
         public FrmXuatKho(string vaiTro)
         {
             InitializeComponent();
+            UiTheme.Apply(this);
             _vaiTro = vaiTro;
         }
 

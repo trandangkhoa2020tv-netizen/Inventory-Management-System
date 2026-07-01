@@ -3,8 +3,17 @@ namespace QuanLyKhoHang.Forms
     partial class FrmMain
     {
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.Panel pnlHeader;
+        private System.Windows.Forms.Panel pnlShell;
+        private System.Windows.Forms.Panel pnlSidebar;
+        private System.Windows.Forms.Panel pnlBrand;
+        private System.Windows.Forms.Label lblBrandIcon;
+        private System.Windows.Forms.Label lblBrandText;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Panel pnlSidebarFooter;
+        private System.Windows.Forms.Label lblVersion;
+        private System.Windows.Forms.Panel pnlHeader;
+        private System.Windows.Forms.Panel pnlHeaderLine;
+        private System.Windows.Forms.Panel pnlSidebarLine;
         private System.Windows.Forms.Panel pnlContent;
         private System.Windows.Forms.Button btnHangHoa;
         private System.Windows.Forms.Button btnKhachHang;
@@ -16,163 +25,268 @@ namespace QuanLyKhoHang.Forms
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null)) components.Dispose();
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 
         private void InitializeComponent()
         {
-            this.pnlHeader = new System.Windows.Forms.Panel();
+            this.pnlShell = new System.Windows.Forms.Panel();
+            this.pnlSidebar = new System.Windows.Forms.Panel();
+            this.pnlBrand = new System.Windows.Forms.Panel();
+            this.lblBrandIcon = new System.Windows.Forms.Label();
+            this.lblBrandText = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnHangHoa = new System.Windows.Forms.Button();
             this.btnKhachHang = new System.Windows.Forms.Button();
             this.btnNhanVien = new System.Windows.Forms.Button();
             this.btnNhapKho = new System.Windows.Forms.Button();
             this.btnXuatKho = new System.Windows.Forms.Button();
+            this.pnlSidebarFooter = new System.Windows.Forms.Panel();
+            this.lblVersion = new System.Windows.Forms.Label();
+            this.pnlHeader = new System.Windows.Forms.Panel();
+            this.btnUserMenu = new System.Windows.Forms.Button();
+            this.pnlHeaderLine = new System.Windows.Forms.Panel();
+            this.pnlSidebarLine = new System.Windows.Forms.Panel();
             this.pnlContent = new System.Windows.Forms.Panel();
-            this.pnlHeader.SuspendLayout();
+            this.cmsUser = new System.Windows.Forms.ContextMenuStrip();
+            this.pnlShell.SuspendLayout();
+            this.pnlSidebar.SuspendLayout();
+            this.pnlBrand.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
+            this.pnlSidebarFooter.SuspendLayout();
+            this.pnlHeader.SuspendLayout();
             this.SuspendLayout();
 
-            // ======================================================================
-            // 1. TỐI ƯU THANH MENU BÁM ĐỈNH (pnlHeader)
-            // Thay màu Gainsboro cũ bằng màu trắng tinh tế, thêm bo viền phẳng nhẹ nhàng
-            this.pnlHeader.Controls.Add(this.flowLayoutPanel1);
-            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlHeader.Location = new System.Drawing.Point(0, 0);
-            this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(1200, 60); // Tăng nhẹ lên 60px cho menu thoáng đạt
-            this.pnlHeader.BackColor = System.Drawing.Color.White;
+            System.Drawing.Size menuButtonSize = new System.Drawing.Size(220, 44);
+            System.Drawing.Font menuFont = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            System.Drawing.Color menuTextColor = System.Drawing.Color.FromArgb(43, 54, 73);
 
-            // 2. CẤU HÌNH BỘ BỐ TRÍ TỰ ĐỘNG (flowLayoutPanel1)
+            // pnlShell
+            this.pnlShell.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlShell.Location = new System.Drawing.Point(0, 0);
+            this.pnlShell.Name = "pnlShell";
+            this.pnlShell.Size = new System.Drawing.Size(1200, 700);
+            this.pnlShell.BackColor = System.Drawing.Color.FromArgb(245, 247, 251);
+            this.pnlShell.Controls.Add(this.pnlContent);
+            this.pnlShell.Controls.Add(this.pnlHeader);
+            this.pnlShell.Controls.Add(this.pnlSidebar);
+
+            // pnlSidebar
+            this.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left;
+            this.pnlSidebar.Location = new System.Drawing.Point(0, 0);
+            this.pnlSidebar.Name = "pnlSidebar";
+            this.pnlSidebar.Size = new System.Drawing.Size(260, 700);
+            this.pnlSidebar.BackColor = System.Drawing.Color.White;
+            this.pnlSidebar.Controls.Add(this.flowLayoutPanel1);
+            this.pnlSidebar.Controls.Add(this.pnlSidebarFooter);
+            this.pnlSidebar.Controls.Add(this.pnlBrand);
+            this.pnlSidebar.Controls.Add(this.pnlSidebarLine);
+
+            // pnlSidebarLine
+            this.pnlSidebarLine.Dock = System.Windows.Forms.DockStyle.Right;
+            this.pnlSidebarLine.Location = new System.Drawing.Point(259, 0);
+            this.pnlSidebarLine.Name = "pnlSidebarLine";
+            this.pnlSidebarLine.Size = new System.Drawing.Size(1, 700);
+            this.pnlSidebarLine.BackColor = System.Drawing.Color.FromArgb(224, 229, 238);
+
+            // pnlBrand
+            this.pnlBrand.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlBrand.Location = new System.Drawing.Point(0, 0);
+            this.pnlBrand.Name = "pnlBrand";
+            this.pnlBrand.Size = new System.Drawing.Size(259, 120);
+            this.pnlBrand.BackColor = System.Drawing.Color.White;
+            this.pnlBrand.Controls.Add(this.lblBrandIcon);
+            this.pnlBrand.Controls.Add(this.lblBrandText);
+
+            this.lblBrandIcon.Text = "QL";
+            this.lblBrandIcon.Font = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Bold);
+            this.lblBrandIcon.BackColor = System.Drawing.Color.FromArgb(30, 112, 235);
+            this.lblBrandIcon.ForeColor = System.Drawing.Color.White;
+            this.lblBrandIcon.Location = new System.Drawing.Point(24, 38);
+            this.lblBrandIcon.Name = "lblBrandIcon";
+            this.lblBrandIcon.Size = new System.Drawing.Size(48, 48);
+            this.lblBrandIcon.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+
+            this.lblBrandText.Text = "Quản Lý\r\nKho Hàng";
+            this.lblBrandText.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblBrandText.ForeColor = System.Drawing.Color.FromArgb(30, 112, 235);
+            this.lblBrandText.Location = new System.Drawing.Point(84, 35);
+            this.lblBrandText.Name = "lblBrandText";
+            this.lblBrandText.Size = new System.Drawing.Size(160, 62);
+            this.lblBrandText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            // flowLayoutPanel1
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 120);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(15, 12, 10, 10); // Căn lề lùi vào chút cho thoáng
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(1200, 60);
+            this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(20, 8, 20, 8);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(259, 470);
             this.flowLayoutPanel1.BackColor = System.Drawing.Color.White;
+            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.flowLayoutPanel1.WrapContents = false;
 
-            // ======================================================================
-            // 3. THIẾT KẾ LẠI HỆ THỐNG NÚT BẤM CHỨC NĂNG (Giao diện Phẳng - Hiện đại)
-            // Kích thước chuẩn chỉnh, font chữ Segoe UI SemiBold chuyên nghiệp, màu nền đồng bộ
-            System.Drawing.Size btnSize = new System.Drawing.Size(145, 36); // Tăng nhẹ kích thước nút cho dễ bấm
-            System.Drawing.Font menuFont = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
-            System.Drawing.Color btnDefaultBg = System.Drawing.Color.FromArgb(245, 247, 250); // Màu xám siêu nhạt chuẩn SaaS
-            System.Drawing.Color btnDefaultText = System.Drawing.Color.FromArgb(64, 74, 96);   // Màu chữ xám đen lịch lãm
-
-            // Nút Hàng Hóa
-            this.btnHangHoa.Size = btnSize;
-            this.btnHangHoa.Text = "📦 Hàng Hóa";
+            // Menu buttons
+            this.btnHangHoa.Size = menuButtonSize;
+            this.btnHangHoa.Margin = new System.Windows.Forms.Padding(0, 0, 0, 10);
+            this.btnHangHoa.Text = "Hàng Hóa";
+            this.btnHangHoa.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnHangHoa.Padding = new System.Windows.Forms.Padding(22, 0, 0, 0);
             this.btnHangHoa.Font = menuFont;
-            this.btnHangHoa.BackColor = btnDefaultBg;
-            this.btnHangHoa.ForeColor = btnDefaultText;
+            this.btnHangHoa.BackColor = System.Drawing.Color.FromArgb(30, 112, 235);
+            this.btnHangHoa.ForeColor = System.Drawing.Color.White;
             this.btnHangHoa.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnHangHoa.FlatAppearance.BorderSize = 0;
             this.btnHangHoa.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnHangHoa.Click += new System.EventHandler(this.btnHangHoa_Click);
 
-            // Nút Khách Hàng
-            this.btnKhachHang.Size = btnSize;
-            this.btnKhachHang.Text = "👥 Khách Hàng";
+            this.btnKhachHang.Size = menuButtonSize;
+            this.btnKhachHang.Margin = new System.Windows.Forms.Padding(0, 0, 0, 10);
+            this.btnKhachHang.Text = "Khách Hàng";
+            this.btnKhachHang.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnKhachHang.Padding = new System.Windows.Forms.Padding(22, 0, 0, 0);
             this.btnKhachHang.Font = menuFont;
-            this.btnKhachHang.BackColor = btnDefaultBg;
-            this.btnKhachHang.ForeColor = btnDefaultText;
+            this.btnKhachHang.BackColor = System.Drawing.Color.White;
+            this.btnKhachHang.ForeColor = menuTextColor;
             this.btnKhachHang.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnKhachHang.FlatAppearance.BorderSize = 0;
             this.btnKhachHang.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnKhachHang.Click += new System.EventHandler(this.btnKhachHang_Click);
 
-            // Nút Nhân Viên
-            this.btnNhanVien.Size = btnSize;
-            this.btnNhanVien.Text = "🧑‍💼 Nhân Viên";
+            this.btnNhanVien.Size = menuButtonSize;
+            this.btnNhanVien.Margin = new System.Windows.Forms.Padding(0, 0, 0, 10);
+            this.btnNhanVien.Text = "Nhân Viên";
+            this.btnNhanVien.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnNhanVien.Padding = new System.Windows.Forms.Padding(22, 0, 0, 0);
             this.btnNhanVien.Font = menuFont;
-            this.btnNhanVien.BackColor = btnDefaultBg;
-            this.btnNhanVien.ForeColor = btnDefaultText;
+            this.btnNhanVien.BackColor = System.Drawing.Color.White;
+            this.btnNhanVien.ForeColor = menuTextColor;
             this.btnNhanVien.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNhanVien.FlatAppearance.BorderSize = 0;
             this.btnNhanVien.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnNhanVien.Click += new System.EventHandler(this.btnNhanVien_Click);
 
-            // Nút Nhập Kho
-            this.btnNhapKho.Size = btnSize;
-            this.btnNhapKho.Text = "📥 Nhập Kho";
+            this.btnNhapKho.Size = menuButtonSize;
+            this.btnNhapKho.Margin = new System.Windows.Forms.Padding(0, 0, 0, 10);
+            this.btnNhapKho.Text = "Nhập Kho";
+            this.btnNhapKho.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnNhapKho.Padding = new System.Windows.Forms.Padding(22, 0, 0, 0);
             this.btnNhapKho.Font = menuFont;
-            this.btnNhapKho.BackColor = btnDefaultBg;
-            this.btnNhapKho.ForeColor = btnDefaultText;
+            this.btnNhapKho.BackColor = System.Drawing.Color.White;
+            this.btnNhapKho.ForeColor = menuTextColor;
             this.btnNhapKho.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNhapKho.FlatAppearance.BorderSize = 0;
             this.btnNhapKho.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnNhapKho.Click += new System.EventHandler(this.btnNhapKho_Click);
 
-            // Nút Xuất Kho
-            this.btnXuatKho.Size = btnSize;
-            this.btnXuatKho.Text = "📤 Xuất Kho";
+            this.btnXuatKho.Size = menuButtonSize;
+            this.btnXuatKho.Margin = new System.Windows.Forms.Padding(0, 0, 0, 10);
+            this.btnXuatKho.Text = "Xuất Kho";
+            this.btnXuatKho.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnXuatKho.Padding = new System.Windows.Forms.Padding(22, 0, 0, 0);
             this.btnXuatKho.Font = menuFont;
-            this.btnXuatKho.BackColor = btnDefaultBg;
-            this.btnXuatKho.ForeColor = btnDefaultText;
+            this.btnXuatKho.BackColor = System.Drawing.Color.White;
+            this.btnXuatKho.ForeColor = menuTextColor;
             this.btnXuatKho.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnXuatKho.FlatAppearance.BorderSize = 0;
             this.btnXuatKho.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnXuatKho.Click += new System.EventHandler(this.btnXuatKho_Click);
 
-            this.flowLayoutPanel1.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.btnHangHoa, this.btnKhachHang, this.btnNhanVien, this.btnNhapKho, this.btnXuatKho
+            this.flowLayoutPanel1.Controls.AddRange(new System.Windows.Forms.Control[]
+            {
+                this.btnHangHoa,
+                this.btnKhachHang,
+                this.btnNhanVien,
+                this.btnNhapKho,
+                this.btnXuatKho
             });
 
-            // ======================================================================
-            // 4. KHU VỰC CHỨA NỘI DUNG PHÂN HỆ (pnlContent)
-            // Màu nền xám nhẹ dịu mắt, làm nổi bật các lưới và bảng nhập liệu bên trong
-            this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlContent.Location = new System.Drawing.Point(0, 60);
-            this.pnlContent.Name = "pnlContent";
-            this.pnlContent.Size = new System.Drawing.Size(1200, 640);
-            this.pnlContent.BackColor = System.Drawing.Color.FromArgb(240, 242, 245);
+            // pnlSidebarFooter
+            this.pnlSidebarFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlSidebarFooter.Location = new System.Drawing.Point(0, 590);
+            this.pnlSidebarFooter.Name = "pnlSidebarFooter";
+            this.pnlSidebarFooter.Size = new System.Drawing.Size(259, 110);
+            this.pnlSidebarFooter.BackColor = System.Drawing.Color.White;
+            this.pnlSidebarFooter.Controls.Add(this.lblVersion);
 
-            // FrmMain Tổng Thể
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1200, 700);
+            this.lblVersion.Text = "Phiên bản 1.0\r\n© 2026 Quản Lý Kho Hàng";
+            this.lblVersion.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular);
+            this.lblVersion.ForeColor = System.Drawing.Color.FromArgb(105, 116, 135);
+            this.lblVersion.Location = new System.Drawing.Point(20, 26);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.Size = new System.Drawing.Size(220, 58);
+            this.lblVersion.BackColor = System.Drawing.Color.FromArgb(248, 250, 253);
+            this.lblVersion.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
-            // ======================================================================
-            // 5. CHUẨN HÓA MENU THẢ XUỐNG USER (ContextMenuStrip)
-            this.cmsUser = new System.Windows.Forms.ContextMenuStrip();
-            var menuTaiKhoan = new System.Windows.Forms.ToolStripMenuItem() { Enabled = false }; 
-            var menuChucVu = new System.Windows.Forms.ToolStripMenuItem() { Enabled = false };
-            var menuDangXuat = new System.Windows.Forms.ToolStripMenuItem() { Text = "🔒 Đăng xuất tài khoản", ForeColor = System.Drawing.Color.Crimson };
+            // pnlHeader
+            this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlHeader.Location = new System.Drawing.Point(260, 0);
+            this.pnlHeader.Name = "pnlHeader";
+            this.pnlHeader.Size = new System.Drawing.Size(940, 60);
+            this.pnlHeader.BackColor = System.Drawing.Color.White;
+            this.pnlHeader.Controls.Add(this.btnUserMenu);
+            this.pnlHeader.Controls.Add(this.pnlHeaderLine);
 
-            menuDangXuat.Click += new System.EventHandler(this.menuDangXuat_Click);
-            this.cmsUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { menuTaiKhoan, menuChucVu, new System.Windows.Forms.ToolStripSeparator(), menuDangXuat });
-
-            // ======================================================================
-            // 6. TỐI ƯU NÚT BẤM USER TÀI KHOẢN (ĐỒNG BỘ MÀU XANH CÔNG NGHỆ 100%)
-            this.btnUserMenu = new System.Windows.Forms.Button();
-            this.btnUserMenu.Text = "👤 Tài khoản: admin"; 
-            this.btnUserMenu.Size = new System.Drawing.Size(185, 38);
-            this.btnUserMenu.Location = new System.Drawing.Point(990, 11); // Giữ nguyên neo góc phải chuẩn mực
-            this.btnUserMenu.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right); 
+            this.btnUserMenu.Text = "Admin";
+            this.btnUserMenu.Size = new System.Drawing.Size(170, 40);
+            this.btnUserMenu.Location = new System.Drawing.Point(755, 10);
+            this.btnUserMenu.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             this.btnUserMenu.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnUserMenu.FlatAppearance.BorderSize = 0;
-            this.btnUserMenu.BackColor = System.Drawing.Color.FromArgb(0, 114, 198); // Mã xanh dương đậm Khoa chọn
-            this.btnUserMenu.ForeColor = System.Drawing.Color.White; 
-            this.btnUserMenu.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.btnUserMenu.FlatAppearance.BorderSize = 1;
+            this.btnUserMenu.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(224, 229, 238);
+            this.btnUserMenu.BackColor = System.Drawing.Color.White;
+            this.btnUserMenu.ForeColor = System.Drawing.Color.FromArgb(30, 41, 59);
+            this.btnUserMenu.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
             this.btnUserMenu.Cursor = System.Windows.Forms.Cursors.Hand;
-
             this.btnUserMenu.Click += new System.EventHandler(this.btnUserMenu_Click);
 
-            // Nạp các control vào Form chính (Giữ nguyên thứ tự nạp gốc, tránh đảo lộn hiển thị)
-            this.Controls.Add(this.btnUserMenu);
-            this.Controls.Add(this.pnlContent);
-            this.Controls.Add(this.pnlHeader);
-            
-            // Ép nút tài khoản admin nổi lên trên thanh header màu trắng
-            this.btnUserMenu.BringToFront();
+            this.pnlHeaderLine.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlHeaderLine.Location = new System.Drawing.Point(0, 59);
+            this.pnlHeaderLine.Name = "pnlHeaderLine";
+            this.pnlHeaderLine.Size = new System.Drawing.Size(940, 1);
+            this.pnlHeaderLine.BackColor = System.Drawing.Color.FromArgb(224, 229, 238);
 
+            // pnlContent
+            this.pnlContent.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlContent.Location = new System.Drawing.Point(260, 60);
+            this.pnlContent.Name = "pnlContent";
+            this.pnlContent.Size = new System.Drawing.Size(940, 640);
+            this.pnlContent.BackColor = System.Drawing.Color.FromArgb(240, 242, 245);
+
+            // cmsUser
+            var menuTaiKhoan = new System.Windows.Forms.ToolStripMenuItem() { Enabled = false };
+            var menuChucVu = new System.Windows.Forms.ToolStripMenuItem() { Enabled = false };
+            var menuDangXuat = new System.Windows.Forms.ToolStripMenuItem() { Text = "Đăng xuất tài khoản", ForeColor = System.Drawing.Color.Crimson };
+            menuDangXuat.Click += new System.EventHandler(this.menuDangXuat_Click);
+            this.cmsUser.Items.AddRange(new System.Windows.Forms.ToolStripItem[]
+            {
+                menuTaiKhoan,
+                menuChucVu,
+                new System.Windows.Forms.ToolStripSeparator(),
+                menuDangXuat
+            });
+
+            // FrmMain
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1200, 700);
+            this.Controls.Add(this.pnlShell);
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Hệ Thống Quản Lý Kho Hàng - Dashboard";
             this.Load += new System.EventHandler(this.FrmMain_Load);
+
             this.pnlHeader.ResumeLayout(false);
+            this.pnlSidebarFooter.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
+            this.pnlBrand.ResumeLayout(false);
+            this.pnlSidebar.ResumeLayout(false);
+            this.pnlShell.ResumeLayout(false);
             this.ResumeLayout(false);
         }
     }

@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using QuanLyKhoHang.Models;
 
 namespace QuanLyKhoHang.Api
@@ -48,8 +52,42 @@ namespace QuanLyKhoHang.Api
                 });
 
                 builder.WebHost.UseUrls(settings.Url);
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy("ApiCors", policy =>
+                    {
+                        if (AllowsAnyOrigin(settings.AllowedOrigins))
+                        {
+                            policy.AllowAnyOrigin();
+                        }
+                        else
+                        {
+                            policy.WithOrigins(settings.AllowedOrigins);
+                        }
+
+                        policy.AllowAnyHeader();
+                        policy.AllowAnyMethod();
+                    });
+                });
 
                 WebApplication app = builder.Build();
+                app.UseCors("ApiCors");
+
+                if (settings.RequireApiKey)
+                {
+                    app.Use(async (context, next) =>
+                    {
+                        if (!HasValidApiKey(context.Request, settings.ApiKey))
+                        {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            await context.Response.WriteAsJsonAsync(new { message = "Khong co quyen truy cap API." });
+                            return;
+                        }
+
+                        await next();
+                    });
+                }
+
                 MapEndpoints(app);
                 app.StartAsync().GetAwaiter().GetResult();
 
@@ -98,33 +136,60 @@ namespace QuanLyKhoHang.Api
             })));
 
             // Nhóm API hàng hóa: xem, thêm, sửa, xóa.
+            app.MapGet("/api/docs", () => Safe(() => Results.Ok(new
+            {
+                basePath = "/api",
+                auth = "Neu ApiSettings.RequireApiKey = true, gui header X-API-Key hoac Authorization: Bearer <key>.",
+                endpoints = new[]
+                {
+                    "GET /api/health",
+                    "GET /api/chuc-nang",
+                    "GET /api/docs",
+                    "GET,POST /api/hang-hoa",
+                    "PUT,DELETE /api/hang-hoa/{id}",
+                    "GET,POST /api/loai-hang",
+                    "PUT,DELETE /api/loai-hang/{id}",
+                    "GET,POST /api/nha-cung-cap",
+                    "PUT,DELETE /api/nha-cung-cap/{id}",
+                    "GET,POST /api/khach-hang",
+                    "PUT,DELETE /api/khach-hang/{id}",
+                    "GET,POST /api/nhan-vien",
+                    "PUT,DELETE /api/nhan-vien/{id}",
+                    "GET /api/ton-kho/thap?soLuongToiDa=10",
+                    "GET /api/phieu-nhap",
+                    "GET /api/phieu-nhap/{id}/chi-tiet",
+                    "GET /api/phieu-xuat",
+                    "GET /api/phieu-xuat/{id}/chi-tiet"
+                }
+            })));
+
             app.MapGet("/api/hang-hoa", () => Safe(() => OkTable(service.GetHangHoa())));
-            app.MapPost("/api/hang-hoa", (HangHoa input) => Safe(() => ExecuteCreate(service.ThemHangHoa(input))));
-            app.MapPut("/api/hang-hoa/{id:int}", (int id, HangHoa input) => Safe(() => ExecuteUpdate(service.SuaHangHoa(id, input))));
+            app.MapPost("/api/hang-hoa", (HangHoa input) => Safe(() => WithValidation(ValidateHangHoa(input), () => ExecuteCreate(service.ThemHangHoa(input)))));
+            app.MapPut("/api/hang-hoa/{id:int}", (int id, HangHoa input) => Safe(() => WithValidation(ValidateHangHoa(input), () => ExecuteUpdate(service.SuaHangHoa(id, input)))));
             app.MapDelete("/api/hang-hoa/{id:int}", (int id) => Safe(() => ExecuteDelete(service.XoaHangHoa(id))));
 
             // Nhóm API loại hàng: phục vụ phân loại hàng hóa.
             app.MapGet("/api/loai-hang", () => Safe(() => OkTable(service.GetLoaiHang())));
-            app.MapPost("/api/loai-hang", (LoaiHang input) => Safe(() => ExecuteCreate(service.ThemLoaiHang(input))));
-            app.MapPut("/api/loai-hang/{id:int}", (int id, LoaiHang input) => Safe(() => ExecuteUpdate(service.SuaLoaiHang(id, input))));
+            app.MapPost("/api/loai-hang", (LoaiHang input) => Safe(() => WithValidation(ValidateLoaiHang(input), () => ExecuteCreate(service.ThemLoaiHang(input)))));
+            app.MapPut("/api/loai-hang/{id:int}", (int id, LoaiHang input) => Safe(() => WithValidation(ValidateLoaiHang(input), () => ExecuteUpdate(service.SuaLoaiHang(id, input)))));
             app.MapDelete("/api/loai-hang/{id:int}", (int id) => Safe(() => ExecuteDelete(service.XoaLoaiHang(id))));
 
             // Nhóm API nhà cung cấp: phục vụ nghiệp vụ nhập kho.
             app.MapGet("/api/nha-cung-cap", () => Safe(() => OkTable(service.GetNhaCungCap())));
-            app.MapPost("/api/nha-cung-cap", (NhaCungCap input) => Safe(() => ExecuteCreate(service.ThemNhaCungCap(input))));
-            app.MapPut("/api/nha-cung-cap/{id:int}", (int id, NhaCungCap input) => Safe(() => ExecuteUpdate(service.SuaNhaCungCap(id, input))));
+            app.MapPost("/api/nha-cung-cap", (NhaCungCap input) => Safe(() => WithValidation(ValidateNhaCungCap(input), () => ExecuteCreate(service.ThemNhaCungCap(input)))));
+            app.MapPut("/api/nha-cung-cap/{id:int}", (int id, NhaCungCap input) => Safe(() => WithValidation(ValidateNhaCungCap(input), () => ExecuteUpdate(service.SuaNhaCungCap(id, input)))));
             app.MapDelete("/api/nha-cung-cap/{id:int}", (int id) => Safe(() => ExecuteDelete(service.XoaNhaCungCap(id))));
 
             // Nhóm API khách hàng: phục vụ nghiệp vụ xuất kho/bán hàng.
             app.MapGet("/api/khach-hang", () => Safe(() => OkTable(service.GetKhachHang())));
-            app.MapPost("/api/khach-hang", (KhachHang input) => Safe(() => ExecuteCreate(service.ThemKhachHang(input))));
-            app.MapPut("/api/khach-hang/{id:int}", (int id, KhachHang input) => Safe(() => ExecuteUpdate(service.SuaKhachHang(id, input))));
+            app.MapPost("/api/khach-hang", (KhachHang input) => Safe(() => WithValidation(ValidateKhachHang(input), () => ExecuteCreate(service.ThemKhachHang(input)))));
+            app.MapPut("/api/khach-hang/{id:int}", (int id, KhachHang input) => Safe(() => WithValidation(ValidateKhachHang(input), () => ExecuteUpdate(service.SuaKhachHang(id, input)))));
             app.MapDelete("/api/khach-hang/{id:int}", (int id) => Safe(() => ExecuteDelete(service.XoaKhachHang(id))));
 
             // Nhóm API nhân viên: phục vụ quản lý người lập phiếu và phân quyền.
             app.MapGet("/api/nhan-vien", () => Safe(() => OkTable(service.GetNhanVien())));
-            app.MapPost("/api/nhan-vien", (NhanVien input) => Safe(() => ExecuteCreate(service.ThemNhanVien(input))));
-            app.MapPut("/api/nhan-vien/{id:int}", (int id, NhanVien input) => Safe(() => ExecuteUpdate(service.SuaNhanVien(id, input))));
+            app.MapPost("/api/nhan-vien", (NhanVien input) => Safe(() => WithValidation(ValidateNhanVien(input), () => ExecuteCreate(service.ThemNhanVien(input)))));
+            app.MapPut("/api/nhan-vien/{id:int}", (int id, NhanVien input) => Safe(() => WithValidation(ValidateNhanVien(input), () => ExecuteUpdate(service.SuaNhanVien(id, input)))));
             app.MapDelete("/api/nhan-vien/{id:int}", (int id) => Safe(() => ExecuteDelete(service.XoaNhanVien(id))));
 
             // Tra cứu các mặt hàng có tồn kho thấp hơn ngưỡng truyền vào.
@@ -148,7 +213,8 @@ namespace QuanLyKhoHang.Api
             }
             catch (Exception ex)
             {
-                return Results.Problem(title: "Loi xu ly API", detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                Debug.WriteLine("Loi xu ly API: " + ex);
+                return Results.Problem(title: "Loi xu ly API", detail: "Vui long kiem tra log ung dung.", statusCode: StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -192,10 +258,204 @@ namespace QuanLyKhoHang.Api
         /// Cấu hình API đọc từ Config/appsettings.json.
         /// Enabled tắt/mở API, Url là địa chỉ lắng nghe mặc định.
         /// </summary>
+        private static IResult WithValidation(List<string> errors, Func<IResult> action)
+        {
+            return errors.Count > 0
+                ? Results.BadRequest(new { message = "Du lieu khong hop le.", errors })
+                : action();
+        }
+
+        private static List<string> ValidateHangHoa(HangHoa input)
+        {
+            List<string> errors = new List<string>();
+            if (input == null)
+            {
+                errors.Add("Body JSON khong duoc de trong.");
+                return errors;
+            }
+
+            RequireText(errors, input.TenHangHoa, "tenHangHoa", 255);
+            RequirePositive(errors, input.MaLoaiHang, "maLoaiHang");
+            RequirePositive(errors, input.MaNhaCungCap, "maNhaCungCap");
+            RequireNonNegative(errors, input.GiaNhap, "giaNhap");
+            RequireNonNegative(errors, input.GiaBan, "giaBan");
+            RequireNonNegative(errors, input.SoLuongTon, "soLuongTon");
+            OptionalMaxLength(errors, input.DonViTinh, "donViTinh", 50);
+            return errors;
+        }
+
+        private static List<string> ValidateLoaiHang(LoaiHang input)
+        {
+            List<string> errors = new List<string>();
+            if (input == null)
+            {
+                errors.Add("Body JSON khong duoc de trong.");
+                return errors;
+            }
+
+            RequireText(errors, input.TenLoaiHang, "tenLoaiHang", 100);
+            return errors;
+        }
+
+        private static List<string> ValidateNhaCungCap(NhaCungCap input)
+        {
+            List<string> errors = new List<string>();
+            if (input == null)
+            {
+                errors.Add("Body JSON khong duoc de trong.");
+                return errors;
+            }
+
+            RequireText(errors, input.TenNhaCungCap, "tenNhaCungCap", 255);
+            OptionalMaxLength(errors, input.DiaChiNCC, "diaChiNCC", 500);
+            OptionalMaxLength(errors, input.SoDienThoai, "soDienThoai", 20);
+            OptionalEmail(errors, input.Email, "email", 100);
+            return errors;
+        }
+
+        private static List<string> ValidateKhachHang(KhachHang input)
+        {
+            List<string> errors = new List<string>();
+            if (input == null)
+            {
+                errors.Add("Body JSON khong duoc de trong.");
+                return errors;
+            }
+
+            RequireText(errors, input.TenKhachHang, "tenKhachHang", 255);
+            OptionalMaxLength(errors, input.DiaChiKH, "diaChiKH", 500);
+            OptionalMaxLength(errors, input.SoDienThoai, "soDienThoai", 20);
+            OptionalEmail(errors, input.Email, "email", 100);
+            return errors;
+        }
+
+        private static List<string> ValidateNhanVien(NhanVien input)
+        {
+            List<string> errors = new List<string>();
+            if (input == null)
+            {
+                errors.Add("Body JSON khong duoc de trong.");
+                return errors;
+            }
+
+            RequireText(errors, input.TenNhanVien, "tenNhanVien", 255);
+            OptionalMaxLength(errors, input.DiaChiNV, "diaChiNV", 500);
+            OptionalMaxLength(errors, input.SoDienThoai, "soDienThoai", 20);
+            OptionalEmail(errors, input.Email, "email", 100);
+            OptionalMaxLength(errors, input.ChucVu, "chucVu", 100);
+            return errors;
+        }
+
+        private static void RequireText(List<string> errors, string value, string fieldName, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                errors.Add(fieldName + " khong duoc de trong.");
+                return;
+            }
+
+            OptionalMaxLength(errors, value, fieldName, maxLength);
+        }
+
+        private static void OptionalMaxLength(List<string> errors, string value, string fieldName, int maxLength)
+        {
+            if (!string.IsNullOrEmpty(value) && value.Length > maxLength)
+            {
+                errors.Add(fieldName + " khong duoc vuot qua " + maxLength + " ky tu.");
+            }
+        }
+
+        private static void OptionalEmail(List<string> errors, string value, string fieldName, int maxLength)
+        {
+            OptionalMaxLength(errors, value, fieldName, maxLength);
+            if (!string.IsNullOrWhiteSpace(value) && (!value.Contains("@") || value.StartsWith("@") || value.EndsWith("@")))
+            {
+                errors.Add(fieldName + " khong dung dinh dang email.");
+            }
+        }
+
+        private static void RequirePositive(List<string> errors, int value, string fieldName)
+        {
+            if (value <= 0)
+            {
+                errors.Add(fieldName + " phai lon hon 0.");
+            }
+        }
+
+        private static void RequireNonNegative(List<string> errors, int value, string fieldName)
+        {
+            if (value < 0)
+            {
+                errors.Add(fieldName + " khong duoc am.");
+            }
+        }
+
+        private static void RequireNonNegative(List<string> errors, decimal value, string fieldName)
+        {
+            if (value < 0)
+            {
+                errors.Add(fieldName + " khong duoc am.");
+            }
+        }
+
+        private static bool HasValidApiKey(HttpRequest request, string configuredApiKey)
+        {
+            if (string.IsNullOrWhiteSpace(configuredApiKey))
+            {
+                return false;
+            }
+
+            string providedApiKey = null;
+            if (request.Headers.TryGetValue("X-API-Key", out var apiKeyValues))
+            {
+                providedApiKey = apiKeyValues.ToString();
+            }
+
+            if (string.IsNullOrWhiteSpace(providedApiKey) && request.Headers.TryGetValue("Authorization", out var authValues))
+            {
+                string authorization = authValues.ToString();
+                const string bearerPrefix = "Bearer ";
+                if (authorization.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    providedApiKey = authorization.Substring(bearerPrefix.Length).Trim();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(providedApiKey))
+            {
+                return false;
+            }
+
+            byte[] expectedBytes = Encoding.UTF8.GetBytes(configuredApiKey);
+            byte[] providedBytes = Encoding.UTF8.GetBytes(providedApiKey);
+            return expectedBytes.Length == providedBytes.Length && CryptographicOperations.FixedTimeEquals(expectedBytes, providedBytes);
+        }
+
+        private static bool AllowsAnyOrigin(string[] allowedOrigins)
+        {
+            if (allowedOrigins == null || allowedOrigins.Length == 0)
+            {
+                return true;
+            }
+
+            foreach (string origin in allowedOrigins)
+            {
+                if (origin == "*")
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private sealed class ApiSettings
         {
             public bool Enabled { get; private set; } = true;
             public string Url { get; private set; } = "http://localhost:5088";
+            public bool RequireApiKey { get; private set; } = false;
+            public string ApiKey { get; private set; } = string.Empty;
+            public string[] AllowedOrigins { get; private set; } = Array.Empty<string>();
 
             /// <summary>
             /// Đọc cấu hình API, nếu thiếu file hoặc thiếu key thì dùng giá trị mặc định.
@@ -228,6 +488,31 @@ namespace QuanLyKhoHang.Api
                     if (api.TryGetProperty("Url", out JsonElement url))
                     {
                         settings.Url = url.GetString() ?? settings.Url;
+                    }
+
+                    if (api.TryGetProperty("RequireApiKey", out JsonElement requireApiKey) && requireApiKey.ValueKind == JsonValueKind.True)
+                    {
+                        settings.RequireApiKey = true;
+                    }
+
+                    if (api.TryGetProperty("ApiKey", out JsonElement apiKey))
+                    {
+                        settings.ApiKey = apiKey.GetString() ?? settings.ApiKey;
+                    }
+
+                    if (api.TryGetProperty("AllowedOrigins", out JsonElement allowedOrigins) && allowedOrigins.ValueKind == JsonValueKind.Array)
+                    {
+                        List<string> origins = new List<string>();
+                        foreach (JsonElement origin in allowedOrigins.EnumerateArray())
+                        {
+                            string value = origin.GetString();
+                            if (!string.IsNullOrWhiteSpace(value))
+                            {
+                                origins.Add(value);
+                            }
+                        }
+
+                        settings.AllowedOrigins = origins.ToArray();
                     }
                 }
                 catch

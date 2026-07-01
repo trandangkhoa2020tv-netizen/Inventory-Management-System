@@ -20,6 +20,7 @@ namespace QuanLyKhoHang.Forms
         public FrmKhachHang(string vaiTro)
         {
             InitializeComponent();
+            UiTheme.Apply(this);
             _vaiTro = vaiTro;
         }
 
