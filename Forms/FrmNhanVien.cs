@@ -1,9 +1,8 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
-using Npgsql;
+using QuanLyKhoHang.ApiClients;
 using QuanLyKhoHang.Models;
-using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -13,7 +12,7 @@ namespace QuanLyKhoHang.Forms
     /// </summary>
     public partial class FrmNhanVien : Form
     {
-        private readonly NhanVienRepository _nhanVienRepo = new NhanVienRepository();
+        private readonly NhanVienApiClient _nhanVienRepo = new NhanVienApiClient();
         private int _selectedId = 0;
 
         public FrmNhanVien()
@@ -135,14 +134,6 @@ namespace QuanLyKhoHang.Forms
                 MessageBox.Show("Xóa nhân viên thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearInputs();
                 LoadData();
-            }
-            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.ForeignKeyViolation)
-            {
-                MessageBox.Show(
-                    "Không thể xóa nhân viên này vì đã có tài khoản hoặc chứng từ nhập/xuất liên quan.\nBạn nên giữ nhân viên để bảo toàn lịch sử dữ liệu.",
-                    "Không thể xóa",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
