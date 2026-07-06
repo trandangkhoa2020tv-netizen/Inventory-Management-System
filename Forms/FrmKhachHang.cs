@@ -1,9 +1,8 @@
 using System;
 using System.Data;
 using System.Windows.Forms;
-using Npgsql;
+using QuanLyKhoHang.ApiClients;
 using QuanLyKhoHang.Models;
-using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -13,7 +12,7 @@ namespace QuanLyKhoHang.Forms
     /// </summary>
     public partial class FrmKhachHang : Form
     {
-        private readonly KhachHangRepository _khachHangRepo = new KhachHangRepository();
+        private readonly KhachHangApiClient _khachHangRepo = new KhachHangApiClient();
         private int _selectedId = 0;
         private readonly string _vaiTro;
 
@@ -137,14 +136,6 @@ namespace QuanLyKhoHang.Forms
                 MessageBox.Show("Xóa khách hàng thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ClearInputs();
                 LoadData();
-            }
-            catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.ForeignKeyViolation)
-            {
-                MessageBox.Show(
-                    "Không thể xóa khách hàng này vì đã có phiếu xuất liên quan.\nBạn nên giữ khách hàng để bảo toàn lịch sử chứng từ.",
-                    "Không thể xóa",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
