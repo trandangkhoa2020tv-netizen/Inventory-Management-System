@@ -4,8 +4,8 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using QuanLyKhoHang.ApiClients;
 using QuanLyKhoHang.Models;
-using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -15,10 +15,10 @@ namespace QuanLyKhoHang.Forms
     /// </summary>
     public partial class FrmXuatKho : Form
     {
-        private readonly PhieuXuatRepository _pxRepo = new PhieuXuatRepository();
-        private readonly KhachHangRepository _khRepo = new KhachHangRepository();
-        private readonly NhanVienRepository _nvRepo = new NhanVienRepository();
-        private readonly HangHoaRepository _hhRepo = new HangHoaRepository();
+        private readonly PhieuXuatApiClient _pxRepo = new PhieuXuatApiClient();
+        private readonly KhachHangApiClient _khRepo = new KhachHangApiClient();
+        private readonly NhanVienApiClient _nvRepo = new NhanVienApiClient();
+        private readonly HangHoaApiClient _hhRepo = new HangHoaApiClient();
 
         private DataTable _dtChiTietLocal;
         private decimal _tongTienPhieu;
