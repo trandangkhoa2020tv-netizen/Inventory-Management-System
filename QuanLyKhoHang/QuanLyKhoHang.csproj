@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="QuanLyKhoHang.Api\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Config\appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

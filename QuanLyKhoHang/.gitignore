@@ -9,7 +9,6 @@ publish/
 .buildcheck*/
 .objcheck/
 .agents/
-.codex/
 
 *.db
 *.sqlite

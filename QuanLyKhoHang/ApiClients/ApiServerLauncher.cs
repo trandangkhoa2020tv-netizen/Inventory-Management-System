@@ -99,7 +99,11 @@ namespace QuanLyKhoHang.ApiClients
                 Arguments = arguments,
                 WorkingDirectory = workingDirectory,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                Environment =
+                {
+                    ["QUANLYKHOHANG_STARTED_BY_DESKTOP"] = "1"
+                }
             };
         }
 

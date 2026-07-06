@@ -21,7 +21,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore QuanLyKhoHang.csproj
+        run: dotnet restore QuanLyKhoHang.sln
 
       - name: Build
-        run: dotnet build QuanLyKhoHang.csproj --configuration Release --no-restore
+        run: dotnet build QuanLyKhoHang.sln --configuration Release --no-restore
