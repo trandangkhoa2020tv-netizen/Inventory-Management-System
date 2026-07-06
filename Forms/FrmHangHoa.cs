@@ -2,8 +2,8 @@ using System;
 using System.Data;
 using System.Globalization;
 using System.Windows.Forms;
+using QuanLyKhoHang.ApiClients;
 using QuanLyKhoHang.Models;
-using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -13,9 +13,9 @@ namespace QuanLyKhoHang.Forms
     /// </summary>
     public partial class FrmHangHoa : Form
     {
-        private readonly HangHoaRepository _hangHoaRepo = new HangHoaRepository();
-        private readonly LoaiHangRepository _loaiHangRepo = new LoaiHangRepository();
-        private readonly NhaCungCapRepository _nccRepo = new NhaCungCapRepository();
+        private readonly HangHoaApiClient _hangHoaRepo = new HangHoaApiClient();
+        private readonly LoaiHangApiClient _loaiHangRepo = new LoaiHangApiClient();
+        private readonly NhaCungCapApiClient _nccRepo = new NhaCungCapApiClient();
 
         // Mã hàng đang được chọn trên DataGridView. Giá trị 0 nghĩa là chưa chọn dòng nào.
         private int _selectedId = 0;
