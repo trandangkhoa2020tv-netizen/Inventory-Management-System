@@ -1,8 +1,8 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using QuanLyKhoHang.ApiClients;
 using QuanLyKhoHang.Models;
-using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -12,13 +12,13 @@ namespace QuanLyKhoHang.Forms
     /// </summary>
     public partial class FrmDangNhap : Form
     {
-        private readonly TaiKhoanRepository _taiKhoanRepository;
+        private readonly AuthApiClient _authApiClient;
 
         public FrmDangNhap()
         {
             InitializeComponent();
             ApplyLoginTheme();
-            _taiKhoanRepository = new TaiKhoanRepository();
+            _authApiClient = new AuthApiClient();
         }
 
         private void ApplyLoginTheme()
@@ -81,7 +81,7 @@ namespace QuanLyKhoHang.Forms
 
             try
             {
-                string vaiTro = _taiKhoanRepository.CheckLogin(username, password);
+                string vaiTro = _authApiClient.CheckLogin(username, password);
 
                 if (!string.IsNullOrEmpty(vaiTro))
                 {
@@ -105,7 +105,7 @@ namespace QuanLyKhoHang.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Lỗi kết nối API: {ex.Message}", "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
