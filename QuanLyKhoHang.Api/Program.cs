@@ -3,6 +3,7 @@ using QuanLyKhoHang.ApiServer;
 using QuanLyKhoHang.Data;
 using QuanLyKhoHang.Models;
 using QuanLyKhoHang.Repositories;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -55,6 +56,8 @@ catch (Exception ex)
 }
 
 app.UseCors("ApiCors");
+
+app.MapGet("/", () => Results.Redirect("/api/health"));
 
 if (apiSettings.RequireApiKey)
 {
@@ -201,6 +204,8 @@ app.MapPost("/api/phieu-xuat", (LuuPhieuXuatRequest input, PhieuXuatRepository r
     });
 }));
 
+app.Lifetime.ApplicationStarted.Register(StartDesktopClientIfNeeded);
+
 app.Run();
 
 static IResult Safe(Func<IResult> action)
@@ -208,6 +213,10 @@ static IResult Safe(Func<IResult> action)
     try
     {
         return action();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.BadRequest(new { message = ex.Message });
     }
     catch (Exception ex)
     {
@@ -442,6 +451,71 @@ static bool HasValidApiKey(HttpRequest request, string configuredApiKey)
     byte[] expectedBytes = Encoding.UTF8.GetBytes(configuredApiKey);
     byte[] providedBytes = Encoding.UTF8.GetBytes(providedApiKey);
     return expectedBytes.Length == providedBytes.Length && CryptographicOperations.FixedTimeEquals(expectedBytes, providedBytes);
+}
+
+static void StartDesktopClientIfNeeded()
+{
+    if (Environment.GetEnvironmentVariable("QUANLYKHOHANG_STARTED_BY_DESKTOP") == "1")
+    {
+        return;
+    }
+
+    string desktopExecutable = FindDesktopExecutable();
+    if (string.IsNullOrEmpty(desktopExecutable))
+    {
+        return;
+    }
+
+    try
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = desktopExecutable,
+            WorkingDirectory = Path.GetDirectoryName(desktopExecutable) ?? AppContext.BaseDirectory,
+            UseShellExecute = true
+        });
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine("Khong the mo giao dien QuanLyKhoHang: " + ex.Message);
+    }
+}
+
+static string FindDesktopExecutable()
+{
+    DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
+    while (directory != null)
+    {
+        string desktopExecutable = Path.Combine(
+            directory.FullName,
+            "QuanLyKhoHang",
+            "bin",
+            "Debug",
+            "net10.0-windows",
+            "QuanLyKhoHang.exe");
+
+        if (File.Exists(desktopExecutable))
+        {
+            return desktopExecutable;
+        }
+
+        desktopExecutable = Path.Combine(
+            directory.FullName,
+            "QuanLyKhoHang",
+            "bin",
+            "Release",
+            "net10.0-windows",
+            "QuanLyKhoHang.exe");
+
+        if (File.Exists(desktopExecutable))
+        {
+            return desktopExecutable;
+        }
+
+        directory = directory.Parent;
+    }
+
+    return string.Empty;
 }
 
 public sealed class ApiSettings

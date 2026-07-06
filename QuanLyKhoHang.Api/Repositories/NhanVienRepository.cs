@@ -63,11 +63,52 @@ namespace QuanLyKhoHang.Repositories
         /// </summary>
         public int Xoa(int maNv)
         {
-            string sql = "DELETE FROM nhanvien WHERE ma_nhanvien = @ma";
-            NpgsqlParameter[] parameters = {
-                new NpgsqlParameter("@ma", maNv)
-            };
-            return _dbHelper.ExecuteNonQuery(sql, parameters);
+            using (var conn = _dbHelper.GetConnection())
+            {
+                conn.Open();
+                using (var transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        if (HasRelatedRows(conn, transaction, "phieunhap", maNv) ||
+                            HasRelatedRows(conn, transaction, "phieuxuat", maNv))
+                        {
+                            throw new InvalidOperationException("Khong the xoa nhan vien nay vi da co phieu nhap/xuat lien quan. Can giu nhan vien de bao toan lich su chung tu.");
+                        }
+
+                        using (var deleteAccountCmd = new NpgsqlCommand("DELETE FROM taikhoan WHERE ma_nhanvien = @ma", conn, transaction))
+                        {
+                            deleteAccountCmd.Parameters.AddWithValue("@ma", maNv);
+                            deleteAccountCmd.ExecuteNonQuery();
+                        }
+
+                        int affectedRows;
+                        using (var deleteEmployeeCmd = new NpgsqlCommand("DELETE FROM nhanvien WHERE ma_nhanvien = @ma", conn, transaction))
+                        {
+                            deleteEmployeeCmd.Parameters.AddWithValue("@ma", maNv);
+                            affectedRows = deleteEmployeeCmd.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit();
+                        return affectedRows;
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        private static bool HasRelatedRows(NpgsqlConnection conn, NpgsqlTransaction transaction, string tableName, int maNv)
+        {
+            string sql = $"SELECT EXISTS (SELECT 1 FROM {tableName} WHERE ma_nhanvien = @ma)";
+            using (var cmd = new NpgsqlCommand(sql, conn, transaction))
+            {
+                cmd.Parameters.AddWithValue("@ma", maNv);
+                return Convert.ToBoolean(cmd.ExecuteScalar());
+            }
         }
     }
 }
