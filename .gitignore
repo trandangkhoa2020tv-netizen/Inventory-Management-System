@@ -7,6 +7,7 @@ publish/
 .env
 
 .buildcheck*/
+.objcheck/
 .agents/
 
 *.db
