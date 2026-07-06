@@ -1,67 +1,247 @@
 # Inventory Management System
 
-Ứng dụng quản lý kho hàng viết bằng C# WinForms, tách backend API riêng để xử lý nghiệp vụ và truy cập PostgreSQL.
+Hệ thống quản lý kho hàng viết bằng C# WinForms, sử dụng backend API riêng để xử lý nghiệp vụ và truy cập PostgreSQL.
 
-## Cấu trúc solution
+Repository hiện được tổ chức theo mô hình 2 project:
+
+```text
+WinForms UI -> HTTP API -> PostgreSQL
+```
+
+Điểm chính của dự án là tách giao diện và backend ra riêng. Giao diện không truy cập database trực tiếp, mà gọi API qua `HttpClient`.
+
+## Mục Tiêu
+
+Dự án phục vụ bài toán quản lý kho cơ bản:
+
+- Quản lý hàng hóa, loại hàng, nhà cung cấp.
+- Quản lý khách hàng và nhân viên.
+- Đăng nhập và phân quyền theo vai trò.
+- Lập phiếu nhập kho, cộng tồn kho.
+- Lập phiếu xuất kho, kiểm tra tồn kho và trừ tồn kho.
+- Xem lịch sử nhập/xuất và chi tiết chứng từ.
+- Xuất báo cáo Excel/PDF.
+- Cung cấp API backend để có thể test bằng Postman hoặc mở rộng sang client khác sau này.
+
+## Cấu Trúc Repository
 
 ```text
 Inventory-Management-System/
+├── .github/
+│   └── workflows/
+│       └── build.yml
+├── QuanLyKhoHang/
+│   ├── ApiClients/
+│   ├── Config/
+│   ├── Forms/
+│   ├── Models/
+│   ├── Reports/
+│   ├── sql/
+│   ├── Program.cs
+│   └── QuanLyKhoHang.csproj
+├── QuanLyKhoHang.Api/
+│   ├── Data/
+│   ├── Repositories/
+│   ├── Properties/
+│   ├── Program.cs
+│   ├── appsettings.json
+│   └── QuanLyKhoHang.Api.csproj
+├── .gitignore
 ├── QuanLyKhoHang.sln
-├── QuanLyKhoHang/        # WinForms giao diện
-└── QuanLyKhoHang.Api/    # ASP.NET Core Minimal API backend
+└── README.md
 ```
 
-Luồng chạy chính:
+Ý nghĩa các project:
+
+| Project | Vai trò |
+| --- | --- |
+| `QuanLyKhoHang` | Ứng dụng WinForms, hiển thị giao diện và gọi API. |
+| `QuanLyKhoHang.Api` | Backend ASP.NET Core Minimal API, xử lý nghiệp vụ và database. |
+
+## Kiến Trúc
+
+Luồng xử lý tiêu biểu:
 
 ```text
-WinForms UI
-  -> ApiClients
+FrmNhanVien
+  -> NhanVienApiClient
+  -> DELETE /api/nhan-vien/{id}
   -> QuanLyKhoHang.Api
-  -> Repositories
+  -> NhanVienRepository
   -> PostgreSQL
 ```
 
-## Chức năng
+Luồng nhập kho:
 
-- Đăng nhập và phân quyền `Admin` / `NhanVien`.
-- Quản lý hàng hóa, khách hàng, nhân viên, loại hàng, nhà cung cấp.
-- Nhập kho, xuất kho, tự động cập nhật tồn kho.
-- Chặn xuất âm bằng kiểm tra tồn kho trong transaction.
-- Tra cứu lịch sử phiếu nhập/xuất và chi tiết phiếu.
-- Xuất báo cáo Excel/PDF từ WinForms.
-- API backend cho đăng nhập, danh mục, tồn kho và chứng từ.
+```text
+FrmNhapKho
+  -> KhoApiClient
+  -> POST /api/phieu-nhap
+  -> PhieuNhapRepository
+  -> transaction:
+       1. tạo phiếu nhập
+       2. thêm chi tiết phiếu
+       3. cộng tồn kho
+```
 
-## Công nghệ
+Luồng xuất kho:
 
-- .NET 10
-- C# WinForms `net10.0-windows`
-- ASP.NET Core Minimal API `net10.0`
-- PostgreSQL
-- Npgsql
-- ClosedXML
-- iTextSharp.LGPLv2.Core
+```text
+FrmXuatKho
+  -> KhoApiClient
+  -> POST /api/phieu-xuat
+  -> PhieuXuatRepository
+  -> transaction:
+       1. tạo phiếu xuất
+       2. kiểm tra tồn kho
+       3. trừ tồn kho
+       4. thêm chi tiết phiếu
+```
 
-## Cấu hình
+## Công Nghệ
 
-WinForms đọc địa chỉ API từ:
+| Thành phần | Công nghệ |
+| --- | --- |
+| Desktop UI | C# WinForms |
+| UI target framework | `net10.0-windows` |
+| Backend | ASP.NET Core Minimal API |
+| API target framework | `net10.0` |
+| Database | PostgreSQL |
+| Database driver | Npgsql |
+| Excel export | ClosedXML |
+| PDF export | iTextSharp.LGPLv2.Core |
+| CI | GitHub Actions |
+
+## Chức Năng Chính
+
+### Tài khoản và phân quyền
+
+- Đăng nhập bằng tài khoản trong bảng `taikhoan`.
+- Hỗ trợ vai trò `Admin` và `NhanVien`.
+- Nhân viên thường bị giới hạn menu tùy tài khoản.
+
+Tài khoản mẫu:
+
+```text
+admin / 123456
+nhanvienkho / 123456
+nhanvienbanhang / 123456
+```
+
+### Danh mục
+
+- Hàng hóa.
+- Loại hàng.
+- Nhà cung cấp.
+- Khách hàng.
+- Nhân viên.
+
+### Kho
+
+- Tạo phiếu nhập.
+- Tạo phiếu xuất.
+- Tự động cập nhật tồn kho.
+- Chặn xuất âm bằng điều kiện database trong transaction.
+- Xem hàng tồn thấp.
+
+### Báo cáo
+
+- Xuất Excel.
+- Xuất PDF.
+- Xem chi tiết phiếu nhập/xuất.
+
+## Cấu Hình
+
+### Cấu hình WinForms
+
+File:
 
 ```text
 QuanLyKhoHang/Config/appsettings.json
 ```
 
-API đọc cấu hình database và server từ:
+Ví dụ:
+
+```json
+{
+  "ApiClientSettings": {
+    "BaseUrl": "http://localhost:5088",
+    "ApiKey": ""
+  }
+}
+```
+
+### Cấu hình API
+
+File:
 
 ```text
 QuanLyKhoHang.Api/appsettings.json
 ```
 
-Mặc định API chạy ở:
+Ví dụ:
 
-```text
-http://localhost:5088
+```json
+{
+  "DatabaseSettings": {
+    "Host": "localhost",
+    "Port": 5432,
+    "Database": "quanlyhanghoa",
+    "Username": "postgres",
+    "Password": "1234"
+  },
+  "ApiSettings": {
+    "Url": "http://localhost:5088",
+    "RequireApiKey": false,
+    "ApiKey": "",
+    "AllowedOrigins": []
+  }
+}
 ```
 
-## Chạy nhanh
+Biến môi trường có thể ghi đè cấu hình database:
+
+```text
+QLKH_DB_HOST
+QLKH_DB_PORT
+QLKH_DB_NAME
+QLKH_DB_USER
+QLKH_DB_PASSWORD
+```
+
+## Cài Đặt Database
+
+Database mặc định:
+
+```text
+Database: quanlyhanghoa
+Username: postgres
+Password: 1234
+Port: 5432
+```
+
+Script SQL nằm trong:
+
+```text
+QuanLyKhoHang/sql/
+```
+
+Thứ tự chạy với database mới:
+
+```text
+create_tables.sql
+sample_data.sql
+```
+
+Với database cũ, có thể chạy thêm:
+
+```text
+sync_existing_database.sql
+migrate_add_trang_thai.sql
+migrate_hash_sample_passwords.sql
+```
+
+## Build Và Chạy
 
 Từ thư mục root repository:
 
@@ -76,77 +256,109 @@ Chạy giao diện WinForms:
 dotnet run --project QuanLyKhoHang/QuanLyKhoHang.csproj
 ```
 
-Khi mở app, WinForms sẽ kiểm tra API tại `/api/health`. Nếu API chưa chạy, app sẽ tự bật backend `QuanLyKhoHang.Api`.
-
-Chạy API thủ công để test Postman:
+Chạy API thủ công:
 
 ```powershell
 dotnet run --project QuanLyKhoHang.Api/QuanLyKhoHang.Api.csproj
 ```
 
-## Database
-
-Database mặc định:
+Khi chạy WinForms, app sẽ kiểm tra API tại:
 
 ```text
-Database: quanlyhanghoa
-User: postgres
-Password: 1234
+http://localhost:5088/api/health
 ```
 
-Script SQL nằm trong:
+Nếu API chưa chạy, WinForms sẽ tự bật backend `QuanLyKhoHang.Api`.
+
+## API Nhanh
+
+Base URL mặc định:
 
 ```text
-QuanLyKhoHang/sql/
+http://localhost:5088
 ```
 
-Thứ tự chạy thủ công:
-
-```text
-create_tables.sql
-sample_data.sql
-```
-
-Với database cũ, chạy thêm khi cần:
-
-```text
-sync_existing_database.sql
-migrate_add_trang_thai.sql
-migrate_hash_sample_passwords.sql
-```
-
-## Tài khoản mẫu
-
-```text
-admin / 123456
-nhanvienkho / 123456
-nhanvienbanhang / 123456
-```
-
-## API chính
+Endpoint hệ thống:
 
 ```http
 GET  /api/health
+GET  /api/chuc-nang
+GET  /api/docs
 POST /api/auth/login
+```
 
-GET,POST        /api/hang-hoa
-PUT,DELETE      /api/hang-hoa/{id}
-GET,POST        /api/khach-hang
-PUT,DELETE      /api/khach-hang/{id}
-GET,POST        /api/nhan-vien
-PUT,DELETE      /api/nhan-vien/{id}
+Endpoint danh mục:
 
+```http
+GET,POST   /api/hang-hoa
+PUT,DELETE /api/hang-hoa/{id}
+
+GET,POST   /api/loai-hang
+PUT,DELETE /api/loai-hang/{id}
+
+GET,POST   /api/nha-cung-cap
+PUT,DELETE /api/nha-cung-cap/{id}
+
+GET,POST   /api/khach-hang
+PUT,DELETE /api/khach-hang/{id}
+
+GET,POST   /api/nhan-vien
+PUT,DELETE /api/nhan-vien/{id}
+```
+
+Endpoint kho:
+
+```http
 GET  /api/ton-kho/thap?soLuongToiDa=10
+
 GET  /api/phieu-nhap
 POST /api/phieu-nhap
 GET  /api/phieu-nhap/{id}/chi-tiet
+
 GET  /api/phieu-xuat
 POST /api/phieu-xuat
 GET  /api/phieu-xuat/{id}/chi-tiet
+GET  /api/phieu-xuat/{id}/thong-tin
 ```
 
-## Ghi chú
+## Lỗi Thường Gặp
 
-- Project `QuanLyKhoHang` là app giao diện, không truy cập database trực tiếp.
-- Project `QuanLyKhoHang.Api` là backend, chứa kết nối database và repositories.
-- Nếu dời folder, cần mở `QuanLyKhoHang.sln` ở root repository.
+### Visual Studio chỉ chạy API, không mở giao diện
+
+Đặt startup project là:
+
+```text
+QuanLyKhoHang
+```
+
+Không đặt startup project là:
+
+```text
+QuanLyKhoHang.Api
+```
+
+### API hiện cửa sổ terminal
+
+API là server nên khi chạy trực tiếp nó sẽ chạy liên tục để nhận request. Nếu chạy đúng từ WinForms, app có thể tự bật API nền. Nếu chạy API thủ công, terminal API là bình thường.
+
+### Không kết nối được database
+
+Kiểm tra:
+
+- PostgreSQL đã chạy chưa.
+- Database `quanlyhanghoa` đã tồn tại chưa.
+- `appsettings.json` của API đã đúng host/user/password chưa.
+- Đã chạy `create_tables.sql` và `sample_data.sql` chưa.
+
+### Xóa nhân viên không được
+
+Nếu nhân viên đã có phiếu nhập/xuất, API sẽ không xóa để giữ lịch sử chứng từ. Nhân viên chưa có chứng từ thì có thể xóa; tài khoản liên quan sẽ được xóa trong cùng transaction.
+
+## Ghi Chú Phát Triển
+
+- Mở solution bằng `QuanLyKhoHang.sln` ở root repository.
+- Không commit `bin/`, `obj/`, `.vs/`.
+- Giữ repository database ở project `QuanLyKhoHang.Api`.
+- Giữ UI ở project `QuanLyKhoHang`.
+- Khi đổi tên cột trả về từ API, kiểm tra lại các form đang bind `DataGridView`.
+- Các thao tác nhập/xuất kho phải tiếp tục dùng transaction để tránh lệch tồn kho.
