@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Windows.Forms;
+using QuanLyKhoHang.ApiClients;
 using QuanLyKhoHang.Models;
-using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.Forms
 {
@@ -14,10 +14,10 @@ namespace QuanLyKhoHang.Forms
     /// </summary>
     public partial class FrmNhapKho : Form
     {
-        private readonly PhieuNhapRepository _pnRepo = new PhieuNhapRepository();
-        private readonly NhaCungCapRepository _nccRepo = new NhaCungCapRepository();
-        private readonly NhanVienRepository _nvRepo = new NhanVienRepository();
-        private readonly HangHoaRepository _hhRepo = new HangHoaRepository();
+        private readonly PhieuNhapApiClient _pnRepo = new PhieuNhapApiClient();
+        private readonly NhaCungCapApiClient _nccRepo = new NhaCungCapApiClient();
+        private readonly NhanVienApiClient _nvRepo = new NhanVienApiClient();
+        private readonly HangHoaApiClient _hhRepo = new HangHoaApiClient();
 
         private DataTable _dtChiTietLocal;
         private decimal _tongTienPhieu;
