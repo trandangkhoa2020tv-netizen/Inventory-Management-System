@@ -1,185 +1,53 @@
-# QuanLyKhoHang
+﻿# QuanLyKhoHang
 
-## Docker build
+Ứng dụng quản lý kho hàng viết bằng C# WinForms, dùng backend HTTP API riêng trong project `QuanLyKhoHang.Api` để xử lý nghiệp vụ và truy cập PostgreSQL.
 
-Dự án là WinForms target `net10.0-windows`, vì vậy `Dockerfile.build` dùng để build/publish artifact trên Windows container, không dùng để chạy giao diện GUI trong container.
+## Chức năng chính
 
-Yêu cầu Docker Desktop đang ở chế độ Windows containers.
+- Đăng nhập và phân quyền theo vai trò `Admin` hoặc `NhanVien`.
+- Quản lý danh mục hàng hóa, khách hàng và nhân viên.
+- Quản lý dữ liệu liên quan đến hàng hóa gồm loại hàng và nhà cung cấp qua backend API.
+- Lập phiếu nhập kho, tính tổng tiền, lưu chi tiết phiếu và tự động cộng tồn kho.
+- Lập phiếu xuất kho, kiểm tra tồn kho, chặn xuất âm và tự động trừ tồn kho.
+- Tra cứu lịch sử phiếu nhập/xuất và chi tiết từng phiếu.
+- Xuất dữ liệu phiếu ra Excel hoặc PDF.
+- Cung cấp API riêng cho đăng nhập, danh mục, tồn kho thấp và chứng từ nhập/xuất.
 
-Build image chứa bản publish:
+## Công nghệ
 
-```powershell
-docker build -f Dockerfile.build -t quan-ly-kho-hang:build .
-```
-
-Lấy thư mục publish ra máy host:
-
-```powershell
-docker create --name qlkh-build quan-ly-kho-hang:build
-docker cp qlkh-build:C:\app .\publish
-docker rm qlkh-build
-```
-
-Nếu muốn đổi runtime:
-
-```powershell
-docker build -f Dockerfile.build --build-arg RUNTIME=win-x64 -t quan-ly-kho-hang:build .
-```
-
-Ứng dụng quản lý kho hàng viết bằng C# WinForms, dùng PostgreSQL để lưu dữ liệu và có API HTTP nội bộ để tích hợp hoặc kiểm thử dữ liệu bằng JSON.
-
-## Mục tiêu chương trình
-
-Phần mềm hỗ trợ các nghiệp vụ kho cơ bản:
-
-- Quản lý danh mục hàng hóa, loại hàng, nhà cung cấp, khách hàng và nhân viên.
-- Lập phiếu nhập kho, tự cộng số lượng tồn.
-- Lập phiếu xuất kho, kiểm tra tồn kho và chặn xuất âm.
-- Tra cứu lịch sử phiếu nhập/xuất.
-- Xuất chi tiết phiếu ra Excel hoặc PDF.
-- Cung cấp API chạy kèm ứng dụng để hệ thống khác có thể đọc/ghi dữ liệu.
-
-## Công nghệ sử dụng
-
-- Ngôn ngữ: C#.
-- Giao diện: Windows Forms.
-- Framework: .NET 10 Windows.
-- Database: PostgreSQL.
-- Thư viện database: `Npgsql`.
-- Xuất Excel: `ClosedXML`.
-- Xuất PDF: `iTextSharp.LGPLv2.Core`.
-- API nội bộ: ASP.NET Core Minimal API chạy chung tiến trình với WinForms.
+- C# WinForms, target `net10.0-windows`.
+- PostgreSQL.
+- ASP.NET Core Minimal API chạy riêng trong project `QuanLyKhoHang.Api`.
+- `Npgsql` cho truy cập PostgreSQL ở backend API.
+- `ClosedXML` cho xuất Excel.
+- `iTextSharp.LGPLv2.Core` cho xuất PDF.
 
 ## Cấu trúc thư mục
 
 ```text
 QuanLyKhoHang/
-  Api/                 API HTTP nội bộ, chuyển dữ liệu kho thành JSON.
-  Config/              File cấu hình database và API.
-  Data/                Lớp kết nối và helper chạy SQL.
-  Forms/               Giao diện WinForms và xử lý sự kiện người dùng.
-  Models/              Các class dữ liệu tương ứng bảng database.
-  Repositories/        Tầng truy cập dữ liệu và nghiệp vụ database.
-  Reports/             Xuất báo cáo Excel/PDF.
+  QuanLyKhoHang.sln     Solution gồm WinForms và backend API.
+  QuanLyKhoHang.csproj  Project WinForms.
+  ApiClients/          Client HTTP để WinForms gọi backend API.
+  Config/              File cấu hình địa chỉ backend API cho WinForms.
+  Forms/               Giao diện WinForms.
+  Models/              Model dữ liệu dùng chung cho UI và API.
+  Reports/             Xuất Excel/PDF.
   sql/                 Script tạo bảng, dữ liệu mẫu và migration.
-  Program.cs           Điểm khởi động ứng dụng.
+  Dockerfile.build     Build/publish app bằng Windows container.
+  docker-compose.yml   PostgreSQL phục vụ phát triển.
+  Program.cs           Điểm khởi động ứng dụng WinForms.
+  QuanLyKhoHang.Api/
+    Program.cs             Backend API server riêng.
+    appsettings.json       Cấu hình database và API server.
+    Data/                  Kết nối PostgreSQL và helper chạy SQL.
+    Repositories/          Tầng truy cập dữ liệu và nghiệp vụ database.
+    QuanLyKhoHang.Api.csproj
 ```
-
-## Ghi chú từng nhóm file
-
-### `Program.cs`
-
-Điểm khởi động chương trình:
-
-- Khởi tạo cấu hình WinForms.
-- Bật API nội bộ nếu `ApiSettings.Enabled = true`.
-- Mở form đăng nhập `FrmDangNhap`.
-- Khi ứng dụng đóng, API cũng tự dừng.
-
-### `Data/DbConnection.cs`
-
-Quản lý chuỗi kết nối PostgreSQL:
-
-- Đọc thông tin kết nối từ `Config/appsettings.json`.
-- Có chuỗi kết nối mặc định để tránh crash khi thiếu file config.
-- Cung cấp `GetConnection()` cho toàn bộ repository.
-- Cung cấp `TestConnection()` cho API health check.
-
-### `Data/DatabaseHelper.cs`
-
-Helper chạy SQL:
-
-- `ExecuteNonQuery`: chạy `INSERT`, `UPDATE`, `DELETE`.
-- `ExecuteQuery`: chạy `SELECT` và trả về `DataTable`.
-- `ExecuteScalar`: chạy SQL trả về một giá trị như `COUNT`, `SUM`, `RETURNING id`.
-
-### `Api/ApiHost.cs`
-
-Host API nội bộ:
-
-- Đọc cấu hình API từ `appsettings.json`.
-- Map toàn bộ endpoint `/api/...`.
-- Bọc lỗi API bằng hàm `Safe()` để trả lỗi HTTP thay vì làm sập ứng dụng.
-- Trả kết quả CRUD thống nhất bằng `ExecuteCreate`, `ExecuteUpdate`, `ExecuteDelete`.
-
-### `Api/InventoryApiService.cs`
-
-Lớp nghiệp vụ cho API:
-
-- Gọi repository có sẵn để tái sử dụng logic CRUD.
-- Chạy một số query riêng để trả tên cột JSON dạng `camelCase`.
-- Cung cấp dữ liệu hàng hóa, loại hàng, nhà cung cấp, khách hàng, nhân viên, phiếu nhập, phiếu xuất và tồn kho thấp.
-
-### `Api/DataTableJson.cs`
-
-Chuyển `DataTable` thành danh sách object JSON:
-
-- Mỗi dòng `DataRow` thành một object.
-- Tên cột là key JSON.
-- `DBNull.Value` được đổi thành `null`.
-
-### `Models/`
-
-Các class dữ liệu:
-
-- `HangHoa`: thông tin mặt hàng, giá nhập, giá bán, tồn kho.
-- `LoaiHang`: nhóm hàng hóa.
-- `NhaCungCap`: thông tin nhà cung cấp.
-- `KhachHang`: thông tin khách hàng.
-- `NhanVien`: thông tin nhân viên.
-- `TaiKhoan`: thông tin đăng nhập và vai trò.
-- `UserSession`: lưu tài khoản/vai trò đang đăng nhập.
-- `PhieuNhap`: thông tin chung phiếu nhập.
-- `ChiTietPhieuNhap`: từng dòng hàng trong phiếu nhập.
-- `PhieuXuat`: thông tin chung phiếu xuất.
-- `ChiTietPhieuXuat`: từng dòng hàng trong phiếu xuất.
-
-### `Repositories/`
-
-Tầng truy cập dữ liệu:
-
-- `HangHoaRepository`: CRUD hàng hóa.
-- `LoaiHangRepository`: CRUD loại hàng.
-- `NhaCungCapRepository`: CRUD nhà cung cấp.
-- `KhachHangRepository`: CRUD khách hàng.
-- `NhanVienRepository`: CRUD nhân viên.
-- `TaiKhoanRepository`: kiểm tra đăng nhập, tương thích database cũ chưa có cột `trang_thai`.
-- `PhieuNhapRepository`: lấy lịch sử phiếu nhập, lấy chi tiết, lưu phiếu nhập bằng transaction và cộng tồn kho.
-- `PhieuXuatRepository`: lấy lịch sử phiếu xuất, lấy chi tiết, lưu phiếu xuất bằng transaction, kiểm tra và trừ tồn kho.
-
-### `Forms/`
-
-Giao diện người dùng:
-
-- `FrmDangNhap`: đăng nhập, lưu `UserSession`, mở màn hình chính.
-- `FrmMain`: menu chính, phân quyền theo vai trò, nhúng các form con.
-- `FrmHangHoa`: quản lý hàng hóa, tìm kiếm theo tên hàng/loại hàng/nhà cung cấp.
-- `FrmKhachHang`: quản lý khách hàng.
-- `FrmNhanVien`: quản lý nhân viên.
-- `FrmNhapKho`: lập phiếu nhập, thêm chi tiết tạm, tính tổng tiền, lưu phiếu và cộng tồn.
-- `FrmXuatKho`: lập phiếu xuất, kiểm tra tồn kho, lưu phiếu và trừ tồn.
-
-Không nên sửa trực tiếp các file `*.Designer.cs` nếu không cần thiết, vì đây là file WinForms sinh ra để lưu layout và event binding.
-
-### `Reports/`
-
-Xuất báo cáo:
-
-- `ExportExcel.ToExcel`: xuất `DataTable` ra file `.xlsx`.
-- `ExportPdf.ToPdf`: xuất `DataTable` ra file `.pdf`, dùng font Arial để hỗ trợ tiếng Việt.
-
-### `sql/`
-
-Script database:
-
-- `create_tables.sql`: tạo schema PostgreSQL.
-- `sample_data.sql`: thêm dữ liệu mẫu và tài khoản mẫu.
-- `migrate_add_trang_thai.sql`: thêm cột `trang_thai` cho database cũ nếu thiếu.
-- `migrate_hash_sample_passwords.sql`: đổi mật khẩu mẫu từ text/SHA-256 sang PBKDF2 cho database cũ.
 
 ## Cấu hình
 
-File cấu hình nằm tại:
+File cấu hình WinForms:
 
 ```text
 Config/appsettings.json
@@ -189,29 +57,27 @@ Ví dụ:
 
 ```json
 {
-  "DatabaseSettings": {
-    "Host": "localhost",
-    "Port": 5432,
-    "Database": "quanlyhanghoa",
-    "Username": "postgres",
-    "Password": "1234"
-  },
-  "ApiSettings": {
-    "Enabled": true,
-    "Url": "http://localhost:5088"
+  "ApiClientSettings": {
+    "BaseUrl": "http://localhost:5088",
+    "ApiKey": ""
   }
 }
 ```
 
 Ý nghĩa:
 
-- `DatabaseSettings`: thông tin kết nối PostgreSQL.
-- `ApiSettings.Enabled`: bật/tắt API nội bộ.
-- `ApiSettings.Url`: địa chỉ API lắng nghe.
+- `ApiClientSettings.BaseUrl`: địa chỉ backend API mà WinForms sẽ gọi.
+- `ApiClientSettings.ApiKey`: key gửi lên API nếu backend bật yêu cầu API key.
 
-Có thể dùng `Config/appsettings.example.json` làm mẫu khi tạo cấu hình cho máy khác.
+File cấu hình backend API nằm ở:
 
-Các biến môi trường sau sẽ ghi đè cấu hình database trong file:
+```text
+QuanLyKhoHang.Api\appsettings.json
+```
+
+Backend API giữ `DatabaseSettings` để kết nối PostgreSQL và `ApiSettings` để cấu hình URL, CORS, API key.
+
+Biến môi trường có thể ghi đè cấu hình database:
 
 ```text
 QLKH_DB_HOST
@@ -229,45 +95,26 @@ Cách nhanh bằng Docker:
 docker compose up -d postgres
 ```
 
-Container PostgreSQL sẽ tự chạy `sql/create_tables.sql` và `sql/sample_data.sql` trong lần khởi tạo volume đầu tiên.
-
-1. Tạo database PostgreSQL:
-
-```sql
-CREATE DATABASE quanlyhanghoa;
-```
-
-2. Kết nối vào database `quanlyhanghoa`.
-
-3. Chạy script tạo bảng:
+Container PostgreSQL dùng database `quanlyhanghoa`, user `postgres`, mật khẩu `1234`. Khi volume được tạo lần đầu, Docker tự chạy:
 
 ```text
 sql/create_tables.sql
-```
-
-4. Chạy dữ liệu mẫu:
-
-```text
 sql/sample_data.sql
 ```
 
-Nếu database cũ báo lỗi thiếu cột `trang_thai`, chạy thêm:
+Cách thủ công:
+
+1. Tạo database PostgreSQL tên `quanlyhanghoa`.
+2. Kết nối vào database đó.
+3. Chạy `sql/create_tables.sql`.
+4. Chạy `sql/sample_data.sql`.
+
+Với database cũ, có thể chạy thêm các script sau khi cần:
 
 ```text
+sql/sync_existing_database.sql
 sql/migrate_add_trang_thai.sql
-```
-
-Nếu database cũ đang dùng mật khẩu mẫu dạng text, có thể chạy thêm:
-
-```text
 sql/migrate_hash_sample_passwords.sql
-```
-
-Hoặc chạy trực tiếp:
-
-```sql
-ALTER TABLE taikhoan
-ADD COLUMN IF NOT EXISTS trang_thai boolean NOT NULL DEFAULT true;
 ```
 
 ## Tài khoản mẫu
@@ -278,12 +125,13 @@ nhanvienkho / 123456
 nhanvienbanhang / 123456
 ```
 
-Phân quyền mẫu:
+Phân quyền hiện tại:
 
-- `admin`: xem toàn bộ chức năng.
-- `nhanvienkho`: dùng nhập kho, không dùng xuất kho.
-- `nhanvienbanhang`: dùng xuất kho, không dùng nhập kho.
-- Tài khoản vai trò `NhanVien` không được vào form quản lý nhân viên.
+- `admin`: xem và dùng toàn bộ chức năng trên menu.
+- `nhanvienkho`: dùng nhập kho, không dùng xuất kho và không vào màn hình nhân viên.
+- `nhanvienbanhang`: dùng xuất kho, không dùng nhập kho và không vào màn hình nhân viên.
+
+Mật khẩu mẫu trong database mới dùng PBKDF2. Code vẫn tương thích với database cũ đang lưu SHA-256 hoặc plain text để tránh lỗi khi nâng cấp.
 
 ## Chạy chương trình
 
@@ -293,29 +141,34 @@ Vào thư mục project:
 cd D:\QuanLyKhoHang\QuanLyKhoHang
 ```
 
-Restore package nếu cần:
+Restore và build:
 
 ```powershell
 dotnet restore
-```
-
-Chạy ứng dụng:
-
-```powershell
-dotnet run
-```
-
-Build kiểm tra:
-
-```powershell
 dotnet build QuanLyKhoHang.csproj
 ```
 
-Nếu build báo file `.exe` hoặc `.dll` đang bị khóa, nghĩa là ứng dụng đang mở. Đóng cửa sổ chương trình rồi build lại.
+Chạy app WinForms:
 
-## API nội bộ
+```powershell
+cd D:\QuanLyKhoHang\QuanLyKhoHang
+dotnet run
+```
 
-API tự chạy cùng WinForms nếu `ApiSettings.Enabled = true`.
+Khi mở app, WinForms sẽ tự kiểm tra `http://localhost:5088/api/health`. Nếu API chưa chạy, app tự bật backend `QuanLyKhoHang.Api` bằng process riêng.
+
+Nếu muốn chạy API thủ công để test Postman:
+
+```powershell
+cd D:\QuanLyKhoHang\QuanLyKhoHang
+dotnet run --project QuanLyKhoHang.Api\QuanLyKhoHang.Api.csproj
+```
+
+Nếu build báo file `.exe` hoặc `.dll` đang bị khóa, hãy đóng cửa sổ ứng dụng `QuanLyKhoHang` đang chạy rồi build lại.
+
+## Backend API
+
+API chạy riêng với project `QuanLyKhoHang.Api`.
 
 Base URL mặc định:
 
@@ -323,16 +176,23 @@ Base URL mặc định:
 http://localhost:5088
 ```
 
-### Endpoint hệ thống
+Endpoint hệ thống:
 
 ```http
 GET /api/health
 GET /api/chuc-nang
+GET /api/docs
+POST /api/auth/login
 ```
 
-`/api/health` trả trạng thái API và kết nối database.
+Nếu bật `RequireApiKey`, gửi một trong hai header:
 
-### Endpoint hàng hóa
+```http
+X-API-Key: <api-key>
+Authorization: Bearer <api-key>
+```
+
+Endpoint hàng hóa:
 
 ```http
 GET    /api/hang-hoa
@@ -359,7 +219,7 @@ Content-Type: application/json
 }
 ```
 
-### Endpoint danh mục
+Endpoint danh mục:
 
 ```http
 GET    /api/loai-hang
@@ -383,72 +243,90 @@ PUT    /api/nhan-vien/{id}
 DELETE /api/nhan-vien/{id}
 ```
 
-### Endpoint kho và chứng từ
+Endpoint kho và chứng từ:
 
 ```http
 GET /api/ton-kho/thap?soLuongToiDa=10
 GET /api/phieu-nhap
+POST /api/phieu-nhap
 GET /api/phieu-nhap/{id}/chi-tiet
 GET /api/phieu-xuat
+POST /api/phieu-xuat
 GET /api/phieu-xuat/{id}/chi-tiet
+GET /api/phieu-xuat/{id}/thong-tin
 ```
 
-## Luồng nghiệp vụ nhập kho
+Các endpoint `POST`/`PUT` có validate dữ liệu cơ bản và trả `400` nếu body không hợp lệ. `PUT`/`DELETE` trả `404` nếu không tìm thấy dòng cần xử lý.
 
-1. Người dùng mở `FrmNhapKho`.
-2. Chọn nhà cung cấp, nhân viên, mặt hàng, số lượng và đơn giá.
-3. Bấm thêm hàng để đưa vào bảng chi tiết tạm.
+## Luồng nghiệp vụ
+
+Nhập kho:
+
+1. Người dùng mở màn hình nhập kho.
+2. Chọn nhà cung cấp, nhân viên, hàng hóa, số lượng và đơn giá.
+3. Thêm hàng vào bảng chi tiết tạm.
 4. Hệ thống tính tổng tiền.
-5. Bấm lưu phiếu.
-6. `PhieuNhapRepository.LuuPhieuNhap()` tạo transaction.
-7. Tạo phiếu nhập.
-8. Thêm từng dòng chi tiết.
-9. Cộng tồn kho từng mặt hàng.
-10. Commit nếu thành công, rollback nếu có lỗi.
+5. Khi lưu, WinForms gọi API; backend tạo transaction, thêm phiếu, thêm chi tiết, cộng tồn kho và commit.
+6. Nếu có lỗi, transaction rollback.
 
-## Luồng nghiệp vụ xuất kho
+Xuất kho:
 
-1. Người dùng mở `FrmXuatKho`.
-2. Chọn khách hàng, nhân viên, mặt hàng, số lượng và đơn giá.
-3. Khi thêm hàng, form kiểm tra số lượng muốn xuất không vượt tồn kho.
-4. Bấm lưu phiếu.
-5. `PhieuXuatRepository.LuuPhieuXuat()` tạo transaction.
-6. Tạo phiếu xuất.
-7. Trừ tồn kho bằng điều kiện `so_luong_ton >= @soluong`.
-8. Thêm chi tiết phiếu xuất.
-9. Commit nếu thành công, rollback nếu thiếu tồn hoặc có lỗi.
+1. Người dùng mở màn hình xuất kho.
+2. Chọn khách hàng, nhân viên, hàng hóa, số lượng và đơn giá.
+3. Form kiểm tra số lượng xuất không vượt tồn kho.
+4. Khi lưu, WinForms gọi API; backend tạo transaction, thêm phiếu, trừ tồn kho theo điều kiện `so_luong_ton >= @soluong`, thêm chi tiết và commit.
+5. Nếu thiếu tồn hoặc có lỗi, transaction rollback.
+
+## Docker build ứng dụng
+
+Dự án là WinForms target `net10.0-windows`, vì vậy `Dockerfile.build` chỉ dùng để build/publish artifact bằng Windows container, không dùng để chạy giao diện GUI trong container.
+
+Yêu cầu Docker Desktop ở chế độ Windows containers.
+
+Build image chứa bản publish:
+
+```powershell
+docker build -f Dockerfile.build -t quan-ly-kho-hang:build .
+```
+
+Lấy thư mục publish ra máy host:
+
+```powershell
+docker create --name qlkh-build quan-ly-kho-hang:build
+docker cp qlkh-build:C:\app .\publish
+docker rm qlkh-build
+```
+
+Đổi runtime nếu cần:
+
+```powershell
+docker build -f Dockerfile.build --build-arg RUNTIME=win-x64 -t quan-ly-kho-hang:build .
+```
 
 ## Lỗi thường gặp
 
-### `column "trang_thai" does not exist`
+`column "trang_thai" does not exist`
 
-Database cũ chưa có cột trạng thái tài khoản. Có thể xử lý bằng một trong hai cách:
+Database cũ thiếu cột trạng thái tài khoản. Chạy `sql/migrate_add_trang_thai.sql` hoặc `sql/sync_existing_database.sql`. Code hiện tại cũng có kiểm tra tương thích để tránh lỗi đăng nhập với schema cũ.
 
-- Chạy `sql/migrate_add_trang_thai.sql`.
-- Hoặc dùng code hiện tại vì `TaiKhoanRepository` đã tự tương thích database cũ.
+Không kết nối được database
 
-### Build báo file đang bị khóa
+- Kiểm tra PostgreSQL đã chạy chưa.
+- Kiểm tra database tên `quanlyhanghoa` đã tồn tại chưa.
+- Kiểm tra `Host`, `Port`, `Username`, `Password` trong `QuanLyKhoHang.Api\appsettings.json`.
+- Kiểm tra đã chạy `create_tables.sql` và `sample_data.sql` chưa.
 
-Thông báo thường gặp:
+API không truy cập được
 
-```text
-The process cannot access the file ... QuanLyKhoHang.exe because it is being used by another process
-```
-
-Cách xử lý: đóng ứng dụng `QuanLyKhoHang` đang chạy rồi build lại.
-
-### Không kết nối được database
-
-Kiểm tra:
-
-- PostgreSQL đã chạy chưa.
-- Database có tên đúng là `quanlyhanghoa` chưa.
-- `Host`, `Port`, `Username`, `Password` trong `Config/appsettings.json` có đúng không.
-- Đã chạy `create_tables.sql` và `sample_data.sql` chưa.
+- Kiểm tra backend `QuanLyKhoHang.Api` đã chạy chưa.
+- Kiểm tra port trong `QuanLyKhoHang.Api\appsettings.json` chưa bị ứng dụng khác chiếm.
+- Kiểm tra `ApiClientSettings.BaseUrl` trong WinForms trỏ đúng URL backend.
+- Nếu bật `RequireApiKey`, kiểm tra header `X-API-Key` hoặc `Authorization`.
+- Nếu gọi từ trình duyệt/web app khác origin, kiểm tra `AllowedOrigins`.
 
 ## Ghi chú bảo trì
 
-- Nên giữ các câu SQL có tham số `NpgsqlParameter` để tránh SQL injection.
-- Không sửa file `*.Designer.cs` nếu chỉ thay đổi logic.
-- Nếu đổi alias tên cột trong repository, cần kiểm tra các form đang đọc cột đó.
-- Các thao tác nhập/xuất kho nên luôn dùng transaction để không lệch tồn kho.
+- Giữ SQL có tham số `NpgsqlParameter` ở backend API để tránh SQL injection.
+- Không sửa `*.Designer.cs` nếu chỉ thay đổi logic xử lý.
+- Khi đổi alias tên cột trong repository/API, kiểm tra các form và JSON response đang đọc tên cột đó.
+- Các thao tác nhập/xuất kho cần tiếp tục dùng transaction để không lệch tồn kho.
