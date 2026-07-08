@@ -8,10 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\QuanLyKhoHang\Models\**\*.cs" Link="Models\%(RecursiveDir)%(Filename)%(Extension)" />
+    <ProjectReference Include="..\QuanLyKhoHang.Shared\QuanLyKhoHang.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

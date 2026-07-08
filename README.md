@@ -1,185 +1,312 @@
-# Inventory Management System
+# Quan Ly Kho Hang
 
-Hệ thống quản lý kho hàng viết bằng C# WinForms, sử dụng backend API riêng để xử lý nghiệp vụ và truy cập PostgreSQL.
+He thong quan ly kho hang gom 4 project chinh:
 
-Repository hiện được tổ chức theo mô hình 2 project:
+- `QuanLyKhoHang`: ung dung desktop WinForms.
+- `QuanLyKhoHang.Api`: backend ASP.NET Core API lam viec voi PostgreSQL.
+- `QuanLyKhoHang.Shared`: class library chua model dung chung.
+- `QuanLyKhoHang.Tests`: test tu dong cho service va JWT.
 
-```text
-WinForms UI -> HTTP API -> PostgreSQL
+Kien truc hien tai:
+
+```txt
+WinForms
+->
+ApiClient
+->
+Endpoints
+->
+Services
+->
+Repositories
+->
+PostgreSQL
 ```
 
-Điểm chính của dự án là tách giao diện và backend ra riêng. Giao diện không truy cập database trực tiếp, mà gọi API qua `HttpClient`.
+WinForms chi phu trach giao dien, nhap lieu, hien thi du lieu va goi API. API phu trach validate, xu ly nghiep vu, thao tac database va tra ket qua JSON ve cho WinForms.
 
-## Mục Tiêu
+## Cau Truc Thu Muc Tong Quan
 
-Dự án phục vụ bài toán quản lý kho cơ bản:
-
-- Quản lý hàng hóa, loại hàng, nhà cung cấp.
-- Quản lý khách hàng và nhân viên.
-- Đăng nhập và phân quyền theo vai trò.
-- Lập phiếu nhập kho, cộng tồn kho.
-- Lập phiếu xuất kho, kiểm tra tồn kho và trừ tồn kho.
-- Xem lịch sử nhập/xuất và chi tiết chứng từ.
-- Xuất báo cáo Excel/PDF.
-- Cung cấp API backend để có thể test bằng Postman hoặc mở rộng sang client khác sau này.
-
-## Cấu Trúc Repository
-
-```text
-Inventory-Management-System/
-├── .github/
-│   └── workflows/
-│       └── build.yml
-├── QuanLyKhoHang/
-│   ├── ApiClients/
-│   ├── Config/
-│   ├── Forms/
-│   ├── Models/
-│   ├── Reports/
-│   ├── sql/
-│   ├── Program.cs
-│   └── QuanLyKhoHang.csproj
-├── QuanLyKhoHang.Api/
-│   ├── Data/
-│   ├── Repositories/
-│   ├── Properties/
-│   ├── Program.cs
-│   ├── appsettings.json
-│   └── QuanLyKhoHang.Api.csproj
-├── .gitignore
-├── QuanLyKhoHang.sln
-└── README.md
+```txt
+QuanLyKhoHang/
+|   .gitignore
+|   QuanLyKhoHang.sln
+|   README.md
+|
++---.github/
+|   |   copilot-instructions.md
+|   |
+|   \---workflows/
+|           build.yml
+|
++---QuanLyKhoHang/                  -> App giao dien WinForms
+|   |   .dockerignore
+|   |   .gitignore
+|   |   docker-compose.yml
+|   |   Dockerfile.build
+|   |   Program.cs
+|   |   QuanLyKhoHang.csproj
+|   |   README.md
+|   |
+|   +---ApiClients/
+|   |       ApiClientSettings.cs
+|   |       ApiHttpClient.cs
+|   |       ApiServerLauncher.cs
+|   |       DanhMucApiClients.cs
+|   |       KhoApiClients.cs
+|   |
+|   +---Config/
+|   |       appsettings.example.json
+|   |       appsettings.json
+|   |
+|   +---Forms/
+|   |       FrmDangNhap.cs
+|   |       FrmDangNhap.Designer.cs
+|   |       FrmDangNhap.resx
+|   |       FrmHangHoa.cs
+|   |       FrmHangHoa.Designer.cs
+|   |       FrmHangHoa.resx
+|   |       FrmKhachHang.cs
+|   |       FrmKhachHang.Designer.cs
+|   |       FrmKhachHang.resx
+|   |       FrmMain.cs
+|   |       FrmMain.Designer.cs
+|   |       FrmMain.resx
+|   |       FrmNhanVien.cs
+|   |       FrmNhanVien.Designer.cs
+|   |       FrmNhanVien.resx
+|   |       FrmNhapKho.cs
+|   |       FrmNhapKho.Designer.cs
+|   |       FrmNhapKho.resx
+|   |       FrmXuatKho.cs
+|   |       FrmXuatKho.Designer.cs
+|   |       FrmXuatKho.resx
+|   |       UiTheme.cs
+|   |
+|   +---Reports/
+|   |       ExportExcel.cs
+|   |       ExportPdf.cs
+|   |
+|   \---sql/
+|           create_tables.sql
+|           migrate_add_trang_thai.sql
+|           migrate_hash_sample_passwords.sql
+|           sample_data.sql
+|           sync_existing_database.sql
+|
+\---QuanLyKhoHang.Api/              -> Backend API
+    |   .gitignore
+    |   appsettings.json
+    |   DataTableJson.cs
+    |   InventoryApiQueries.cs
+    |   Program.cs
+    |   QuanLyKhoHang.Api.csproj
+    |   README.md
+    |
+    +---Config/
+    |       ApiSettings.cs
+    |
+    +---Data/
+    |       DatabaseHelper.cs
+    |       DatabaseMaintenance.cs
+    |       DbConnection.cs
+    |
+    +---DTOs/
+    |       AuthDtos.cs
+    |       DataTableDtoMapper.cs
+    |       PhieuKhoDtos.cs
+    |       ResponseDtos.cs
+    |
+    +---Endpoints/
+    |       AuthEndpoints.cs
+    |       HangHoaEndpoints.cs
+    |       LoaiHangEndpoints.cs
+    |       NhaCungCapEndpoints.cs
+    |       KhachHangEndpoints.cs
+    |       NhanVienEndpoints.cs
+    |       KhoEndpoints.cs
+    |       PhieuNhapEndpoints.cs
+    |       PhieuXuatEndpoints.cs
+    |       SystemEndpoints.cs
+    |
+    +---Properties/
+    |       launchSettings.json
+    |
+    +---Repositories/
+    |       HangHoaRepository.cs
+    |       KhachHangRepository.cs
+    |       LoaiHangRepository.cs
+    |       NhaCungCapRepository.cs
+    |       NhanVienRepository.cs
+    |       PhieuNhapRepository.cs
+    |       PhieuXuatRepository.cs
+    |       TaiKhoanRepository.cs
+    |
+    \---Services/
+            ApiKeyValidator.cs
+            ApiResults.cs
+            ApiValidationException.cs
+            AuthService.cs
+            HangHoaService.cs
+            LoaiHangService.cs
+            NhaCungCapService.cs
+            KhachHangService.cs
+            NhanVienService.cs
+            DesktopClientLauncher.cs
+            KhoService.cs
+            PhieuNhapService.cs
+            PhieuXuatService.cs
+            JwtTokenService.cs
+            ValidationHelper.cs
+|
++---QuanLyKhoHang.Shared/           -> Model dung chung
+|   |   QuanLyKhoHang.Shared.csproj
+|   |
+|   \---Models/
+|           ChiTietPhieuNhap.cs
+|           ChiTietPhieuXuat.cs
+|           HangHoa.cs
+|           KhachHang.cs
+|           LoaiHang.cs
+|           NhaCungCap.cs
+|           NhanVien.cs
+|           PhieuNhap.cs
+|           PhieuXuat.cs
+|           TaiKhoan.cs
+|           UserSession.cs
+|
+\---QuanLyKhoHang.Tests/            -> Test tu dong
+        JwtTokenServiceTests.cs
+        ServiceValidationTests.cs
+        QuanLyKhoHang.Tests.csproj
 ```
 
-Ý nghĩa các project:
+Thu muc build nhu `bin/`, `obj/`, `.vs/` khong duoc dua vao cay tren vi do la file sinh ra khi build.
 
-| Project | Vai trò |
+## Y Nghia Tung Phan
+
+| Thanh phan | Vai tro |
 | --- | --- |
-| `QuanLyKhoHang` | Ứng dụng WinForms, hiển thị giao diện và gọi API. |
-| `QuanLyKhoHang.Api` | Backend ASP.NET Core Minimal API, xử lý nghiệp vụ và database. |
+| `.github/workflows/build.yml` | Cau hinh GitHub Actions de build/test tu dong. |
+| `QuanLyKhoHang.sln` | Solution gom WinForms, API, Shared va Tests. |
+| `QuanLyKhoHang/` | Project giao dien desktop WinForms. |
+| `QuanLyKhoHang.Api/` | Project backend API ket noi PostgreSQL. |
+| `QuanLyKhoHang.Shared/` | Project chua model dung chung cho WinForms va API. |
+| `QuanLyKhoHang.Tests/` | Project test tu dong bang xUnit. |
+| `QuanLyKhoHang/ApiClients/` | Noi WinForms goi HTTP API. |
+| `QuanLyKhoHang/Forms/` | Cac man hinh giao dien nguoi dung. |
+| `QuanLyKhoHang/Reports/` | Xuat bao cao Excel/PDF. |
+| `QuanLyKhoHang/sql/` | Script tao database va du lieu mau. |
+| `QuanLyKhoHang.Api/Endpoints/` | Khai bao route API theo Minimal API, thay vai tro controller. |
+| `QuanLyKhoHang.Api/Services/` | Xu ly logic nghiep vu va validate. |
+| `QuanLyKhoHang.Api/Repositories/` | Truy van database PostgreSQL. |
+| `QuanLyKhoHang.Api/Data/` | Ket noi database va helper chay SQL. |
+| `QuanLyKhoHang.Api/DTOs/` | Kieu du lieu request/response rieng cho API, gom DTO output cho `/api/v2`. |
+| `QuanLyKhoHang.Api/Config/` | Class cau hinh API. |
 
-## Kiến Trúc
+## Luong Xu Ly Chuan
 
-Luồng xử lý tiêu biểu:
+Vi du them hoac sua hang hoa:
 
-```text
-FrmNhanVien
-  -> NhanVienApiClient
-  -> DELETE /api/nhan-vien/{id}
-  -> QuanLyKhoHang.Api
-  -> NhanVienRepository
-  -> PostgreSQL
+```txt
+FrmHangHoa.cs
+->
+HangHoaApiClient
+->
+POST/PUT /api/hang-hoa
+->
+HangHoaEndpoints.cs
+->
+HangHoaService.cs
+->
+HangHoaRepository.cs
+->
+PostgreSQL
 ```
 
-Luồng nhập kho:
+Vi du lap phieu nhap:
 
-```text
-FrmNhapKho
-  -> KhoApiClient
-  -> POST /api/phieu-nhap
-  -> PhieuNhapRepository
-  -> transaction:
-       1. tạo phiếu nhập
-       2. thêm chi tiết phiếu
-       3. cộng tồn kho
+```txt
+FrmNhapKho.cs
+->
+PhieuNhapApiClient
+->
+POST /api/phieu-nhap
+->
+PhieuNhapEndpoints.cs
+->
+PhieuNhapService.cs
+->
+PhieuNhapRepository.cs
+->
+Transaction:
+  1. Tao phieu nhap
+  2. Them chi tiet phieu
+  3. Cong ton kho
 ```
 
-Luồng xuất kho:
+Vi du lap phieu xuat:
 
-```text
-FrmXuatKho
-  -> KhoApiClient
-  -> POST /api/phieu-xuat
-  -> PhieuXuatRepository
-  -> transaction:
-       1. tạo phiếu xuất
-       2. kiểm tra tồn kho
-       3. trừ tồn kho
-       4. thêm chi tiết phiếu
+```txt
+FrmXuatKho.cs
+->
+PhieuXuatApiClient
+->
+POST /api/phieu-xuat
+->
+PhieuXuatEndpoints.cs
+->
+PhieuXuatService.cs
+->
+PhieuXuatRepository.cs
+->
+Transaction:
+  1. Tao phieu xuat
+  2. Kiem tra ton kho
+  3. Tru ton kho
+  4. Them chi tiet phieu
 ```
 
-## Công Nghệ
+## Cong Nghe Su Dung
 
-| Thành phần | Công nghệ |
+| Thanh phan | Cong nghe |
 | --- | --- |
-| Desktop UI | C# WinForms |
-| UI target framework | `net10.0-windows` |
+| Giao dien | C# WinForms |
+| Desktop target | `net10.0-windows` |
 | Backend | ASP.NET Core Minimal API |
-| API target framework | `net10.0` |
+| API target | `net10.0` |
+| API docs/test | Swagger UI / Swashbuckle |
 | Database | PostgreSQL |
-| Database driver | Npgsql |
-| Excel export | ClosedXML |
-| PDF export | iTextSharp.LGPLv2.Core |
-| CI | GitHub Actions |
+| Driver database | Npgsql |
+| Excel | ClosedXML |
+| PDF | iTextSharp.LGPLv2.Core |
+| CI/CD | GitHub Actions |
 
-## Chức Năng Chính
+## Chuc Nang Chinh
 
-### Tài khoản và phân quyền
+- Dang nhap va phan quyen theo vai tro.
+- Quan ly hang hoa.
+- Quan ly loai hang.
+- Quan ly nha cung cap.
+- Quan ly khach hang.
+- Quan ly nhan vien.
+- Lap phieu nhap kho va cong ton kho.
+- Lap phieu xuat kho va tru ton kho.
+- Chan xuat am bang transaction o database.
+- Xem hang ton kho thap.
+- Xem lich su phieu nhap/phieu xuat.
+- Xem chi tiet tung phieu.
+- Xuat Excel/PDF.
 
-- Đăng nhập bằng tài khoản trong bảng `taikhoan`.
-- Hỗ trợ vai trò `Admin` và `NhanVien`.
-- Nhân viên thường bị giới hạn menu tùy tài khoản.
+## Cau Hinh Database
 
-Tài khoản mẫu:
+File cau hinh database nam o:
 
-```text
-admin / 123456
-nhanvienkho / 123456
-nhanvienbanhang / 123456
-```
-
-### Danh mục
-
-- Hàng hóa.
-- Loại hàng.
-- Nhà cung cấp.
-- Khách hàng.
-- Nhân viên.
-
-### Kho
-
-- Tạo phiếu nhập.
-- Tạo phiếu xuất.
-- Tự động cập nhật tồn kho.
-- Chặn xuất âm bằng điều kiện database trong transaction.
-- Xem hàng tồn thấp.
-
-### Báo cáo
-
-- Xuất Excel.
-- Xuất PDF.
-- Xem chi tiết phiếu nhập/xuất.
-
-## Cấu Hình
-
-### Cấu hình WinForms
-
-File:
-
-```text
-QuanLyKhoHang/Config/appsettings.json
-```
-
-Ví dụ:
-
-```json
-{
-  "ApiClientSettings": {
-    "BaseUrl": "http://localhost:5088",
-    "ApiKey": ""
-  }
-}
-```
-
-### Cấu hình API
-
-File:
-
-```text
+```txt
 QuanLyKhoHang.Api/appsettings.json
 ```
 
-Ví dụ:
+Vi du:
 
 ```json
 {
@@ -195,13 +322,20 @@ Ví dụ:
     "RequireApiKey": false,
     "ApiKey": "",
     "AllowedOrigins": []
+  },
+  "JwtSettings": {
+    "RequireJwt": false,
+    "Issuer": "QuanLyKhoHang.Api",
+    "Audience": "QuanLyKhoHang.WinForms",
+    "SecretKey": "QuanLyKhoHang-Development-Secret-Key-Change-Me",
+    "ExpirationMinutes": 480
   }
 }
 ```
 
-Biến môi trường có thể ghi đè cấu hình database:
+Bien moi truong co the ghi de cau hinh database:
 
-```text
+```txt
 QLKH_DB_HOST
 QLKH_DB_PORT
 QLKH_DB_NAME
@@ -209,87 +343,112 @@ QLKH_DB_USER
 QLKH_DB_PASSWORD
 ```
 
-## Cài Đặt Database
+## Cau Hinh WinForms Goi API
 
-Database mặc định:
+File:
 
-```text
+```txt
+QuanLyKhoHang/Config/appsettings.json
+```
+
+Vi du:
+
+```json
+{
+  "ApiClientSettings": {
+    "BaseUrl": "http://localhost:5088",
+    "ApiKey": ""
+  }
+}
+```
+
+## Cai Dat Database
+
+Database mac dinh:
+
+```txt
 Database: quanlyhanghoa
 Username: postgres
 Password: 1234
 Port: 5432
 ```
 
-Script SQL nằm trong:
+Script SQL nam trong:
 
-```text
+```txt
 QuanLyKhoHang/sql/
 ```
 
-Thứ tự chạy với database mới:
+Thu tu chay voi database moi:
 
-```text
-create_tables.sql
-sample_data.sql
+```txt
+1. create_tables.sql
+2. sample_data.sql
 ```
 
-Với database cũ, có thể chạy thêm:
+Voi database cu, co the chay them:
 
-```text
-sync_existing_database.sql
+```txt
 migrate_add_trang_thai.sql
 migrate_hash_sample_passwords.sql
+sync_existing_database.sql
 ```
 
-## Build Và Chạy
+## Build Va Chay
 
-Từ thư mục root repository:
+Tai root repository:
 
 ```powershell
 dotnet restore QuanLyKhoHang.sln
 dotnet build QuanLyKhoHang.sln
 ```
 
-Chạy giao diện WinForms:
+Chay WinForms:
 
 ```powershell
 dotnet run --project QuanLyKhoHang/QuanLyKhoHang.csproj
 ```
 
-Chạy API thủ công:
+Chay API rieng:
 
 ```powershell
 dotnet run --project QuanLyKhoHang.Api/QuanLyKhoHang.Api.csproj
 ```
 
-Khi chạy WinForms, app sẽ kiểm tra API tại:
+Mac dinh API lang nghe tai:
 
-```text
-http://localhost:5088/api/health
-```
-
-Nếu API chưa chạy, WinForms sẽ tự bật backend `QuanLyKhoHang.Api`.
-
-## API Nhanh
-
-Base URL mặc định:
-
-```text
+```txt
 http://localhost:5088
 ```
 
-Endpoint hệ thống:
+Kiem tra API:
+
+```http
+GET http://localhost:5088/api/health
+```
+
+Mo Swagger UI de test API truc quan:
+
+```txt
+http://localhost:5088/swagger
+```
+
+## API Chinh
 
 ```http
 GET  /api/health
 GET  /api/chuc-nang
 GET  /api/docs
+GET  /swagger
 POST /api/auth/login
-```
+GET  /api/v2/hang-hoa
+GET  /api/v2/loai-hang
+GET  /api/v2/nha-cung-cap
+GET  /api/v2/khach-hang
+GET  /api/v2/nhan-vien
+GET  /api/v2/phieu-nhap
+GET  /api/v2/phieu-xuat
 
-Endpoint danh mục:
-
-```http
 GET,POST   /api/hang-hoa
 PUT,DELETE /api/hang-hoa/{id}
 
@@ -304,11 +463,7 @@ PUT,DELETE /api/khach-hang/{id}
 
 GET,POST   /api/nhan-vien
 PUT,DELETE /api/nhan-vien/{id}
-```
 
-Endpoint kho:
-
-```http
 GET  /api/ton-kho/thap?soLuongToiDa=10
 
 GET  /api/phieu-nhap
@@ -321,44 +476,29 @@ GET  /api/phieu-xuat/{id}/chi-tiet
 GET  /api/phieu-xuat/{id}/thong-tin
 ```
 
-## Lỗi Thường Gặp
+## Ghi Chu Ve Controller
 
-### Visual Studio chỉ chạy API, không mở giao diện
+Project hien tai chua dung `Controllers/`. Backend dang dung Minimal API nen route duoc tach vao:
 
-Đặt startup project là:
-
-```text
-QuanLyKhoHang
+```txt
+QuanLyKhoHang.Api/Endpoints/
 ```
 
-Không đặt startup project là:
+Trong cau truc hien tai:
 
-```text
-QuanLyKhoHang.Api
+```txt
+Controller tuong duong Endpoints
+Service    xu ly nghiep vu
+Repository thao tac database
 ```
 
-### API hiện cửa sổ terminal
+Neu muon chuyen sang MVC Controller sau nay, co the tao them `Controllers/` va chuyen route tu `Endpoints/` sang controller, nhung hien tai khong can thiet de app chay.
 
-API là server nên khi chạy trực tiếp nó sẽ chạy liên tục để nhận request. Nếu chạy đúng từ WinForms, app có thể tự bật API nền. Nếu chạy API thủ công, terminal API là bình thường.
+## Ghi Chu Phat Trien
 
-### Không kết nối được database
-
-Kiểm tra:
-
-- PostgreSQL đã chạy chưa.
-- Database `quanlyhanghoa` đã tồn tại chưa.
-- `appsettings.json` của API đã đúng host/user/password chưa.
-- Đã chạy `create_tables.sql` và `sample_data.sql` chưa.
-
-### Xóa nhân viên không được
-
-Nếu nhân viên đã có phiếu nhập/xuất, API sẽ không xóa để giữ lịch sử chứng từ. Nhân viên chưa có chứng từ thì có thể xóa; tài khoản liên quan sẽ được xóa trong cùng transaction.
-
-## Ghi Chú Phát Triển
-
-- Mở solution bằng `QuanLyKhoHang.sln` ở root repository.
-- Không commit `bin/`, `obj/`, `.vs/`.
-- Giữ repository database ở project `QuanLyKhoHang.Api`.
-- Giữ UI ở project `QuanLyKhoHang`.
-- Khi đổi tên cột trả về từ API, kiểm tra lại các form đang bind `DataGridView`.
-- Các thao tác nhập/xuất kho phải tiếp tục dùng transaction để tránh lệch tồn kho.
+- Khong commit `bin/`, `obj/`, `.vs/`.
+- Khong dua SQL truc tiep vao Form.
+- Khong de WinForms truy cap PostgreSQL truc tiep.
+- Khi doi route API, phai cap nhat file trong `QuanLyKhoHang/ApiClients/`.
+- Khi doi alias cot SQL tra ve, kiem tra lai DataGridView va ComboBox trong cac Form.
+- Nghiep vu nhap/xuat kho phai giu transaction de tranh lech ton kho.

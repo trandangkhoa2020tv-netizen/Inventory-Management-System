@@ -63,6 +63,11 @@ namespace QuanLyKhoHang.ApiClients
                     "api/auth/login",
                     new { username, password });
 
+                if (!string.IsNullOrWhiteSpace(response?.Token))
+                {
+                    ApiHttpClient.SetBearerToken(response.Token);
+                }
+
                 return response?.VaiTro ?? string.Empty;
             }
             catch (UnauthorizedAccessException)
@@ -83,6 +88,14 @@ namespace QuanLyKhoHang.ApiClients
             /// <summary>Vai trò phân quyền của tài khoản.</summary>
             [JsonPropertyName("vaiTro")]
             public string VaiTro { get; set; }
+
+            /// <summary>JWT dùng để gọi các endpoint nghiệp vụ nếu backend bật JwtSettings.RequireJwt.</summary>
+            [JsonPropertyName("token")]
+            public string Token { get; set; }
+
+            /// <summary>Thời điểm token hết hạn theo giờ UTC từ API.</summary>
+            [JsonPropertyName("expiresAt")]
+            public DateTime ExpiresAt { get; set; }
         }
     }
 }

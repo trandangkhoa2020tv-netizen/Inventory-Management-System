@@ -1,0 +1,18 @@
+# Build output
+bin/
+obj/
+
+# Test output
+TestResults/
+coverage/
+coverage.cobertura.xml
+*.trx
+
+# User/local IDE files
+*.user
+*.suo
+*.rsuser
+.vs/
+
+# Local logs
+*.log

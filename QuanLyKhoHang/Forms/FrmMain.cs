@@ -164,5 +164,10 @@ namespace QuanLyKhoHang.Forms
             SetActiveMenu(btnXuatKho);
             OpenChildForm(new FrmXuatKho(UserSession.VaiTro));
         }
+
+        private void lblVersion_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

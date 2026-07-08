@@ -14,6 +14,16 @@ namespace QuanLyKhoHang.ApiClients
         private static readonly HttpClient Client = CreateClient();
 
         /// <summary>
+        /// Gắn hoặc xóa JWT Bearer token cho các request sau khi đăng nhập.
+        /// </summary>
+        public static void SetBearerToken(string token)
+        {
+            Client.DefaultRequestHeaders.Authorization = string.IsNullOrWhiteSpace(token)
+                ? null
+                : new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        }
+
+        /// <summary>
         /// Gửi request GET tới endpoint và đọc mảng JSON trả về thành DataTable.
         /// </summary>
         public static DataTable GetTable(string path)

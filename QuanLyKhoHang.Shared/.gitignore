@@ -1,0 +1,12 @@
+# Build output
+bin/
+obj/
+
+# User/local IDE files
+*.user
+*.suo
+*.rsuser
+.vs/
+
+# Local logs
+*.log
