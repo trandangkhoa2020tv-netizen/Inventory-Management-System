@@ -23,6 +23,9 @@ namespace QuanLyKhoHang.Forms
         // Vai trò được truyền từ FrmMain để khóa/mở quyền thao tác.
         private readonly string _vaiTro;
 
+        /// <summary>
+        /// Khởi tạo form hàng hóa và nhận vai trò người dùng để phân quyền thao tác.
+        /// </summary>
         public FrmHangHoa(string vaiTro)
         {
             InitializeComponent();
@@ -52,6 +55,9 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Sau khi lưới gắn dữ liệu, định dạng các cột số để dễ đọc.
+        /// </summary>
         private void dgvHangHoa_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
             ApplyNumberColumnFormat(4);
@@ -59,6 +65,9 @@ namespace QuanLyKhoHang.Forms
             ApplyNumberColumnFormat(6);
         }
 
+        /// <summary>
+        /// Áp dụng định dạng số tiếng Việt và căn phải cho một cột trong lưới hàng hóa.
+        /// </summary>
         private void ApplyNumberColumnFormat(int columnIndex)
         {
             if (dgvHangHoa.Columns.Count <= columnIndex)

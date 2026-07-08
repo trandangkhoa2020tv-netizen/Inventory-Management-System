@@ -2,8 +2,14 @@ using Npgsql;
 
 namespace QuanLyKhoHang.Data
 {
+    /// <summary>
+    /// Các tác vụ bảo trì database cần chạy khi API khởi động.
+    /// </summary>
     public static class DatabaseMaintenance
     {
+        /// <summary>
+        /// Đồng bộ các sequence tự tăng với dữ liệu hiện có để tránh trùng khóa sau khi import dữ liệu mẫu.
+        /// </summary>
         public static void EnsureSerialSequences()
         {
             using NpgsqlConnection connection = DbConnection.GetConnection();
@@ -23,6 +29,9 @@ namespace QuanLyKhoHang.Data
             }
         }
 
+        /// <summary>
+        /// Lấy danh sách các cột dùng sequence nextval trong schema public.
+        /// </summary>
         private static List<(string TableName, string ColumnName)> GetSerialColumns(NpgsqlConnection connection)
         {
             const string sql = @"SELECT table_name, column_name
@@ -43,6 +52,9 @@ namespace QuanLyKhoHang.Data
             return columns;
         }
 
+        /// <summary>
+        /// Tạo câu SQL setval cho một sequence dựa trên giá trị lớn nhất hiện có của cột khóa.
+        /// </summary>
         private static string BuildSetValSql(string tableName, string columnName)
         {
             return $@"SELECT setval(
@@ -52,11 +64,17 @@ namespace QuanLyKhoHang.Data
                       );";
         }
 
+        /// <summary>
+        /// Bao tên bảng/cột bằng dấu nháy kép để dùng an toàn trong SQL identifier.
+        /// </summary>
         private static string QuoteIdentifier(string value)
         {
             return "\"" + value.Replace("\"", "\"\"") + "\"";
         }
 
+        /// <summary>
+        /// Escape dấu nháy đơn trong chuỗi literal SQL.
+        /// </summary>
         private static string EscapeLiteral(string value)
         {
             return value.Replace("'", "''");

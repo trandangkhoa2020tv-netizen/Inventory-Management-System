@@ -15,6 +15,9 @@ namespace QuanLyKhoHang.Forms
         private readonly NhanVienApiClient _nhanVienRepo = new NhanVienApiClient();
         private int _selectedId = 0;
 
+        /// <summary>
+        /// Khởi tạo form quản lý nhân viên.
+        /// </summary>
         public FrmNhanVien()
         {
             InitializeComponent();

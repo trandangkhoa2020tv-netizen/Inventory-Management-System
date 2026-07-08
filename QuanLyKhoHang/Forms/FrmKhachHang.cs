@@ -16,6 +16,9 @@ namespace QuanLyKhoHang.Forms
         private int _selectedId = 0;
         private readonly string _vaiTro;
 
+        /// <summary>
+        /// Khởi tạo form khách hàng và nhận vai trò người dùng để giới hạn quyền xóa.
+        /// </summary>
         public FrmKhachHang(string vaiTro)
         {
             InitializeComponent();

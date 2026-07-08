@@ -6,10 +6,16 @@ using System.Text.Json;
 
 namespace QuanLyKhoHang.ApiClients
 {
+    /// <summary>
+    /// Lớp dùng chung để gửi HTTP request tới backend và chuyển JSON trả về thành dữ liệu WinForms cần dùng.
+    /// </summary>
     internal static class ApiHttpClient
     {
         private static readonly HttpClient Client = CreateClient();
 
+        /// <summary>
+        /// Gửi request GET tới endpoint và đọc mảng JSON trả về thành DataTable.
+        /// </summary>
         public static DataTable GetTable(string path)
         {
             return SendAsync(async () =>
@@ -21,6 +27,9 @@ namespace QuanLyKhoHang.ApiClients
             });
         }
 
+        /// <summary>
+        /// Gửi request POST có body JSON và đọc kết quả JSON trả về theo kiểu dữ liệu mong muốn.
+        /// </summary>
         public static TResponse PostForJson<TRequest, TResponse>(string path, TRequest body)
         {
             return SendAsync(async () =>
@@ -32,6 +41,9 @@ namespace QuanLyKhoHang.ApiClients
             });
         }
 
+        /// <summary>
+        /// Gửi request POST để thêm mới dữ liệu, chỉ kiểm tra trạng thái thành công của API.
+        /// </summary>
         public static void Post<TRequest>(string path, TRequest body)
         {
             SendAsync(async () =>
@@ -42,6 +54,9 @@ namespace QuanLyKhoHang.ApiClients
             });
         }
 
+        /// <summary>
+        /// Gửi request PUT để cập nhật dữ liệu, chỉ kiểm tra trạng thái thành công của API.
+        /// </summary>
         public static void Put<TRequest>(string path, TRequest body)
         {
             SendAsync(async () =>
@@ -52,6 +67,9 @@ namespace QuanLyKhoHang.ApiClients
             });
         }
 
+        /// <summary>
+        /// Gửi request DELETE để xóa dữ liệu theo endpoint truyền vào.
+        /// </summary>
         public static void Delete(string path)
         {
             SendAsync(async () =>
@@ -62,6 +80,9 @@ namespace QuanLyKhoHang.ApiClients
             });
         }
 
+        /// <summary>
+        /// Tạo HttpClient theo cấu hình BaseUrl và gắn API key nếu có.
+        /// </summary>
         private static HttpClient CreateClient()
         {
             ApiClientSettings settings = ApiClientSettings.Load();
@@ -79,11 +100,17 @@ namespace QuanLyKhoHang.ApiClients
             return client;
         }
 
+        /// <summary>
+        /// Bảo đảm BaseUrl luôn kết thúc bằng dấu gạch chéo để ghép đường dẫn endpoint chính xác.
+        /// </summary>
         private static string EnsureTrailingSlash(string value)
         {
             return value.EndsWith("/", StringComparison.Ordinal) ? value : value + "/";
         }
 
+        /// <summary>
+        /// Chạy thao tác HTTP bất đồng bộ theo kiểu đồng bộ để các form WinForms gọi được đơn giản.
+        /// </summary>
         private static T SendAsync<T>(Func<Task<T>> action)
         {
             try
@@ -100,6 +127,9 @@ namespace QuanLyKhoHang.ApiClients
             }
         }
 
+        /// <summary>
+        /// Kiểm tra HTTP status code và chuyển lỗi API thành exception có thông báo dễ hiểu.
+        /// </summary>
         private static async Task EnsureSuccess(HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode)
@@ -116,6 +146,9 @@ namespace QuanLyKhoHang.ApiClients
             throw new InvalidOperationException(message);
         }
 
+        /// <summary>
+        /// Đọc nội dung lỗi từ API, ưu tiên các trường message, detail hoặc danh sách errors.
+        /// </summary>
         private static async Task<string> ReadErrorMessage(HttpResponseMessage response)
         {
             string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -159,6 +192,9 @@ namespace QuanLyKhoHang.ApiClients
             return content;
         }
 
+        /// <summary>
+        /// Chuyển mảng JSON từ API thành DataTable, tự suy luận kiểu dữ liệu từng cột.
+        /// </summary>
         private static async Task<DataTable> ReadTable(Stream stream)
         {
             using JsonDocument document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
@@ -199,6 +235,9 @@ namespace QuanLyKhoHang.ApiClients
             return table;
         }
 
+        /// <summary>
+        /// Suy luận kiểu cột DataTable dựa trên giá trị JSON đầu tiên khác null của thuộc tính.
+        /// </summary>
         private static Type InferColumnType(List<JsonElement> rows, string propertyName)
         {
             foreach (JsonElement row in rows)
@@ -229,6 +268,9 @@ namespace QuanLyKhoHang.ApiClients
             return typeof(string);
         }
 
+        /// <summary>
+        /// Chuyển JsonElement sang kiểu dữ liệu tương ứng với cột DataTable.
+        /// </summary>
         private static object ConvertValue(JsonElement value, Type targetType)
         {
             if (value.ValueKind == JsonValueKind.Null || value.ValueKind == JsonValueKind.Undefined)

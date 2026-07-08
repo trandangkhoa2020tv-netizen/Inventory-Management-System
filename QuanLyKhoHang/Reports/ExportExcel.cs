@@ -54,6 +54,9 @@ namespace QuanLyKhoHang.Reports
             }
         }
 
+        /// <summary>
+        /// Xuất phiếu xuất kho đầy đủ ra Excel, gồm thông tin phiếu, bảng chi tiết và phần tổng hợp.
+        /// </summary>
         public static void ToPhieuXuatExcel(DataTable thongTinPhieu, DataTable chiTietPhieu, string titleHeader)
         {
             if (thongTinPhieu == null || thongTinPhieu.Rows.Count == 0 || chiTietPhieu == null || chiTietPhieu.Rows.Count == 0)
@@ -109,6 +112,9 @@ namespace QuanLyKhoHang.Reports
             }
         }
 
+        /// <summary>
+        /// Tạo phần đầu báo cáo Excel gồm tên hệ thống, tiêu đề, ngày in và mã phiếu.
+        /// </summary>
         private static void BuildHeader(IXLWorksheet ws, DataRow info)
         {
             ws.Range("A1:F1").Merge().Value = "HỆ THỐNG QUẢN LÝ KHO HÀNG";
@@ -131,6 +137,9 @@ namespace QuanLyKhoHang.Reports
             ws.Range("A5:F5").Style.Font.FontColor = XLColor.FromHtml("#495057");
         }
 
+        /// <summary>
+        /// Tạo khối thông tin khách hàng, ngày xuất, nhân viên lập và ghi chú của phiếu.
+        /// </summary>
         private static void BuildInfoBlock(IXLWorksheet ws, DataRow info)
         {
             ws.Cell("A7").Value = "Khách hàng";
@@ -160,6 +169,9 @@ namespace QuanLyKhoHang.Reports
             ws.Range("E9:F9").Merge();
         }
 
+        /// <summary>
+        /// Tạo bảng chi tiết mặt hàng xuất và trả về dòng tổng tiền để phần sau tham chiếu.
+        /// </summary>
         private static int BuildDetailTable(IXLWorksheet ws, DataTable chiTietPhieu)
         {
             int headerRow = 11;
@@ -219,6 +231,9 @@ namespace QuanLyKhoHang.Reports
             return totalRow;
         }
 
+        /// <summary>
+        /// Tạo phần tóm tắt báo cáo gồm số dòng hàng, tổng số lượng và tổng tiền.
+        /// </summary>
         private static void BuildReportSummary(IXLWorksheet ws, int totalRow, DataTable chiTietPhieu)
         {
             decimal tongSoLuong = 0;
@@ -259,6 +274,9 @@ namespace QuanLyKhoHang.Reports
             ws.Range(noteRow, 1, noteRow, 6).Style.Font.FontColor = XLColor.FromHtml("#495057");
         }
 
+        /// <summary>
+        /// Lấy giá trị chuỗi từ DataRow theo tên cột, trả chuỗi rỗng nếu cột thiếu hoặc giá trị null.
+        /// </summary>
         private static string GetValue(DataRow row, string columnName)
         {
             return row.Table.Columns.Contains(columnName) && row[columnName] != DBNull.Value
@@ -266,6 +284,9 @@ namespace QuanLyKhoHang.Reports
                 : string.Empty;
         }
 
+        /// <summary>
+        /// Định dạng chuỗi ngày giờ theo chuẩn dd/MM/yyyy HH:mm nếu parse được.
+        /// </summary>
         private static string FormatDate(string value)
         {
             return DateTime.TryParse(value, out DateTime date)
@@ -273,6 +294,9 @@ namespace QuanLyKhoHang.Reports
                 : value;
         }
 
+        /// <summary>
+        /// Chuyển chuỗi số theo văn hóa Việt Nam hoặc invariant culture sang decimal.
+        /// </summary>
         private static decimal ParseDecimal(string value)
         {
             if (decimal.TryParse(value, NumberStyles.Any, VietnamCulture, out decimal viValue))

@@ -11,6 +11,9 @@ namespace QuanLyKhoHang
     /// </summary>
     internal static class Program
     {
+        /// <summary>
+        /// Khởi tạo cấu hình WinForms, bảo đảm API đã chạy và mở màn hình đăng nhập đầu tiên.
+        /// </summary>
         [STAThread]
         private static void Main()
         {

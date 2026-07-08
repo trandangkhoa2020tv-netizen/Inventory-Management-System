@@ -28,6 +28,9 @@ namespace QuanLyKhoHang.Forms
         // Mã phiếu đang chọn ở bảng lịch sử, dùng khi xuất Excel/PDF.
         private int _maPhieuDuocChon;
 
+        /// <summary>
+        /// Khởi tạo form nhập kho và nhận vai trò người dùng để phục vụ phân quyền.
+        /// </summary>
         public FrmNhapKho(string vaiTro)
         {
             InitializeComponent();
@@ -89,17 +92,26 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Sau khi lưới chi tiết có dữ liệu, định dạng cột số lượng, đơn giá và thành tiền.
+        /// </summary>
         private void dgvChiTiet_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
             ApplyNumberColumnFormat(dgvChiTiet, 3);
             ApplyNumberColumnFormat(dgvChiTiet, 4);
         }
 
+        /// <summary>
+        /// Sau khi lưới lịch sử có dữ liệu, định dạng cột tổng tiền.
+        /// </summary>
         private void dgvLichSuPhieu_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
             ApplyNumberColumnFormat(dgvLichSuPhieu, 4);
         }
 
+        /// <summary>
+        /// Áp dụng định dạng số tiếng Việt và căn phải cho một cột DataGridView.
+        /// </summary>
         private static void ApplyNumberColumnFormat(DataGridView grid, int columnIndex)
         {
             if (grid.Columns.Count <= columnIndex)

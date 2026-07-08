@@ -93,6 +93,9 @@ namespace QuanLyKhoHang.Reports
             }
         }
 
+        /// <summary>
+        /// Xuất phiếu xuất kho đầy đủ ra PDF, gồm thông tin phiếu, bảng chi tiết và chữ ký.
+        /// </summary>
         public static void ToPhieuXuatPdf(DataTable thongTinPhieu, DataTable chiTietPhieu, string titleHeader)
         {
             if (thongTinPhieu == null || thongTinPhieu.Rows.Count == 0 || chiTietPhieu == null || chiTietPhieu.Rows.Count == 0)
@@ -148,6 +151,9 @@ namespace QuanLyKhoHang.Reports
             }
         }
 
+        /// <summary>
+        /// Thêm phần đầu PDF gồm tên hệ thống, ghi chú nội bộ và ngày in.
+        /// </summary>
         private static void AddHeader(iTextSharp.text.Document document, iTextSharp.text.Font fontCompany, iTextSharp.text.Font fontSmall)
         {
             iTextSharp.text.pdf.PdfPTable header = new iTextSharp.text.pdf.PdfPTable(2);
@@ -170,6 +176,9 @@ namespace QuanLyKhoHang.Reports
             AddDivider(document);
         }
 
+        /// <summary>
+        /// Thêm tiêu đề chính của tài liệu PDF.
+        /// </summary>
         private static void AddTitle(iTextSharp.text.Document document, string title, iTextSharp.text.Font fontTitle)
         {
             iTextSharp.text.Paragraph paragraph = new iTextSharp.text.Paragraph(title, fontTitle);
@@ -179,6 +188,9 @@ namespace QuanLyKhoHang.Reports
             document.Add(paragraph);
         }
 
+        /// <summary>
+        /// Thêm khối thông tin phiếu xuất như mã phiếu, ngày xuất, khách hàng và nhân viên.
+        /// </summary>
         private static void AddInfoBlock(iTextSharp.text.Document document, DataRow info, iTextSharp.text.Font fontSection, iTextSharp.text.Font fontBody)
         {
             iTextSharp.text.Paragraph sectionTitle = new iTextSharp.text.Paragraph("Thông tin phiếu", fontSection);
@@ -215,6 +227,9 @@ namespace QuanLyKhoHang.Reports
             document.Add(table);
         }
 
+        /// <summary>
+        /// Thêm bảng chi tiết hàng xuất vào PDF.
+        /// </summary>
         private static void AddDetailTable(iTextSharp.text.Document document, DataTable chiTietPhieu, iTextSharp.text.Font fontHeader, iTextSharp.text.Font fontBody, iTextSharp.text.Font fontBold)
         {
             iTextSharp.text.Paragraph sectionTitle = new iTextSharp.text.Paragraph("Chi tiết hàng xuất", fontBold);
@@ -252,6 +267,9 @@ namespace QuanLyKhoHang.Reports
             document.Add(table);
         }
 
+        /// <summary>
+        /// Thêm ghi chú giao nhận và tổng tiền của phiếu xuất.
+        /// </summary>
         private static void AddSummary(iTextSharp.text.Document document, DataRow info, iTextSharp.text.Font fontBody, iTextSharp.text.Font fontTotal)
         {
             decimal total = ParseDecimal(GetValue(info, "Tổng Tiền"));
@@ -274,6 +292,9 @@ namespace QuanLyKhoHang.Reports
             document.Add(table);
         }
 
+        /// <summary>
+        /// Thêm ba ô chữ ký cho người lập phiếu, người giao và người nhận hàng.
+        /// </summary>
         private static void AddSignatureBlock(iTextSharp.text.Document document, iTextSharp.text.Font fontBody, iTextSharp.text.Font fontBold)
         {
             iTextSharp.text.pdf.PdfPTable table = new iTextSharp.text.pdf.PdfPTable(3);
@@ -287,6 +308,9 @@ namespace QuanLyKhoHang.Reports
             document.Add(table);
         }
 
+        /// <summary>
+        /// Thêm một ô chữ ký vào bảng chữ ký.
+        /// </summary>
         private static void AddSignatureCell(iTextSharp.text.pdf.PdfPTable table, string title, iTextSharp.text.Font fontBold, iTextSharp.text.Font fontBody)
         {
             iTextSharp.text.pdf.PdfPCell cell = NoBorderCell();
@@ -297,6 +321,9 @@ namespace QuanLyKhoHang.Reports
             table.AddCell(cell);
         }
 
+        /// <summary>
+        /// Thêm đường kẻ phân cách giữa phần đầu và nội dung PDF.
+        /// </summary>
         private static void AddDivider(iTextSharp.text.Document document)
         {
             iTextSharp.text.pdf.PdfPTable divider = new iTextSharp.text.pdf.PdfPTable(1);
@@ -312,6 +339,9 @@ namespace QuanLyKhoHang.Reports
             document.Add(divider);
         }
 
+        /// <summary>
+        /// Thêm một ô thông tin vào bảng thông tin phiếu, có thể tô nền cho ô nhãn.
+        /// </summary>
         private static void AddInfoCell(iTextSharp.text.pdf.PdfPTable table, string text, iTextSharp.text.Font font, bool shaded)
         {
             iTextSharp.text.pdf.PdfPCell cell = new iTextSharp.text.pdf.PdfPCell(new iTextSharp.text.Phrase(text, font));
@@ -325,6 +355,9 @@ namespace QuanLyKhoHang.Reports
             table.AddCell(cell);
         }
 
+        /// <summary>
+        /// Thêm một ô dữ liệu vào bảng chi tiết với căn lề được truyền vào.
+        /// </summary>
         private static void AddBodyCell(iTextSharp.text.pdf.PdfPTable table, string text, iTextSharp.text.Font font, int alignment)
         {
             iTextSharp.text.pdf.PdfPCell cell = new iTextSharp.text.pdf.PdfPCell(new iTextSharp.text.Phrase(text, font));
@@ -335,6 +368,9 @@ namespace QuanLyKhoHang.Reports
             table.AddCell(cell);
         }
 
+        /// <summary>
+        /// Tạo ô PDF không viền dùng cho các vùng bố cục tự do.
+        /// </summary>
         private static iTextSharp.text.pdf.PdfPCell NoBorderCell()
         {
             iTextSharp.text.pdf.PdfPCell cell = new iTextSharp.text.pdf.PdfPCell();
@@ -343,6 +379,9 @@ namespace QuanLyKhoHang.Reports
             return cell;
         }
 
+        /// <summary>
+        /// Lấy giá trị chuỗi từ DataRow theo tên cột, trả chuỗi rỗng nếu cột thiếu hoặc giá trị null.
+        /// </summary>
         private static string GetValue(DataRow row, string columnName)
         {
             return row.Table.Columns.Contains(columnName) && row[columnName] != DBNull.Value
@@ -350,6 +389,9 @@ namespace QuanLyKhoHang.Reports
                 : string.Empty;
         }
 
+        /// <summary>
+        /// Định dạng chuỗi ngày giờ theo chuẩn dd/MM/yyyy HH:mm nếu parse được.
+        /// </summary>
         private static string FormatDate(string value)
         {
             return DateTime.TryParse(value, out DateTime date)
@@ -357,12 +399,18 @@ namespace QuanLyKhoHang.Reports
                 : value;
         }
 
+        /// <summary>
+        /// Định dạng chuỗi số thành tiền tệ không phần thập phân theo văn hóa Việt Nam.
+        /// </summary>
         private static string FormatMoney(string value)
         {
             decimal amount = ParseDecimal(value);
             return amount.ToString("N0", VietnamCulture);
         }
 
+        /// <summary>
+        /// Chuyển chuỗi số theo văn hóa Việt Nam hoặc invariant culture sang decimal.
+        /// </summary>
         private static decimal ParseDecimal(string value)
         {
             if (decimal.TryParse(value, NumberStyles.Any, VietnamCulture, out decimal viValue))

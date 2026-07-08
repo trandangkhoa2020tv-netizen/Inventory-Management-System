@@ -119,12 +119,18 @@ namespace QuanLyKhoHang.Data
                 : fallback;
         }
 
+        /// <summary>
+        /// Lấy giá trị chuỗi từ biến môi trường; nếu không có thì giữ nguyên giá trị fallback.
+        /// </summary>
         private static string GetEnvironmentString(string variableName, string fallback)
         {
             string value = Environment.GetEnvironmentVariable(variableName);
             return string.IsNullOrWhiteSpace(value) ? fallback : value;
         }
 
+        /// <summary>
+        /// Lấy giá trị số nguyên từ biến môi trường; nếu thiếu hoặc không parse được thì dùng fallback.
+        /// </summary>
         private static int GetEnvironmentInt(string variableName, int fallback)
         {
             string value = Environment.GetEnvironmentVariable(variableName);

@@ -74,6 +74,9 @@ namespace QuanLyKhoHang.Repositories
             return string.Equals(password, storedPassword, StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Kiểm tra mật khẩu dạng PBKDF2 theo định dạng pbkdf2$iterations$salt$hash.
+        /// </summary>
         private static bool VerifyPbkdf2(string password, string storedPassword)
         {
             string[] parts = storedPassword.Split('$');
@@ -102,6 +105,9 @@ namespace QuanLyKhoHang.Repositories
             }
         }
 
+        /// <summary>
+        /// Băm mật khẩu bằng SHA-256 để tương thích dữ liệu tài khoản cũ.
+        /// </summary>
         private static string HashSha256(string password)
         {
             using SHA256 sha256 = SHA256.Create();
@@ -116,6 +122,9 @@ namespace QuanLyKhoHang.Repositories
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Kiểm tra chuỗi có đúng 64 ký tự hexa của mã SHA-256 hay không.
+        /// </summary>
         private static bool IsSha256Hex(string value)
         {
             if (value.Length != 64)

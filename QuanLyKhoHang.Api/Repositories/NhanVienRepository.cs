@@ -101,6 +101,9 @@ namespace QuanLyKhoHang.Repositories
             }
         }
 
+        /// <summary>
+        /// Kiểm tra nhân viên đã được dùng trong bảng chứng từ nhập/xuất hay chưa.
+        /// </summary>
         private static bool HasRelatedRows(NpgsqlConnection conn, NpgsqlTransaction transaction, string tableName, int maNv)
         {
             string sql = $"SELECT EXISTS (SELECT 1 FROM {tableName} WHERE ma_nhanvien = @ma)";

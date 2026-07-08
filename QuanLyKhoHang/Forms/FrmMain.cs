@@ -17,6 +17,9 @@ namespace QuanLyKhoHang.Forms
         private readonly Color inactiveMenuBackColor = Color.White;
         private readonly Color inactiveMenuTextColor = Color.FromArgb(43, 54, 73);
 
+        /// <summary>
+        /// Khởi tạo form chính và mở ở chế độ toàn màn hình.
+        /// </summary>
         public FrmMain()
         {
             InitializeComponent();
@@ -106,11 +109,17 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Hiển thị menu tài khoản tại vị trí nút người dùng.
+        /// </summary>
         private void btnUserMenu_Click(object sender, EventArgs e)
         {
             cmsUser.Show(btnUserMenu, new System.Drawing.Point(0, btnUserMenu.Height));
         }
 
+        /// <summary>
+        /// Đổi màu nút menu đang được chọn và trả các nút còn lại về trạng thái thường.
+        /// </summary>
         private void SetActiveMenu(Button activeButton)
         {
             Button[] menuButtons = { btnHangHoa, btnKhachHang, btnNhanVien, btnNhapKho, btnXuatKho };

@@ -2,11 +2,21 @@ using System.Text.Json;
 
 namespace QuanLyKhoHang.ApiClients
 {
+    /// <summary>
+    /// Cấu hình kết nối từ ứng dụng WinForms tới backend API.
+    /// Giá trị được đọc từ file appsettings trong thư mục chạy ứng dụng.
+    /// </summary>
     public sealed class ApiClientSettings
     {
+        /// <summary>Địa chỉ gốc của API server.</summary>
         public string BaseUrl { get; private set; } = "http://localhost:5088";
+
+        /// <summary>Khóa API gửi kèm request nếu backend bật xác thực bằng API key.</summary>
         public string ApiKey { get; private set; } = string.Empty;
 
+        /// <summary>
+        /// Đọc cấu hình API client; nếu thiếu file hoặc lỗi định dạng thì dùng cấu hình mặc định.
+        /// </summary>
         public static ApiClientSettings Load()
         {
             ApiClientSettings settings = new ApiClientSettings();

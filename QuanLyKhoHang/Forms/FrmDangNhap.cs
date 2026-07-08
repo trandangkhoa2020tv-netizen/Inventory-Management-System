@@ -14,6 +14,9 @@ namespace QuanLyKhoHang.Forms
     {
         private readonly AuthApiClient _authApiClient;
 
+        /// <summary>
+        /// Khởi tạo form đăng nhập, áp dụng giao diện riêng và chuẩn bị client xác thực.
+        /// </summary>
         public FrmDangNhap()
         {
             InitializeComponent();
@@ -21,6 +24,9 @@ namespace QuanLyKhoHang.Forms
             _authApiClient = new AuthApiClient();
         }
 
+        /// <summary>
+        /// Áp dụng màu sắc, font chữ và kiểu nút cho màn hình đăng nhập.
+        /// </summary>
         private void ApplyLoginTheme()
         {
             BackColor = Color.FromArgb(248, 250, 252);
@@ -55,6 +61,9 @@ namespace QuanLyKhoHang.Forms
             btnExit.Cursor = Cursors.Hand;
         }
 
+        /// <summary>
+        /// Định dạng ô nhập tài khoản/mật khẩu theo giao diện đăng nhập.
+        /// </summary>
         private static void StyleTextBox(TextBox textBox)
         {
             textBox.BorderStyle = BorderStyle.FixedSingle;

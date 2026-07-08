@@ -3,10 +3,16 @@ using System.Net.Http;
 
 namespace QuanLyKhoHang.ApiClients
 {
+    /// <summary>
+    /// Tự kiểm tra và khởi động backend API khi người dùng mở ứng dụng WinForms.
+    /// </summary>
     internal static class ApiServerLauncher
     {
         private static Process _startedProcess;
 
+        /// <summary>
+        /// Bảo đảm API server đang chạy; nếu chưa chạy thì tìm project/dll API và khởi động bằng dotnet.
+        /// </summary>
         public static void EnsureStarted()
         {
             ApiClientSettings settings = ApiClientSettings.Load();
@@ -35,6 +41,9 @@ namespace QuanLyKhoHang.ApiClients
             throw new InvalidOperationException("Khong khoi dong duoc backend QuanLyKhoHang.Api. Hay build project API va kiem tra cau hinh database.");
         }
 
+        /// <summary>
+        /// Dừng process API do ứng dụng desktop tự khởi động khi WinForms thoát.
+        /// </summary>
         public static void StopIfStartedByApp()
         {
             try
@@ -51,6 +60,9 @@ namespace QuanLyKhoHang.ApiClients
             }
         }
 
+        /// <summary>
+        /// Gọi endpoint health để kiểm tra API đã sẵn sàng nhận request hay chưa.
+        /// </summary>
         private static bool IsHealthy(string baseUrl)
         {
             try
@@ -66,6 +78,9 @@ namespace QuanLyKhoHang.ApiClients
             }
         }
 
+        /// <summary>
+        /// Tạo thông tin khởi động API, ưu tiên DLL đã build rồi mới chạy trực tiếp project.
+        /// </summary>
         private static ProcessStartInfo CreateStartInfo()
         {
             string apiDirectory = FindApiDirectory();
@@ -91,6 +106,9 @@ namespace QuanLyKhoHang.ApiClients
             throw new FileNotFoundException("Khong tim thay backend QuanLyKhoHang.Api.");
         }
 
+        /// <summary>
+        /// Tạo ProcessStartInfo chạy lệnh dotnet trong thư mục backend.
+        /// </summary>
         private static ProcessStartInfo CreateDotnetStartInfo(string workingDirectory, string arguments)
         {
             return new ProcessStartInfo
@@ -107,6 +125,9 @@ namespace QuanLyKhoHang.ApiClients
             };
         }
 
+        /// <summary>
+        /// Tìm thư mục project QuanLyKhoHang.Api bằng cách duyệt từ thư mục chạy hiện tại lên các thư mục cha.
+        /// </summary>
         private static string FindApiDirectory()
         {
             DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
@@ -130,6 +151,9 @@ namespace QuanLyKhoHang.ApiClients
             throw new DirectoryNotFoundException("Khong tim thay thu muc QuanLyKhoHang.Api.");
         }
 
+        /// <summary>
+        /// Bảo đảm URL gốc kết thúc bằng dấu gạch chéo trước khi ghép đường dẫn con.
+        /// </summary>
         private static string EnsureTrailingSlash(string value)
         {
             return value.EndsWith("/", StringComparison.Ordinal) ? value : value + "/";

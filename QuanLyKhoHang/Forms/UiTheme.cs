@@ -3,6 +3,9 @@ using System.Windows.Forms;
 
 namespace QuanLyKhoHang.Forms
 {
+    /// <summary>
+    /// Áp dụng giao diện dùng chung cho các form WinForms trong hệ thống.
+    /// </summary>
     internal static class UiTheme
     {
         private static readonly Color PageBackColor = Color.FromArgb(248, 250, 252);
@@ -15,6 +18,9 @@ namespace QuanLyKhoHang.Forms
         private static readonly Color HeaderBackColor = Color.FromArgb(239, 246, 255);
         private static readonly Color SelectionBackColor = Color.FromArgb(37, 99, 235);
 
+        /// <summary>
+        /// Thiết lập màu nền, font chữ và duyệt toàn bộ control trên form để áp dụng style.
+        /// </summary>
         public static void Apply(Form form)
         {
             form.BackColor = PageBackColor;
@@ -27,6 +33,9 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Nhận diện loại control hiện tại và gọi hàm style phù hợp, sau đó xử lý tiếp các control con.
+        /// </summary>
         private static void ApplyControl(Control control)
         {
             switch (control)
@@ -66,6 +75,9 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Định dạng panel làm vùng chứa chính, thêm viền và padding cho các panel nhập liệu/điều khiển.
+        /// </summary>
         private static void ApplyPanel(Panel panel)
         {
             panel.BackColor = SurfaceColor;
@@ -77,6 +89,9 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Định dạng GroupBox dùng cho các khối nhập thông tin.
+        /// </summary>
         private static void ApplyGroupBox(GroupBox groupBox)
         {
             groupBox.ForeColor = TextColor;
@@ -85,6 +100,9 @@ namespace QuanLyKhoHang.Forms
             groupBox.Padding = new Padding(12, 10, 12, 12);
         }
 
+        /// <summary>
+        /// Định dạng Label; các label tiêu đề, tìm kiếm và tổng tiền có màu/font riêng.
+        /// </summary>
         private static void ApplyLabel(Label label)
         {
             label.ForeColor = TextColor;
@@ -115,6 +133,9 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Định dạng TextBox theo kiểu ô nhập liệu đồng nhất trên toàn ứng dụng.
+        /// </summary>
         private static void ApplyTextBox(TextBox textBox)
         {
             textBox.BorderStyle = BorderStyle.FixedSingle;
@@ -123,6 +144,9 @@ namespace QuanLyKhoHang.Forms
             textBox.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
         }
 
+        /// <summary>
+        /// Định dạng ComboBox dùng để chọn danh mục như hàng hóa, nhân viên, khách hàng.
+        /// </summary>
         private static void ApplyComboBox(ComboBox comboBox)
         {
             comboBox.FlatStyle = FlatStyle.Standard;
@@ -131,6 +155,9 @@ namespace QuanLyKhoHang.Forms
             comboBox.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
         }
 
+        /// <summary>
+        /// Định dạng Button theo tên chức năng như thêm, sửa, xóa, lưu phiếu, xuất Excel/PDF.
+        /// </summary>
         private static void ApplyButton(Button button)
         {
             button.FlatStyle = FlatStyle.Flat;
@@ -187,6 +214,9 @@ namespace QuanLyKhoHang.Forms
             }
         }
 
+        /// <summary>
+        /// Áp dụng kiểu nút màu đặc với chữ trắng cho các thao tác chính.
+        /// </summary>
         private static void SetSolidButton(Button button, Color backColor)
         {
             button.BackColor = backColor;
@@ -194,6 +224,9 @@ namespace QuanLyKhoHang.Forms
             button.FlatAppearance.BorderSize = 0;
         }
 
+        /// <summary>
+        /// Định dạng DataGridView để hiển thị danh sách dữ liệu rõ ràng và chỉ đọc.
+        /// </summary>
         private static void ApplyGrid(DataGridView grid)
         {
             grid.BackgroundColor = Color.White;
