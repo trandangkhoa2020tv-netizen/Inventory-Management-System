@@ -357,7 +357,7 @@ Load lai danh sach phieu va ton kho
 Tu root repository:
 
 ```powershell
-dotnet run --project QuanLyKhoHang/QuanLyKhoHang.csproj
+dotnet run --project QuanLyKhoHang.WinForms/QuanLyKhoHang.WinForms.csproj
 ```
 
 Trong Visual Studio:

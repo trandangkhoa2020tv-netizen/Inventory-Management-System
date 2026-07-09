@@ -406,7 +406,7 @@ dotnet build QuanLyKhoHang.sln
 Chay WinForms:
 
 ```powershell
-dotnet run --project QuanLyKhoHang/QuanLyKhoHang.csproj
+dotnet run --project QuanLyKhoHang.WinForms/QuanLyKhoHang.WinForms.csproj
 ```
 
 Chay API rieng:
