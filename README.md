@@ -2,7 +2,7 @@
 
 He thong quan ly kho hang gom 4 project chinh:
 
-- `QuanLyKhoHang`: ung dung desktop WinForms.
+- `QuanLyKhoHang.WinForms`: ung dung desktop WinForms.
 - `QuanLyKhoHang.Api`: backend ASP.NET Core API lam viec voi PostgreSQL.
 - `QuanLyKhoHang.Shared`: class library chua model dung chung.
 - `QuanLyKhoHang.Tests`: test tu dong cho service va JWT.
@@ -25,6 +25,8 @@ PostgreSQL
 
 WinForms chi phu trach giao dien, nhap lieu, hien thi du lieu va goi API. API phu trach validate, xu ly nghiep vu, thao tac database va tra ket qua JSON ve cho WinForms.
 
+Luu y ve ten thu muc: project desktop WinForms hien nam trong `QuanLyKhoHang.WinForms/`. Ten thu muc cu `QuanLyKhoHang/` khong con duoc dung cho project WinForms.
+
 ## Cau Truc Thu Muc Tong Quan
 
 ```txt
@@ -39,13 +41,13 @@ QuanLyKhoHang/
 |   \---workflows/
 |           build.yml
 |
-+---QuanLyKhoHang/                  -> App giao dien WinForms
++---QuanLyKhoHang.WinForms/         -> App giao dien WinForms
 |   |   .dockerignore
 |   |   .gitignore
 |   |   docker-compose.yml
 |   |   Dockerfile.build
 |   |   Program.cs
-|   |   QuanLyKhoHang.csproj
+|   |   QuanLyKhoHang.WinForms.csproj
 |   |   README.md
 |   |
 |   +---ApiClients/
@@ -189,14 +191,14 @@ Thu muc build nhu `bin/`, `obj/`, `.vs/` khong duoc dua vao cay tren vi do la fi
 | --- | --- |
 | `.github/workflows/build.yml` | Cau hinh GitHub Actions de build/test tu dong. |
 | `QuanLyKhoHang.sln` | Solution gom WinForms, API, Shared va Tests. |
-| `QuanLyKhoHang/` | Project giao dien desktop WinForms. |
+| `QuanLyKhoHang.WinForms/` | Project giao dien desktop WinForms. |
 | `QuanLyKhoHang.Api/` | Project backend API ket noi PostgreSQL. |
 | `QuanLyKhoHang.Shared/` | Project chua model dung chung cho WinForms va API. |
 | `QuanLyKhoHang.Tests/` | Project test tu dong bang xUnit. |
-| `QuanLyKhoHang/ApiClients/` | Noi WinForms goi HTTP API. |
-| `QuanLyKhoHang/Forms/` | Cac man hinh giao dien nguoi dung. |
-| `QuanLyKhoHang/Reports/` | Xuat bao cao Excel/PDF. |
-| `QuanLyKhoHang/sql/` | Script tao database va du lieu mau. |
+| `QuanLyKhoHang.WinForms/ApiClients/` | Noi WinForms goi HTTP API. |
+| `QuanLyKhoHang.WinForms/Forms/` | Cac man hinh giao dien nguoi dung. |
+| `QuanLyKhoHang.WinForms/Reports/` | Xuat bao cao Excel/PDF. |
+| `QuanLyKhoHang.WinForms/sql/` | Script tao database va du lieu mau. |
 | `QuanLyKhoHang.Api/Endpoints/` | Khai bao route API theo Minimal API, thay vai tro controller. |
 | `QuanLyKhoHang.Api/Services/` | Xu ly logic nghiep vu va validate. |
 | `QuanLyKhoHang.Api/Repositories/` | Truy van database PostgreSQL. |
@@ -348,7 +350,7 @@ QLKH_DB_PASSWORD
 File:
 
 ```txt
-QuanLyKhoHang/Config/appsettings.json
+QuanLyKhoHang.WinForms/Config/appsettings.json
 ```
 
 Vi du:
@@ -376,7 +378,7 @@ Port: 5432
 Script SQL nam trong:
 
 ```txt
-QuanLyKhoHang/sql/
+QuanLyKhoHang.WinForms/sql/
 ```
 
 Thu tu chay voi database moi:
@@ -499,6 +501,6 @@ Neu muon chuyen sang MVC Controller sau nay, co the tao them `Controllers/` va c
 - Khong commit `bin/`, `obj/`, `.vs/`.
 - Khong dua SQL truc tiep vao Form.
 - Khong de WinForms truy cap PostgreSQL truc tiep.
-- Khi doi route API, phai cap nhat file trong `QuanLyKhoHang/ApiClients/`.
+- Khi doi route API, phai cap nhat file trong `QuanLyKhoHang.WinForms/ApiClients/`.
 - Khi doi alias cot SQL tra ve, kiem tra lai DataGridView va ComboBox trong cac Form.
 - Nghiep vu nhap/xuat kho phai giu transaction de tranh lech ton kho.

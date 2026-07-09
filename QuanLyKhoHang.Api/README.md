@@ -15,7 +15,7 @@ Backend hien tai dung ASP.NET Core Minimal API. Vi vay project khong co `Control
 ## Vai Tro Trong Solution
 
 ```txt
-QuanLyKhoHang WinForms
+QuanLyKhoHang.WinForms
 ->
 HTTP API
 ->

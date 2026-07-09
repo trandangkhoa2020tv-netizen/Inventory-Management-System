@@ -1,6 +1,8 @@
-# QuanLyKhoHang - WinForms App
+# QuanLyKhoHang.WinForms - WinForms App
 
-`QuanLyKhoHang` la project giao dien desktop WinForms cua he thong quan ly kho hang.
+`QuanLyKhoHang.WinForms` la project giao dien desktop WinForms cua he thong quan ly kho hang.
+
+Thu muc project hien tai la `QuanLyKhoHang.WinForms/`. Ten thu muc cu `QuanLyKhoHang/` khong con duoc dung cho WinForms.
 
 Project nay phu trach:
 
@@ -15,7 +17,7 @@ Project nay khong nen truy cap PostgreSQL truc tiep. Moi thao tac du lieu nen di
 ## Vai Tro Trong Solution
 
 ```txt
-QuanLyKhoHang WinForms
+QuanLyKhoHang.WinForms
 ->
 ApiClients
 ->
@@ -27,14 +29,14 @@ PostgreSQL
 ## Cau Truc Thu Muc
 
 ```txt
-QuanLyKhoHang/
+QuanLyKhoHang.WinForms/
 |   .dockerignore
 |   .gitignore
 |   docker-compose.yml
 |   Dockerfile.build
 |   Program.cs
-|   QuanLyKhoHang.csproj
-|   QuanLyKhoHang.csproj.user
+|   QuanLyKhoHang.WinForms.csproj
+|   QuanLyKhoHang.WinForms.csproj.user
 |   README.md
 |
 +---ApiClients/
@@ -95,7 +97,7 @@ QuanLyKhoHang/
 | `../QuanLyKhoHang.Shared/Models/` | Model du lieu dung chung qua ProjectReference. |
 | `Reports/` | Xuat file Excel/PDF. |
 | `sql/` | Script tao database va du lieu mau. |
-| `QuanLyKhoHang.csproj` | Cau hinh project WinForms. |
+| `QuanLyKhoHang.WinForms.csproj` | Cau hinh project WinForms. |
 
 ## ApiClients
 
@@ -364,7 +366,7 @@ Trong Visual Studio:
 
 ```txt
 1. Mo QuanLyKhoHang.sln
-2. Chuot phai project QuanLyKhoHang
+2. Chuot phai project QuanLyKhoHang.WinForms
 3. Chon Set as Startup Project
 4. Bam Start
 ```

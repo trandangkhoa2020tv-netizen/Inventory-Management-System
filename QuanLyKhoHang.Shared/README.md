@@ -2,7 +2,7 @@
 
 Thu muc nay la project dung chung cho ca hai project chinh:
 
-- `QuanLyKhoHang`: ung dung WinForms.
+- `QuanLyKhoHang.WinForms`: ung dung WinForms.
 - `QuanLyKhoHang.Api`: backend Web API.
 
 Muc dich cua project nay la tach cac model du lieu ra khoi WinForms. Nhu vay API khong con phu thuoc nguoc vao project giao dien, va ca hai ben cung dung mot bo class model giong nhau.
@@ -25,7 +25,7 @@ Project nay khong xu ly database, khong goi API, khong chua giao dien va khong c
 Truoc day model nam trong:
 
 ```txt
-QuanLyKhoHang/Models
+QuanLyKhoHang.WinForms/Models
 ```
 
 Neu API lay model truc tiep tu folder do thi backend bi phu thuoc vao WinForms. Huong phu thuoc do khong tot, vi giao dien la lop ben ngoai, con API la lop xu ly rieng.
@@ -39,7 +39,7 @@ QuanLyKhoHang.Shared/Models
 Ca WinForms va API cung reference project Shared:
 
 ```txt
-QuanLyKhoHang
+QuanLyKhoHang.WinForms
         \
          -> QuanLyKhoHang.Shared
         /
