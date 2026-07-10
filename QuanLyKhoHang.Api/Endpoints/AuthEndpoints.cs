@@ -24,7 +24,8 @@ public static class AuthEndpoints
 
             string token = tokenService.CreateToken(input.Username.Trim(), vaiTro, out DateTime expiresAt);
             return Results.Ok(new { tenTaiKhoan = input.Username.Trim(), vaiTro, token, expiresAt });
-        }));
+        }))
+            .RequireRateLimiting("Login");
 
         return app;
     }

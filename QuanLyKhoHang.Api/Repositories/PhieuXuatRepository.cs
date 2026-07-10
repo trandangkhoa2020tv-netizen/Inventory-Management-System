@@ -56,7 +56,8 @@ namespace QuanLyKhoHang.Repositories
         {
             string sql = @"INSERT INTO chitietphieuxuat (ma_phieuxuat, ma_hanghoa, so_luong, don_gia_xuat, thanh_tien)
                            VALUES (@mapx, @mahang, @soluong, @dongia, @thanhtien);
-                           UPDATE hanghoa SET so_luong_ton = so_luong_ton - @soluong WHERE ma_hanghoa = @mahang;";
+                           UPDATE hanghoa SET so_luong_ton = so_luong_ton - @soluong
+                           WHERE ma_hanghoa = @mahang AND is_deleted = false;";
             NpgsqlParameter[] parameters = {
                 new NpgsqlParameter("@mapx", ct.MaPhieuXuat),
                 new NpgsqlParameter("@mahang", ct.MaHangHoa),
@@ -186,7 +187,7 @@ namespace QuanLyKhoHang.Repositories
         {
             const string truTonSql = @"UPDATE hanghoa
                                        SET so_luong_ton = so_luong_ton - @soluong
-                                       WHERE ma_hanghoa = @mahang AND so_luong_ton >= @soluong";
+                                       WHERE ma_hanghoa = @mahang AND is_deleted = false AND so_luong_ton >= @soluong";
 
             using (var truTonCmd = new NpgsqlCommand(truTonSql, conn, transaction))
             {

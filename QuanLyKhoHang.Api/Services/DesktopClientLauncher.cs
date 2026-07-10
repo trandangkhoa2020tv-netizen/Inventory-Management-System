@@ -7,6 +7,12 @@ namespace QuanLyKhoHang.ApiServer.Services;
 /// </summary>
 public static class DesktopClientLauncher
 {
+    private static readonly (string ProjectDirectory, string ExecutableName)[] DesktopCandidates =
+    {
+        ("QuanLyKhoHang.WinForms", "QuanLyKhoHang.WinForms.exe"),
+        ("QuanLyKhoHang", "QuanLyKhoHang.exe")
+    };
+
     /// <summary>
     /// Mở WinForms nếu API không được khởi động bởi chính ứng dụng desktop.
     /// </summary>
@@ -39,37 +45,30 @@ public static class DesktopClientLauncher
     }
 
     /// <summary>
-    /// Tìm file QuanLyKhoHang.exe trong các thư mục build Debug hoặc Release.
+    /// Tim file WinForms executable trong cac thu muc build Debug hoac Release.
     /// </summary>
     private static string FindDesktopExecutable()
     {
         DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory != null)
         {
-            string desktopExecutable = Path.Combine(
-                directory.FullName,
-                "QuanLyKhoHang",
-                "bin",
-                "Debug",
-                "net10.0-windows",
-                "QuanLyKhoHang.exe");
-
-            if (File.Exists(desktopExecutable))
+            foreach ((string projectDirectory, string executableName) in DesktopCandidates)
             {
-                return desktopExecutable;
-            }
+                foreach (string configuration in new[] { "Debug", "Release" })
+                {
+                    string desktopExecutable = Path.Combine(
+                        directory.FullName,
+                        projectDirectory,
+                        "bin",
+                        configuration,
+                        "net10.0-windows",
+                        executableName);
 
-            desktopExecutable = Path.Combine(
-                directory.FullName,
-                "QuanLyKhoHang",
-                "bin",
-                "Release",
-                "net10.0-windows",
-                "QuanLyKhoHang.exe");
-
-            if (File.Exists(desktopExecutable))
-            {
-                return desktopExecutable;
+                    if (File.Exists(desktopExecutable))
+                    {
+                        return desktopExecutable;
+                    }
+                }
             }
 
             directory = directory.Parent;

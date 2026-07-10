@@ -19,14 +19,55 @@ public static class NhanVienEndpoints
         app.MapGet("/api/v2/nhan-vien", (INhanVienService service) =>
             ApiResults.Safe(() => Results.Ok(service.GetDtos())));
 
-        app.MapPost("/api/nhan-vien", (NhanVien input, INhanVienService service) =>
-            ApiResults.Safe(() => ApiResults.Created(service.Them(input))));
+        app.MapPost("/api/nhan-vien", (NhanVien input, HttpContext context, INhanVienService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                IResult denied = ApiAuthorization.RequireAdmin(context);
+                if (denied != null)
+                {
+                    return denied;
+                }
 
-        app.MapPut("/api/nhan-vien/{id:int}", (int id, NhanVien input, INhanVienService service) =>
-            ApiResults.Safe(() => ApiResults.Updated(service.Sua(id, input))));
+                int affectedRows = service.Them(input);
+                auditLog.Record(context, "CREATE", "nhanvien", null, input);
+                return ApiResults.Created(affectedRows);
+            }));
 
-        app.MapDelete("/api/nhan-vien/{id:int}", (int id, INhanVienService service) =>
-            ApiResults.Safe(() => ApiResults.Deleted(service.Xoa(id))));
+        app.MapPut("/api/nhan-vien/{id:int}", (int id, NhanVien input, HttpContext context, INhanVienService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                IResult denied = ApiAuthorization.RequireAdmin(context);
+                if (denied != null)
+                {
+                    return denied;
+                }
+
+                int affectedRows = service.Sua(id, input);
+                if (affectedRows > 0)
+                {
+                    auditLog.Record(context, "UPDATE", "nhanvien", id, input);
+                }
+
+                return ApiResults.Updated(affectedRows);
+            }));
+
+        app.MapDelete("/api/nhan-vien/{id:int}", (int id, HttpContext context, INhanVienService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                IResult denied = ApiAuthorization.RequireAdmin(context);
+                if (denied != null)
+                {
+                    return denied;
+                }
+
+                int affectedRows = service.Xoa(id);
+                if (affectedRows > 0)
+                {
+                    auditLog.Record(context, "SOFT_DELETE", "nhanvien", id, new { maNhanVien = id });
+                }
+
+                return ApiResults.Deleted(affectedRows);
+            }));
 
         return app;
     }

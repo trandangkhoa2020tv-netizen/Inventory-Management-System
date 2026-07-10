@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using System.Security.Cryptography;
-using System.Text;
 using Npgsql;
 using QuanLyKhoHang.Data;
 
@@ -52,7 +51,7 @@ namespace QuanLyKhoHang.Repositories
         }
 
         /// <summary>
-        /// Kiem tra mat khau. Uu tien PBKDF2, van chap nhan SHA-256/plain text de tuong thich database cu.
+        /// Kiem tra mat khau PBKDF2, khong chap nhan plain text hoac SHA-256.
         /// </summary>
         private static bool VerifyPassword(string password, string storedPassword)
         {
@@ -61,17 +60,12 @@ namespace QuanLyKhoHang.Repositories
                 return false;
             }
 
-            if (storedPassword.StartsWith("pbkdf2$", StringComparison.OrdinalIgnoreCase))
+            if (!storedPassword.StartsWith("pbkdf2$", StringComparison.OrdinalIgnoreCase))
             {
-                return VerifyPbkdf2(password, storedPassword);
+                return false;
             }
 
-            if (IsSha256Hex(storedPassword))
-            {
-                return string.Equals(HashSha256(password), storedPassword, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return string.Equals(password, storedPassword, StringComparison.Ordinal);
+            return VerifyPbkdf2(password, storedPassword);
         }
 
         /// <summary>
@@ -103,48 +97,6 @@ namespace QuanLyKhoHang.Repositories
             {
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Băm mật khẩu bằng SHA-256 để tương thích dữ liệu tài khoản cũ.
-        /// </summary>
-        private static string HashSha256(string password)
-        {
-            using SHA256 sha256 = SHA256.Create();
-            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            StringBuilder builder = new StringBuilder(bytes.Length * 2);
-
-            foreach (byte value in bytes)
-            {
-                builder.Append(value.ToString("x2"));
-            }
-
-            return builder.ToString();
-        }
-
-        /// <summary>
-        /// Kiểm tra chuỗi có đúng 64 ký tự hexa của mã SHA-256 hay không.
-        /// </summary>
-        private static bool IsSha256Hex(string value)
-        {
-            if (value.Length != 64)
-            {
-                return false;
-            }
-
-            foreach (char c in value)
-            {
-                bool isHex = (c >= '0' && c <= '9')
-                    || (c >= 'a' && c <= 'f')
-                    || (c >= 'A' && c <= 'F');
-
-                if (!isHex)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         /// <summary>

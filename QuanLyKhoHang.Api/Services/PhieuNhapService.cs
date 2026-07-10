@@ -1,5 +1,6 @@
 using System.Data;
 using QuanLyKhoHang.ApiServer.DTOs;
+using QuanLyKhoHang.Models;
 using QuanLyKhoHang.Repositories;
 
 namespace QuanLyKhoHang.ApiServer.Services;
@@ -101,16 +102,45 @@ public sealed class PhieuNhapService : IPhieuNhapService
         ValidationHelper.RequirePositive(errors, input.PhieuNhap.MaNhanVien, "maNhanVien");
         ValidateChiTiet(errors, input.ChiTietList);
         ValidationHelper.ThrowIfAny(errors);
+        NormalizeTotals(input);
     }
 
     /// <summary>
     /// Kiểm tra danh sách chi tiết phiếu nhập không được rỗng.
     /// </summary>
-    private static void ValidateChiTiet<T>(List<string> errors, List<T> chiTietList)
+    private static void ValidateChiTiet(List<string> errors, List<ChiTietPhieuNhap> chiTietList)
     {
         if (chiTietList == null || chiTietList.Count == 0)
         {
             errors.Add("Phieu phai co it nhat mot mat hang.");
+            return;
         }
+
+        for (int i = 0; i < chiTietList.Count; i++)
+        {
+            ChiTietPhieuNhap chiTiet = chiTietList[i];
+            string prefix = "chiTietList[" + i + "].";
+            if (chiTiet == null)
+            {
+                errors.Add(prefix + "khong duoc de trong.");
+                continue;
+            }
+
+            ValidationHelper.RequirePositive(errors, chiTiet.MaHangHoa, prefix + "maHangHoa");
+            ValidationHelper.RequirePositive(errors, chiTiet.SoLuong, prefix + "soLuong");
+            ValidationHelper.RequireNonNegativeDecimal(errors, chiTiet.DonGiaNhap, prefix + "donGiaNhap");
+        }
+    }
+
+    private static void NormalizeTotals(LuuPhieuNhapRequest input)
+    {
+        decimal tongTien = 0;
+        foreach (ChiTietPhieuNhap chiTiet in input.ChiTietList)
+        {
+            chiTiet.ThanhTien = chiTiet.SoLuong * chiTiet.DonGiaNhap;
+            tongTien += chiTiet.ThanhTien;
+        }
+
+        input.PhieuNhap.TongTien = tongTien;
     }
 }

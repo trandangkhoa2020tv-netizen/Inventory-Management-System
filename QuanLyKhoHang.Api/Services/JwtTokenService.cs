@@ -54,6 +54,17 @@ public sealed class JwtTokenService
     /// </summary>
     public bool IsValid(string token)
     {
+        return TryReadUser(token, out _, out _);
+    }
+
+    /// <summary>
+    /// Kiem tra token va lay ten tai khoan/vai tro dung cho phan quyen backend.
+    /// </summary>
+    public bool TryReadUser(string token, out string username, out string role)
+    {
+        username = string.Empty;
+        role = string.Empty;
+
         if (string.IsNullOrWhiteSpace(token))
         {
             return false;
@@ -77,10 +88,19 @@ public sealed class JwtTokenService
             using JsonDocument document = JsonDocument.Parse(payloadBytes);
             JsonElement payload = document.RootElement;
 
-            return HasString(payload, "iss", _settings.Issuer)
+            bool isValid = HasString(payload, "iss", _settings.Issuer)
                 && HasString(payload, "aud", _settings.Audience)
                 && payload.TryGetProperty("exp", out JsonElement exp)
                 && DateTimeOffset.FromUnixTimeSeconds(exp.GetInt64()) > DateTimeOffset.UtcNow;
+
+            if (!isValid)
+            {
+                return false;
+            }
+
+            username = GetString(payload, "sub");
+            role = GetString(payload, "role");
+            return !string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(role);
         }
         catch
         {
@@ -128,6 +148,13 @@ public sealed class JwtTokenService
     {
         return payload.TryGetProperty(propertyName, out JsonElement value)
             && string.Equals(value.GetString(), expected, StringComparison.Ordinal);
+    }
+
+    private static string GetString(JsonElement payload, string propertyName)
+    {
+        return payload.TryGetProperty(propertyName, out JsonElement value)
+            ? value.GetString() ?? string.Empty
+            : string.Empty;
     }
 
     private static bool ConstantTimeEquals(string expected, string actual)

@@ -26,6 +26,7 @@ namespace QuanLyKhoHang.Repositories
                            FROM hanghoa h
                            JOIN loaihang l ON h.ma_loaihang = l.ma_loaihang
                            JOIN nhacungcap n ON h.ma_nhacungcap = n.ma_nhacungcap
+                           WHERE h.is_deleted = false
                            ORDER BY h.ma_hanghoa DESC";
             return _dbHelper.ExecuteQuery(sql);
         }
@@ -57,7 +58,7 @@ namespace QuanLyKhoHang.Repositories
         {
             string sql = @"UPDATE hanghoa SET ten_hanghoa = @ten, ma_loaihang = @maloai, ma_nhacungcap = @mancc,
                            gia_nhap = @gianhap, gia_ban = @giaban, so_luong_ton = @ton, don_vi_tinh = @dvt, ghi_chu = @ghichu
-                           WHERE ma_hanghoa = @ma";
+                           WHERE ma_hanghoa = @ma AND is_deleted = false";
             NpgsqlParameter[] parameters = {
                 new NpgsqlParameter("@ma", hh.MaHangHoa),
                 new NpgsqlParameter("@ten", hh.TenHangHoa),
@@ -77,7 +78,7 @@ namespace QuanLyKhoHang.Repositories
         /// </summary>
         public int Xoa(int maHang)
         {
-            string sql = "DELETE FROM hanghoa WHERE ma_hanghoa = @ma";
+            string sql = "UPDATE hanghoa SET is_deleted = true WHERE ma_hanghoa = @ma AND is_deleted = false";
             NpgsqlParameter[] parameters = {
                 new NpgsqlParameter("@ma", maHang)
             };

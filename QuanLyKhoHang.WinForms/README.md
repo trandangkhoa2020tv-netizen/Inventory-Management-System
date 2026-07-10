@@ -1,23 +1,39 @@
-# QuanLyKhoHang.WinForms - WinForms App
+# QuanLyKhoHang.WinForms - Desktop App
 
-`QuanLyKhoHang.WinForms` la project giao dien desktop WinForms cua he thong quan ly kho hang.
-
-Thu muc project hien tai la `QuanLyKhoHang.WinForms/`. Ten thu muc cu `QuanLyKhoHang/` khong con duoc dung cho WinForms.
+`QuanLyKhoHang.WinForms` la ung dung giao dien desktop cua he thong quan ly kho hang.
 
 Project nay phu trach:
 
 - Hien thi man hinh nguoi dung.
-- Nhan thao tac them, sua, xoa, tim kiem.
+- Kiem tra API da chay chua va tu khoi dong backend khi can.
+- Dang nhap thong qua API va nhan JWT.
+- Luu thong tin phien dang nhap trong `UserSession`.
 - Goi backend API thong qua `ApiClients/`.
+- Gan `X-API-Key` neu backend bat API key.
+- Gan `Authorization: Bearer <jwt>` sau khi dang nhap.
 - Hien thi du lieu len DataGridView, ComboBox va cac form.
 - Xuat bao cao Excel/PDF.
 
-Project nay khong nen truy cap PostgreSQL truc tiep. Moi thao tac du lieu nen di qua backend API.
+WinForms khong truy cap PostgreSQL truc tiep. Moi thao tac du lieu di qua `QuanLyKhoHang.Api`.
 
 ## Vai Tro Trong Solution
 
 ```txt
 QuanLyKhoHang.WinForms
+->
+ApiServerLauncher
+  - GET /api/health
+  - tu khoi dong QuanLyKhoHang.Api neu can
+->
+FrmDangNhap
+->
+AuthApiClient
+->
+POST /api/auth/login
+->
+ApiHttpClient.SetBearerToken(token)
+->
+FrmMain + cac form nghiep vu
 ->
 ApiClients
 ->
@@ -79,6 +95,7 @@ QuanLyKhoHang.WinForms/
 |       ExportPdf.cs
 |
 \---sql/
+        backup_database.ps1
         create_tables.sql
         migrate_add_trang_thai.sql
         migrate_hash_sample_passwords.sql
@@ -90,14 +107,14 @@ QuanLyKhoHang.WinForms/
 
 | Thu muc/file | Vai tro |
 | --- | --- |
-| `Program.cs` | Diem chay dau tien cua WinForms. Khoi tao app, dam bao API dang chay, mo form dang nhap. |
-| `ApiClients/` | Lop trung gian goi HTTP API. Form khong nen goi `HttpClient` truc tiep. |
-| `Config/` | Cau hinh client nhu BaseUrl va ApiKey. |
-| `Forms/` | Cac man hinh giao dien WinForms. |
+| `Program.cs` | Diem chay dau tien. Khoi tao app, dam bao API dang chay, mo form dang nhap. |
+| `ApiClients/` | Lop trung gian goi HTTP API. Form khong goi `HttpClient` truc tiep. |
+| `Config/` | Cau hinh client nhu `BaseUrl` va `ApiKey`. |
+| `Forms/` | Cac man hinh WinForms. |
 | `../QuanLyKhoHang.Shared/Models/` | Model du lieu dung chung qua ProjectReference. |
-| `Reports/` | Xuat file Excel/PDF. |
-| `sql/` | Script tao database va du lieu mau. |
-| `QuanLyKhoHang.WinForms.csproj` | Cau hinh project WinForms. |
+| `Reports/` | Xuat Excel/PDF. |
+| `sql/` | Script tao, migrate, seed, sync va backup database. |
+| `QuanLyKhoHang.WinForms.csproj` | Cau hinh target `net10.0-windows`, WinForms, package export. |
 
 ## ApiClients
 
@@ -112,13 +129,13 @@ ApiClients/
 
 | File | Chuc nang |
 | --- | --- |
-| `ApiClientSettings.cs` | Doc `Config/appsettings.json` de lay BaseUrl va ApiKey. |
-| `ApiHttpClient.cs` | Wrapper dung chung cho GET, POST, PUT, DELETE, xu ly JSON va loi API. |
-| `ApiServerLauncher.cs` | Goi `/api/health`, neu API chua chay thi tu khoi dong project API. |
+| `ApiClientSettings.cs` | Doc `Config/appsettings.json` de lay `BaseUrl` va `ApiKey`. |
+| `ApiHttpClient.cs` | Wrapper dung chung cho GET/POST/PUT/DELETE, doc JSON ve DataTable, xu ly loi API, gan API key va Bearer token. |
+| `ApiServerLauncher.cs` | Goi `/api/health`; neu API chua chay thi tu khoi dong `QuanLyKhoHang.Api`. |
 | `DanhMucApiClients.cs` | Client cho hang hoa, loai hang, nha cung cap, khach hang, nhan vien. |
 | `KhoApiClients.cs` | Client cho ton kho, phieu nhap, phieu xuat va dang nhap. |
 
-Luong goi API mau:
+Luong goi API:
 
 ```txt
 Form
@@ -126,8 +143,9 @@ Form
 *ApiClient
 ->
 ApiHttpClient
-->
-HTTP request
+  - BaseUrl tu Config/appsettings.json
+  - X-API-Key neu co
+  - Bearer token sau login
 ->
 QuanLyKhoHang.Api
 ```
@@ -140,7 +158,7 @@ Config/
 |   appsettings.json
 ```
 
-Vi du `appsettings.json`:
+Vi du:
 
 ```json
 {
@@ -154,54 +172,53 @@ Vi du `appsettings.json`:
 | Key | Y nghia |
 | --- | --- |
 | `BaseUrl` | Dia chi backend API. |
-| `ApiKey` | API key gui len backend neu backend bat `RequireApiKey`. |
+| `ApiKey` | API key gui len backend neu backend bat `ApiSettings.RequireApiKey`. De rong neu khong dung API key. |
+
+JWT khong nam trong file config WinForms. Token duoc lay tu `/api/auth/login` va gan vao `ApiHttpClient` trong bo nho khi ung dung dang chay.
 
 ## Forms
 
 ```txt
 Forms/
 |   FrmDangNhap.cs
-|   FrmDangNhap.Designer.cs
-|   FrmDangNhap.resx
 |   FrmHangHoa.cs
-|   FrmHangHoa.Designer.cs
-|   FrmHangHoa.resx
 |   FrmKhachHang.cs
-|   FrmKhachHang.Designer.cs
-|   FrmKhachHang.resx
 |   FrmMain.cs
-|   FrmMain.Designer.cs
-|   FrmMain.resx
 |   FrmNhanVien.cs
-|   FrmNhanVien.Designer.cs
-|   FrmNhanVien.resx
 |   FrmNhapKho.cs
-|   FrmNhapKho.Designer.cs
-|   FrmNhapKho.resx
 |   FrmXuatKho.cs
-|   FrmXuatKho.Designer.cs
-|   FrmXuatKho.resx
 |   UiTheme.cs
 ```
 
 | Form | Chuc nang |
 | --- | --- |
-| `FrmDangNhap` | Dang nhap, goi API auth, tao session nguoi dung. |
-| `FrmMain` | Man hinh chinh, menu dieu huong va phan quyen. |
+| `FrmDangNhap` | Doc username/password, goi API auth, nhan role/JWT, luu `UserSession`, mo `FrmMain`. |
+| `FrmMain` | Man hinh chinh, menu dieu huong, hien user/role, phan quyen menu va dang xuat. |
 | `FrmHangHoa` | Quan ly hang hoa. |
 | `FrmKhachHang` | Quan ly khach hang. |
-| `FrmNhanVien` | Quan ly nhan vien. |
+| `FrmNhanVien` | Quan ly nhan vien, chi hien cho Admin. |
 | `FrmNhapKho` | Lap phieu nhap kho, them chi tiet phieu, xem lich su nhap. |
 | `FrmXuatKho` | Lap phieu xuat kho, xem lich su xuat, in/xuat thong tin phieu. |
-| `UiTheme` | Mau sac, font, style dung chung cho giao dien. |
+| `UiTheme` | Mau sac, font, style dung chung. |
 
-Moi form thuong co 3 file:
+Moi form thuong co:
 
 ```txt
 FrmTenForm.cs           -> logic xu ly su kien
 FrmTenForm.Designer.cs  -> code UI do WinForms Designer sinh ra
 FrmTenForm.resx         -> resource cua form
 ```
+
+## Phan Quyen Tren Desktop
+
+WinForms phan quyen UI dua tren `UserSession.VaiTro` va ten tai khoan:
+
+- `Admin`: xem tat ca chuc nang.
+- `NhanVien`: khong vao man hinh quan ly nhan vien.
+- Tai khoan kho chi hien luong nhap kho.
+- Tai khoan ban hang chi hien luong xuat kho.
+
+Phan quyen that su van duoc API kiem tra lai bang JWT/role. UI chi giup an nut khong phu hop; backend van la lop chan cuoi.
 
 ## Models Dung Chung
 
@@ -220,21 +237,9 @@ FrmTenForm.resx         -> resource cua form
 |   UserSession.cs
 ```
 
-| Model | Y nghia |
-| --- | --- |
-| `HangHoa` | Mat hang trong kho. |
-| `LoaiHang` | Nhom/loai hang hoa. |
-| `NhaCungCap` | Don vi cung cap hang. |
-| `KhachHang` | Khach hang mua hang. |
-| `NhanVien` | Nhan vien lap phieu va su dung he thong. |
-| `TaiKhoan` | Tai khoan dang nhap. |
-| `PhieuNhap` | Phieu nhap kho. |
-| `ChiTietPhieuNhap` | Tung dong hang trong phieu nhap. |
-| `PhieuXuat` | Phieu xuat kho. |
-| `ChiTietPhieuXuat` | Tung dong hang trong phieu xuat. |
-| `UserSession` | Luu thong tin nguoi dung dang dang nhap. |
+WinForms va API cung reference `QuanLyKhoHang.Shared`, nen backend khong phu thuoc vao folder model cua UI.
 
-Luu y: model da tach sang project `QuanLyKhoHang.Shared`. WinForms va API cung reference project nay, nen backend khong con phu thuoc vao folder model cua WinForms.
+`UserSession` chi luu thong tin can cho UI nhu ten tai khoan va vai tro. JWT duoc luu trong `ApiHttpClient` header, khong dat trong model Shared.
 
 ## Reports
 
@@ -253,6 +258,7 @@ Reports/
 
 ```txt
 sql/
+|   backup_database.ps1
 |   create_tables.sql
 |   migrate_add_trang_thai.sql
 |   migrate_hash_sample_passwords.sql
@@ -262,11 +268,20 @@ sql/
 
 | File | Chuc nang |
 | --- | --- |
-| `create_tables.sql` | Tao bang database chinh. |
-| `sample_data.sql` | Them du lieu mau. |
+| `create_tables.sql` | Tao schema chinh, constraint, index va bang audit log. |
+| `sample_data.sql` | Them du lieu mau, tai khoan mau dung mat khau hash. |
 | `migrate_add_trang_thai.sql` | Them cot trang thai cho tai khoan neu database cu chua co. |
 | `migrate_hash_sample_passwords.sql` | Chuyen mat khau mau sang dang hash. |
 | `sync_existing_database.sql` | Dong bo database cu voi schema hien tai. |
+| `backup_database.ps1` | Backup PostgreSQL bang `pg_dump`, doc thong tin ket noi tu bien moi truong. |
+
+Khi tai lieu can minh hoa database password, de trong:
+
+```txt
+Password:
+```
+
+Neu can chay script backup voi mat khau database, dat bien moi truong `QLKH_DB_PASSWORD` tren may local thay vi ghi vao README.
 
 ## Luong Khoi Dong App
 
@@ -279,7 +294,7 @@ ApiServerLauncher.EnsureStarted()
 ->
 GET /api/health
 ->
-Neu API chua chay thi khoi dong QuanLyKhoHang.Api
+Neu API chua chay thi tim DLL/project API va chay dotnet
 ->
 Application.Run(new FrmDangNhap())
 ```
@@ -293,19 +308,13 @@ AuthApiClient.CheckLogin(username, password)
 ->
 POST /api/auth/login
 ->
-API tra ve vai tro
+API tra ve vaiTro, token, expiresAt
 ->
-UserSession luu thong tin nguoi dung
+ApiHttpClient.SetBearerToken(token)
+->
+UserSession luu ten tai khoan va vai tro
 ->
 FrmMain phan quyen menu
-```
-
-Tai khoan mau:
-
-```txt
-admin / 123456
-nhanvienkho / 123456
-nhanvienbanhang / 123456
 ```
 
 ## Luong Danh Muc
@@ -317,11 +326,13 @@ FrmHangHoa.cs
 ->
 HangHoaApiClient
 ->
+ApiHttpClient gui Bearer token
+->
 GET/POST/PUT/DELETE /api/hang-hoa
 ->
-API xu ly
+API validate, phan quyen neu can, ghi audit log neu thay doi du lieu
 ->
-DataTable tra ve Form
+DataTable JSON tra ve Form
 ->
 DataGridView hien thi
 ```
@@ -335,7 +346,11 @@ PhieuNhapApiClient
 ->
 POST /api/phieu-nhap
 ->
-API tao phieu nhap trong transaction
+API validate chi tiet
+->
+Repository tao phieu, them chi tiet va cong ton trong transaction
+->
+AuditLogService ghi CREATE phieunhap
 ->
 Load lai danh sach phieu va ton kho
 ```
@@ -349,7 +364,11 @@ PhieuXuatApiClient
 ->
 POST /api/phieu-xuat
 ->
-API kiem tra ton kho va tru ton trong transaction
+API validate chi tiet
+->
+Repository kiem tra ton, tao phieu, tru ton va them chi tiet trong transaction
+->
+AuditLogService ghi CREATE phieuxuat
 ->
 Load lai danh sach phieu va ton kho
 ```
@@ -376,6 +395,8 @@ Trong Visual Studio:
 - Sua logic trong `*.cs`, han che sua tay `*.Designer.cs`.
 - Neu sua control bang Designer thi Visual Studio se tu cap nhat `*.Designer.cs`.
 - Khong viet SQL trong Form.
-- Khong tao `HttpClient` truc tiep trong Form, nen goi qua `ApiClients/`.
-- Khi doi ten cot API tra ve, kiem tra lai DataGridView/ComboBox dang bind cot.
+- Khong tao `HttpClient` truc tiep trong Form; goi qua `ApiClients/`.
+- Khi doi ten cot API tra ve, kiem tra DataGridView/ComboBox dang bind cot.
 - Khi doi route API, cap nhat client tuong ung trong `ApiClients/`.
+- Khi backend bat `RequireJwt`, dam bao login thanh cong truoc khi mo form nghiep vu.
+- Khong ghi mat khau database vao README; neu can minh hoa thi de password rong.

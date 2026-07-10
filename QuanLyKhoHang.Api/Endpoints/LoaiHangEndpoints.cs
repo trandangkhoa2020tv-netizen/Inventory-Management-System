@@ -19,14 +19,37 @@ public static class LoaiHangEndpoints
         app.MapGet("/api/v2/loai-hang", (ILoaiHangService service) =>
             ApiResults.Safe(() => Results.Ok(service.GetDtos())));
 
-        app.MapPost("/api/loai-hang", (LoaiHang input, ILoaiHangService service) =>
-            ApiResults.Safe(() => ApiResults.Created(service.Them(input))));
+        app.MapPost("/api/loai-hang", (LoaiHang input, HttpContext context, ILoaiHangService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                int affectedRows = service.Them(input);
+                auditLog.Record(context, "CREATE", "loaihang", null, input);
+                return ApiResults.Created(affectedRows);
+            }));
 
-        app.MapPut("/api/loai-hang/{id:int}", (int id, LoaiHang input, ILoaiHangService service) =>
-            ApiResults.Safe(() => ApiResults.Updated(service.Sua(id, input))));
+        app.MapPut("/api/loai-hang/{id:int}", (int id, LoaiHang input, HttpContext context, ILoaiHangService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                int affectedRows = service.Sua(id, input);
+                if (affectedRows > 0)
+                {
+                    auditLog.Record(context, "UPDATE", "loaihang", id, input);
+                }
 
-        app.MapDelete("/api/loai-hang/{id:int}", (int id, ILoaiHangService service) =>
-            ApiResults.Safe(() => ApiResults.Deleted(service.Xoa(id))));
+                return ApiResults.Updated(affectedRows);
+            }));
+
+        app.MapDelete("/api/loai-hang/{id:int}", (int id, HttpContext context, ILoaiHangService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                int affectedRows = service.Xoa(id);
+                if (affectedRows > 0)
+                {
+                    auditLog.Record(context, "DELETE", "loaihang", id, new { maLoaiHang = id });
+                }
+
+                return ApiResults.Deleted(affectedRows);
+            }));
 
         return app;
     }

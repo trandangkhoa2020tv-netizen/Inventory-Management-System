@@ -3,29 +3,93 @@
 He thong quan ly kho hang gom 4 project chinh:
 
 - `QuanLyKhoHang.WinForms`: ung dung desktop WinForms.
-- `QuanLyKhoHang.Api`: backend ASP.NET Core API lam viec voi PostgreSQL.
+- `QuanLyKhoHang.Api`: backend ASP.NET Core Minimal API.
 - `QuanLyKhoHang.Shared`: class library chua model dung chung.
-- `QuanLyKhoHang.Tests`: test tu dong cho service va JWT.
+- `QuanLyKhoHang.Tests`: test tu dong cho service, validation va JWT.
 
-Kien truc hien tai:
+WinForms chi phu trach giao dien va goi API. API phu trach xac thuc, phan quyen, validate, xu ly nghiep vu, ghi audit log, thao tac PostgreSQL va tra JSON ve cho WinForms.
+
+## Luong Moi Cua He Thong
+
+Luong tong quat:
 
 ```txt
 WinForms
 ->
-ApiClient
+ApiClients
 ->
-Endpoints
+ApiHttpClient
+  - X-API-Key neu API bat RequireApiKey
+  - Authorization: Bearer <jwt> sau khi dang nhap
+->
+Minimal API Endpoints
+->
+JWT middleware + role authorization
 ->
 Services
 ->
 Repositories
 ->
 PostgreSQL
+->
+AuditLog cho thao tac thay doi du lieu
 ```
 
-WinForms chi phu trach giao dien, nhap lieu, hien thi du lieu va goi API. API phu trach validate, xu ly nghiep vu, thao tac database va tra ket qua JSON ve cho WinForms.
+Luong khoi dong desktop:
 
-Luu y ve ten thu muc: project desktop WinForms hien nam trong `QuanLyKhoHang.WinForms/`. Ten thu muc cu `QuanLyKhoHang/` khong con duoc dung cho project WinForms.
+```txt
+Program.cs (WinForms)
+->
+ApplicationConfiguration.Initialize()
+->
+ApiServerLauncher.EnsureStarted()
+->
+GET /api/health
+->
+Neu API chua chay thi khoi dong QuanLyKhoHang.Api
+->
+FrmDangNhap
+```
+
+Luong dang nhap:
+
+```txt
+FrmDangNhap
+->
+AuthApiClient.CheckLogin(username, password)
+->
+POST /api/auth/login
+->
+AuthService + TaiKhoanRepository
+->
+API tra ve vaiTro, token, expiresAt
+->
+ApiHttpClient.SetBearerToken(token)
+->
+UserSession luu ten tai khoan va vai tro
+->
+FrmMain phan quyen menu
+```
+
+Luong nghiep vu sau khi dang nhap:
+
+```txt
+Form nghiep vu
+->
+*ApiClient
+->
+ApiHttpClient gui Bearer token
+->
+Endpoint
+->
+Service validate va xu ly rule
+->
+Repository chay SQL/transaction
+->
+AuditLogService ghi lich su voi user/role/ip
+->
+Form load lai du lieu
+```
 
 ## Cau Truc Thu Muc Tong Quan
 
@@ -41,11 +105,7 @@ QuanLyKhoHang/
 |   \---workflows/
 |           build.yml
 |
-+---QuanLyKhoHang.WinForms/         -> App giao dien WinForms
-|   |   .dockerignore
-|   |   .gitignore
-|   |   docker-compose.yml
-|   |   Dockerfile.build
++---QuanLyKhoHang.WinForms/
 |   |   Program.cs
 |   |   QuanLyKhoHang.WinForms.csproj
 |   |   README.md
@@ -63,26 +123,12 @@ QuanLyKhoHang/
 |   |
 |   +---Forms/
 |   |       FrmDangNhap.cs
-|   |       FrmDangNhap.Designer.cs
-|   |       FrmDangNhap.resx
 |   |       FrmHangHoa.cs
-|   |       FrmHangHoa.Designer.cs
-|   |       FrmHangHoa.resx
 |   |       FrmKhachHang.cs
-|   |       FrmKhachHang.Designer.cs
-|   |       FrmKhachHang.resx
 |   |       FrmMain.cs
-|   |       FrmMain.Designer.cs
-|   |       FrmMain.resx
 |   |       FrmNhanVien.cs
-|   |       FrmNhanVien.Designer.cs
-|   |       FrmNhanVien.resx
 |   |       FrmNhapKho.cs
-|   |       FrmNhapKho.Designer.cs
-|   |       FrmNhapKho.resx
 |   |       FrmXuatKho.cs
-|   |       FrmXuatKho.Designer.cs
-|   |       FrmXuatKho.resx
 |   |       UiTheme.cs
 |   |
 |   +---Reports/
@@ -90,79 +136,81 @@ QuanLyKhoHang/
 |   |       ExportPdf.cs
 |   |
 |   \---sql/
+|           backup_database.ps1
 |           create_tables.sql
 |           migrate_add_trang_thai.sql
 |           migrate_hash_sample_passwords.sql
 |           sample_data.sql
 |           sync_existing_database.sql
 |
-\---QuanLyKhoHang.Api/              -> Backend API
-    |   .gitignore
-    |   appsettings.json
-    |   DataTableJson.cs
-    |   InventoryApiQueries.cs
-    |   Program.cs
-    |   QuanLyKhoHang.Api.csproj
-    |   README.md
-    |
-    +---Config/
-    |       ApiSettings.cs
-    |
-    +---Data/
-    |       DatabaseHelper.cs
-    |       DatabaseMaintenance.cs
-    |       DbConnection.cs
-    |
-    +---DTOs/
-    |       AuthDtos.cs
-    |       DataTableDtoMapper.cs
-    |       PhieuKhoDtos.cs
-    |       ResponseDtos.cs
-    |
-    +---Endpoints/
-    |       AuthEndpoints.cs
-    |       HangHoaEndpoints.cs
-    |       LoaiHangEndpoints.cs
-    |       NhaCungCapEndpoints.cs
-    |       KhachHangEndpoints.cs
-    |       NhanVienEndpoints.cs
-    |       KhoEndpoints.cs
-    |       PhieuNhapEndpoints.cs
-    |       PhieuXuatEndpoints.cs
-    |       SystemEndpoints.cs
-    |
-    +---Properties/
-    |       launchSettings.json
-    |
-    +---Repositories/
-    |       HangHoaRepository.cs
-    |       KhachHangRepository.cs
-    |       LoaiHangRepository.cs
-    |       NhaCungCapRepository.cs
-    |       NhanVienRepository.cs
-    |       PhieuNhapRepository.cs
-    |       PhieuXuatRepository.cs
-    |       TaiKhoanRepository.cs
-    |
-    \---Services/
-            ApiKeyValidator.cs
-            ApiResults.cs
-            ApiValidationException.cs
-            AuthService.cs
-            HangHoaService.cs
-            LoaiHangService.cs
-            NhaCungCapService.cs
-            KhachHangService.cs
-            NhanVienService.cs
-            DesktopClientLauncher.cs
-            KhoService.cs
-            PhieuNhapService.cs
-            PhieuXuatService.cs
-            JwtTokenService.cs
-            ValidationHelper.cs
++---QuanLyKhoHang.Api/
+|   |   appsettings.json
+|   |   appsettings.Production.json
+|   |   DataTableJson.cs
+|   |   InventoryApiQueries.cs
+|   |   Program.cs
+|   |   QuanLyKhoHang.Api.csproj
+|   |   README.md
+|   |
+|   +---Config/
+|   |       ApiSettings.cs
+|   |       JwtSettings.cs
+|   |
+|   +---Data/
+|   |       DatabaseHelper.cs
+|   |       DatabaseMaintenance.cs
+|   |       DbConnection.cs
+|   |
+|   +---DTOs/
+|   |       AuthDtos.cs
+|   |       DataTableDtoMapper.cs
+|   |       PhieuKhoDtos.cs
+|   |       ResponseDtos.cs
+|   |
+|   +---Endpoints/
+|   |       AuthEndpoints.cs
+|   |       HangHoaEndpoints.cs
+|   |       KhachHangEndpoints.cs
+|   |       KhoEndpoints.cs
+|   |       LoaiHangEndpoints.cs
+|   |       NhaCungCapEndpoints.cs
+|   |       NhanVienEndpoints.cs
+|   |       PhieuNhapEndpoints.cs
+|   |       PhieuXuatEndpoints.cs
+|   |       SystemEndpoints.cs
+|   |
+|   +---Repositories/
+|   |       HangHoaRepository.cs
+|   |       KhachHangRepository.cs
+|   |       LoaiHangRepository.cs
+|   |       NhaCungCapRepository.cs
+|   |       NhanVienRepository.cs
+|   |       PhieuNhapRepository.cs
+|   |       PhieuXuatRepository.cs
+|   |       TaiKhoanRepository.cs
+|   |
+|   \---Services/
+|           ApiAuthorization.cs
+|           ApiKeyValidator.cs
+|           ApiResults.cs
+|           ApiValidationException.cs
+|           AuditLogService.cs
+|           AuthService.cs
+|           DesktopClientLauncher.cs
+|           HangHoaService.cs
+|           JwtTokenService.cs
+|           KhachHangService.cs
+|           KhoService.cs
+|           LoaiHangService.cs
+|           NhaCungCapService.cs
+|           NhanVienService.cs
+|           PhieuNhapService.cs
+|           PhieuXuatService.cs
+|           ValidationHelper.cs
 |
-+---QuanLyKhoHang.Shared/           -> Model dung chung
++---QuanLyKhoHang.Shared/
 |   |   QuanLyKhoHang.Shared.csproj
+|   |   README.md
 |   |
 |   \---Models/
 |           ChiTietPhieuNhap.cs
@@ -177,138 +225,33 @@ QuanLyKhoHang/
 |           TaiKhoan.cs
 |           UserSession.cs
 |
-\---QuanLyKhoHang.Tests/            -> Test tu dong
+\---QuanLyKhoHang.Tests/
         JwtTokenServiceTests.cs
         ServiceValidationTests.cs
         QuanLyKhoHang.Tests.csproj
+        README.md
 ```
 
-Thu muc build nhu `bin/`, `obj/`, `.vs/` khong duoc dua vao cay tren vi do la file sinh ra khi build.
+Thu muc build nhu `bin/`, `obj/`, `.vs/` la file sinh ra khi build va khong dua vao cay tren.
 
-## Y Nghia Tung Phan
+## Vai Tro Tung Project
 
-| Thanh phan | Vai tro |
+| Project | Vai tro |
 | --- | --- |
-| `.github/workflows/build.yml` | Cau hinh GitHub Actions de build/test tu dong. |
-| `QuanLyKhoHang.sln` | Solution gom WinForms, API, Shared va Tests. |
-| `QuanLyKhoHang.WinForms/` | Project giao dien desktop WinForms. |
-| `QuanLyKhoHang.Api/` | Project backend API ket noi PostgreSQL. |
-| `QuanLyKhoHang.Shared/` | Project chua model dung chung cho WinForms va API. |
-| `QuanLyKhoHang.Tests/` | Project test tu dong bang xUnit. |
-| `QuanLyKhoHang.WinForms/ApiClients/` | Noi WinForms goi HTTP API. |
-| `QuanLyKhoHang.WinForms/Forms/` | Cac man hinh giao dien nguoi dung. |
-| `QuanLyKhoHang.WinForms/Reports/` | Xuat bao cao Excel/PDF. |
-| `QuanLyKhoHang.WinForms/sql/` | Script tao database va du lieu mau. |
-| `QuanLyKhoHang.Api/Endpoints/` | Khai bao route API theo Minimal API, thay vai tro controller. |
-| `QuanLyKhoHang.Api/Services/` | Xu ly logic nghiep vu va validate. |
-| `QuanLyKhoHang.Api/Repositories/` | Truy van database PostgreSQL. |
-| `QuanLyKhoHang.Api/Data/` | Ket noi database va helper chay SQL. |
-| `QuanLyKhoHang.Api/DTOs/` | Kieu du lieu request/response rieng cho API, gom DTO output cho `/api/v2`. |
-| `QuanLyKhoHang.Api/Config/` | Class cau hinh API. |
-
-## Luong Xu Ly Chuan
-
-Vi du them hoac sua hang hoa:
-
-```txt
-FrmHangHoa.cs
-->
-HangHoaApiClient
-->
-POST/PUT /api/hang-hoa
-->
-HangHoaEndpoints.cs
-->
-HangHoaService.cs
-->
-HangHoaRepository.cs
-->
-PostgreSQL
-```
-
-Vi du lap phieu nhap:
-
-```txt
-FrmNhapKho.cs
-->
-PhieuNhapApiClient
-->
-POST /api/phieu-nhap
-->
-PhieuNhapEndpoints.cs
-->
-PhieuNhapService.cs
-->
-PhieuNhapRepository.cs
-->
-Transaction:
-  1. Tao phieu nhap
-  2. Them chi tiet phieu
-  3. Cong ton kho
-```
-
-Vi du lap phieu xuat:
-
-```txt
-FrmXuatKho.cs
-->
-PhieuXuatApiClient
-->
-POST /api/phieu-xuat
-->
-PhieuXuatEndpoints.cs
-->
-PhieuXuatService.cs
-->
-PhieuXuatRepository.cs
-->
-Transaction:
-  1. Tao phieu xuat
-  2. Kiem tra ton kho
-  3. Tru ton kho
-  4. Them chi tiet phieu
-```
-
-## Cong Nghe Su Dung
-
-| Thanh phan | Cong nghe |
-| --- | --- |
-| Giao dien | C# WinForms |
-| Desktop target | `net10.0-windows` |
-| Backend | ASP.NET Core Minimal API |
-| API target | `net10.0` |
-| API docs/test | Swagger UI / Swashbuckle |
-| Database | PostgreSQL |
-| Driver database | Npgsql |
-| Excel | ClosedXML |
-| PDF | iTextSharp.LGPLv2.Core |
-| CI/CD | GitHub Actions |
-
-## Chuc Nang Chinh
-
-- Dang nhap va phan quyen theo vai tro.
-- Quan ly hang hoa.
-- Quan ly loai hang.
-- Quan ly nha cung cap.
-- Quan ly khach hang.
-- Quan ly nhan vien.
-- Lap phieu nhap kho va cong ton kho.
-- Lap phieu xuat kho va tru ton kho.
-- Chan xuat am bang transaction o database.
-- Xem hang ton kho thap.
-- Xem lich su phieu nhap/phieu xuat.
-- Xem chi tiet tung phieu.
-- Xuat Excel/PDF.
+| `QuanLyKhoHang.WinForms` | Giao dien desktop, dieu huong, form nghiep vu, goi API, xuat Excel/PDF. |
+| `QuanLyKhoHang.Api` | Backend Minimal API, xac thuc JWT, API key, phan quyen, rate limit, validate, transaction, audit log. |
+| `QuanLyKhoHang.Shared` | Model dung chung cho WinForms va API. |
+| `QuanLyKhoHang.Tests` | Unit test cho validation service va JWT. |
 
 ## Cau Hinh Database
 
-File cau hinh database nam o:
+File cau hinh database cua API:
 
 ```txt
 QuanLyKhoHang.Api/appsettings.json
 ```
 
-Vi du:
+Vi du cau hinh. Mat khau database trong README luon de trong de khong lo thong tin nhay cam:
 
 ```json
 {
@@ -317,7 +260,7 @@ Vi du:
     "Port": 5432,
     "Database": "quanlyhanghoa",
     "Username": "postgres",
-    "Password": "1234"
+    "Password": ""
   },
   "ApiSettings": {
     "Url": "http://localhost:5088",
@@ -326,14 +269,16 @@ Vi du:
     "AllowedOrigins": []
   },
   "JwtSettings": {
-    "RequireJwt": false,
+    "RequireJwt": true,
     "Issuer": "QuanLyKhoHang.Api",
     "Audience": "QuanLyKhoHang.WinForms",
-    "SecretKey": "QuanLyKhoHang-Development-Secret-Key-Change-Me",
+    "SecretKey": "",
     "ExpirationMinutes": 480
   }
 }
 ```
+
+Dat mat khau database bang file local hoac bien moi truong tren may chay that. Khong ghi mat khau database vao README, issue, commit message hoac tai lieu chia se.
 
 Bien moi truong co the ghi de cau hinh database:
 
@@ -345,23 +290,15 @@ QLKH_DB_USER
 QLKH_DB_PASSWORD
 ```
 
-## Cau Hinh WinForms Goi API
-
-File:
+Bien moi truong ASP.NET Core co the ghi de API/JWT:
 
 ```txt
-QuanLyKhoHang.WinForms/Config/appsettings.json
-```
-
-Vi du:
-
-```json
-{
-  "ApiClientSettings": {
-    "BaseUrl": "http://localhost:5088",
-    "ApiKey": ""
-  }
-}
+ApiSettings__ApiKey
+ApiSettings__RequireApiKey
+ApiSettings__AllowedOrigins__0
+JwtSettings__RequireJwt
+JwtSettings__SecretKey
+JwtSettings__ExpirationMinutes
 ```
 
 ## Cai Dat Database
@@ -371,7 +308,7 @@ Database mac dinh:
 ```txt
 Database: quanlyhanghoa
 Username: postgres
-Password: 1234
+Password:
 Port: 5432
 ```
 
@@ -388,13 +325,50 @@ Thu tu chay voi database moi:
 2. sample_data.sql
 ```
 
-Voi database cu, co the chay them:
+Voi database cu, chay script dong bo schema:
+
+```txt
+sync_existing_database.sql
+```
+
+Neu chi can migrate rieng:
 
 ```txt
 migrate_add_trang_thai.sql
 migrate_hash_sample_passwords.sql
-sync_existing_database.sql
 ```
+
+Sao luu database:
+
+```powershell
+.\QuanLyKhoHang.WinForms\sql\backup_database.ps1
+```
+
+Script backup doc `QLKH_DB_PASSWORD` tu bien moi truong; khong can ghi mat khau vao README.
+
+## Bao Mat Va Phan Quyen
+
+- `/api/auth/login` tra ve `token` va `expiresAt`.
+- WinForms luu token vao `ApiHttpClient` va gui `Authorization: Bearer <jwt>` cho cac request tiep theo.
+- Khi `JwtSettings.RequireJwt = true`, cac endpoint nghiep vu yeu cau JWT hop le.
+- Cac route public: `/`, `/api/health`, `/api/chuc-nang`, `/api/docs`, `/api/auth/login`, `/swagger`.
+- Mot so thao tac nhay cam yeu cau role `Admin`, vi du xoa hang hoa, xoa khach hang, them/sua/xoa nhan vien.
+- API co the bat them `ApiSettings.RequireApiKey`; client gui `X-API-Key`.
+- API ghi audit log cho thao tac them, sua, xoa va lap phieu.
+- API co rate limit cho login va mot so endpoint hang hoa.
+- Moi truong production bat kiem tra cau hinh: phai bat JWT, dung HTTPS, gioi han CORS, khong dung secret/mac dinh yeu.
+
+## Chuc Nang Chinh
+
+- Dang nhap, JWT va phan quyen theo vai tro.
+- Quan ly hang hoa, loai hang, nha cung cap, khach hang, nhan vien.
+- Lap phieu nhap kho, cong ton kho bang transaction.
+- Lap phieu xuat kho, kiem tra ton kho va tru ton bang transaction.
+- Chan xuat am bang transaction va rang buoc database.
+- Xem hang ton kho thap.
+- Xem lich su va chi tiet phieu nhap/phieu xuat.
+- Xuat Excel/PDF.
+- Ghi audit log cac thao tac thay doi du lieu.
 
 ## Build Va Chay
 
@@ -429,27 +403,37 @@ Kiem tra API:
 GET http://localhost:5088/api/health
 ```
 
-Mo Swagger UI de test API truc quan:
+Swagger chi bat trong moi truong development:
 
 ```txt
 http://localhost:5088/swagger
 ```
 
+Chay test:
+
+```powershell
+dotnet test QuanLyKhoHang.sln
+```
+
 ## API Chinh
 
 ```http
+GET  /
 GET  /api/health
 GET  /api/chuc-nang
 GET  /api/docs
-GET  /swagger
 POST /api/auth/login
+
 GET  /api/v2/hang-hoa
 GET  /api/v2/loai-hang
 GET  /api/v2/nha-cung-cap
 GET  /api/v2/khach-hang
 GET  /api/v2/nhan-vien
 GET  /api/v2/phieu-nhap
+GET  /api/v2/phieu-nhap/{id}/chi-tiet
 GET  /api/v2/phieu-xuat
+GET  /api/v2/phieu-xuat/{id}/chi-tiet
+GET  /api/v2/phieu-xuat/{id}/thong-tin
 
 GET,POST   /api/hang-hoa
 PUT,DELETE /api/hang-hoa/{id}
@@ -478,29 +462,14 @@ GET  /api/phieu-xuat/{id}/chi-tiet
 GET  /api/phieu-xuat/{id}/thong-tin
 ```
 
-## Ghi Chu Ve Controller
-
-Project hien tai chua dung `Controllers/`. Backend dang dung Minimal API nen route duoc tach vao:
-
-```txt
-QuanLyKhoHang.Api/Endpoints/
-```
-
-Trong cau truc hien tai:
-
-```txt
-Controller tuong duong Endpoints
-Service    xu ly nghiep vu
-Repository thao tac database
-```
-
-Neu muon chuyen sang MVC Controller sau nay, co the tao them `Controllers/` va chuyen route tu `Endpoints/` sang controller, nhung hien tai khong can thiet de app chay.
+Route `/api/...` tra JSON tu DataTable de WinForms hien tai tuong thich. Route `/api/v2/...` tra DTO typed object, phu hop cho client moi, Swagger va test.
 
 ## Ghi Chu Phat Trien
 
 - Khong commit `bin/`, `obj/`, `.vs/`.
 - Khong dua SQL truc tiep vao Form.
 - Khong de WinForms truy cap PostgreSQL truc tiep.
-- Khi doi route API, phai cap nhat file trong `QuanLyKhoHang.WinForms/ApiClients/`.
-- Khi doi alias cot SQL tra ve, kiem tra lai DataGridView va ComboBox trong cac Form.
+- Khi doi route API, cap nhat file trong `QuanLyKhoHang.WinForms/ApiClients/`.
+- Khi doi alias cot SQL tra ve, kiem tra DataGridView va ComboBox trong cac Form.
 - Nghiep vu nhap/xuat kho phai giu transaction de tranh lech ton kho.
+- Khong ghi mat khau database vao README; cac vi du cau hinh luon de `Password` rong.

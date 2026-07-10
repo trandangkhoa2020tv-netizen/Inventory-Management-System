@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Npgsql;
 
 namespace QuanLyKhoHang.ApiServer.Services;
 
@@ -24,9 +25,17 @@ public static class ApiResults
         {
             return Results.BadRequest(new { message = ex.Message });
         }
+        catch (PostgresException ex) when (IsDataRuleViolation(ex))
+        {
+            return Results.BadRequest(new { message = ToDataRuleMessage(ex) });
+        }
         catch (Exception ex)
         {
-            return Results.Problem(title: "Loi xu ly API", detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+            Console.Error.WriteLine(ex);
+            return Results.Problem(
+                title: "Loi xu ly API",
+                detail: "Da xay ra loi he thong. Hay kiem tra log backend.",
+                statusCode: StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -64,5 +73,38 @@ public static class ApiResults
         return affectedRows == 0
             ? Results.NotFound(new { message = "Khong tim thay du lieu can xoa." })
             : Results.Ok(new { message = "Da xoa du lieu.", affectedRows });
+    }
+
+    private static bool IsDataRuleViolation(PostgresException ex)
+    {
+        return ex.SqlState == PostgresErrorCodes.UniqueViolation
+            || ex.SqlState == PostgresErrorCodes.ForeignKeyViolation
+            || ex.SqlState == PostgresErrorCodes.CheckViolation
+            || ex.SqlState == PostgresErrorCodes.NotNullViolation;
+    }
+
+    private static string ToDataRuleMessage(PostgresException ex)
+    {
+        if (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+        {
+            return "Du lieu bi trung voi ban ghi da co.";
+        }
+
+        if (ex.SqlState == PostgresErrorCodes.ForeignKeyViolation)
+        {
+            return "Du lieu lien ket khong ton tai hoac dang duoc su dung.";
+        }
+
+        if (ex.SqlState == PostgresErrorCodes.CheckViolation)
+        {
+            return "Du lieu khong thoa man rang buoc an toan cua database.";
+        }
+
+        if (ex.SqlState == PostgresErrorCodes.NotNullViolation)
+        {
+            return "Du lieu bat buoc khong duoc de trong.";
+        }
+
+        return "Du lieu khong hop le.";
     }
 }

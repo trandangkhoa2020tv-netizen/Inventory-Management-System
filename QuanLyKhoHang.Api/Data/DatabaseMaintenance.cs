@@ -7,6 +7,44 @@ namespace QuanLyKhoHang.Data
     /// </summary>
     public static class DatabaseMaintenance
     {
+        private const string Admin123456Hash =
+            "pbkdf2$100000$cWxraC1hZG1pbi0xMjM0NTYtc2FsdC12MQ==$D42Ak1eqSBNJflAoIDRvaAMOsz7NF5X7UQjvDwGr0xk=";
+
+        private const string Staff123456Hash =
+            "pbkdf2$100000$cWxraC1zdGFmZi1zYWx0LXYx$dS8VgTfJ0gRv1mu5WUKd36fm95MT4+wSG9lI5rlplZk=";
+
+        public static void EnsureRuntimeSchema()
+        {
+            using NpgsqlConnection connection = DbConnection.GetConnection();
+            connection.Open();
+
+            ExecuteNonQuery(connection, @"
+                ALTER TABLE IF EXISTS hanghoa ADD COLUMN IF NOT EXISTS is_deleted boolean DEFAULT false;
+                UPDATE hanghoa SET is_deleted = false WHERE is_deleted IS NULL;
+                ALTER TABLE IF EXISTS hanghoa ALTER COLUMN is_deleted SET DEFAULT false;
+                ALTER TABLE IF EXISTS hanghoa ALTER COLUMN is_deleted SET NOT NULL;");
+
+            ExecuteNonQuery(connection, @"
+                ALTER TABLE IF EXISTS nhanvien ADD COLUMN IF NOT EXISTS is_deleted boolean DEFAULT false;
+                UPDATE nhanvien SET is_deleted = false WHERE is_deleted IS NULL;
+                ALTER TABLE IF EXISTS nhanvien ALTER COLUMN is_deleted SET DEFAULT false;
+                ALTER TABLE IF EXISTS nhanvien ALTER COLUMN is_deleted SET NOT NULL;");
+
+            ExecuteNonQuery(connection, @"
+                CREATE TABLE IF NOT EXISTS auditlog
+                (
+                    ma_audit serial PRIMARY KEY,
+                    ten_taikhoan varchar(100) NOT NULL,
+                    vai_tro varchar(50) NOT NULL,
+                    hanh_dong varchar(50) NOT NULL,
+                    bang_du_lieu varchar(100) NOT NULL,
+                    ma_ban_ghi integer NULL,
+                    noi_dung text NULL,
+                    ip_address varchar(100) NULL,
+                    thoi_gian timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );");
+        }
+
         /// <summary>
         /// Đồng bộ các sequence tự tăng với dữ liệu hiện có để tránh trùng khóa sau khi import dữ liệu mẫu.
         /// </summary>
@@ -27,6 +65,72 @@ namespace QuanLyKhoHang.Data
                     Console.Error.WriteLine($"Khong the dong bo sequence {column.TableName}.{column.ColumnName}: {ex.Message}");
                 }
             }
+        }
+
+        /// <summary>
+        /// Dong bo mat khau mau sang PBKDF2 de database cu van dang nhap duoc sau khi tat plain text/SHA-256.
+        /// </summary>
+        public static void EnsureSampleAccountPasswords()
+        {
+            using NpgsqlConnection connection = DbConnection.GetConnection();
+            connection.Open();
+
+            UpdatePasswordIfCurrentValueMatches(
+                connection,
+                "admin",
+                Admin123456Hash,
+                new[]
+                {
+                    "admin123",
+                    "123456",
+                    "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+                    "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+                    "pbkdf2$100000$cWxraC1hZG1pbi1zYWx0LXYx$lOctHBqPmdhFZLUgAMvE2r5aknrFc/20Khp5yLTyr+s="
+                });
+
+            UpdatePasswordIfCurrentValueMatches(
+                connection,
+                "nhanvienkho",
+                Staff123456Hash,
+                new[]
+                {
+                    "123456",
+                    "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                });
+
+            UpdatePasswordIfCurrentValueMatches(
+                connection,
+                "nhanvienbanhang",
+                Staff123456Hash,
+                new[]
+                {
+                    "123456",
+                    "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                });
+        }
+
+        private static void UpdatePasswordIfCurrentValueMatches(
+            NpgsqlConnection connection,
+            string username,
+            string newPasswordHash,
+            string[] oldPasswordValues)
+        {
+            const string sql = @"UPDATE taikhoan
+                                 SET mat_khau = @newPasswordHash
+                                 WHERE ten_taikhoan = @username
+                                   AND mat_khau = ANY(@oldPasswordValues)";
+
+            using NpgsqlCommand command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@newPasswordHash", newPasswordHash);
+            command.Parameters.AddWithValue("@username", username);
+            command.Parameters.AddWithValue("@oldPasswordValues", oldPasswordValues);
+            command.ExecuteNonQuery();
+        }
+
+        private static void ExecuteNonQuery(NpgsqlConnection connection, string sql)
+        {
+            using NpgsqlCommand command = new NpgsqlCommand(sql, connection);
+            command.ExecuteNonQuery();
         }
 
         /// <summary>

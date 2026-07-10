@@ -18,6 +18,18 @@ public sealed class JwtTokenServiceTests
     }
 
     [Fact]
+    public void TryReadUser_ShouldReturnUsernameAndRole()
+    {
+        JwtTokenService service = CreateService();
+
+        string token = service.CreateToken("admin", "Admin", out _);
+
+        Assert.True(service.TryReadUser(token, out string username, out string role));
+        Assert.Equal("admin", username);
+        Assert.Equal("Admin", role);
+    }
+
+    [Fact]
     public void IsValid_ShouldRejectInvalidToken()
     {
         JwtTokenService service = CreateService();

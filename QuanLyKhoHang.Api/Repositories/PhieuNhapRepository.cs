@@ -56,7 +56,8 @@ namespace QuanLyKhoHang.Repositories
         {
             string sql = @"INSERT INTO chitietphieunhap (ma_phieunhap, ma_hanghoa, so_luong, don_gia_nhap, thanh_tien)
                            VALUES (@mapn, @mahang, @soluong, @dongia, @thanhtien);
-                           UPDATE hanghoa SET so_luong_ton = so_luong_ton + @soluong WHERE ma_hanghoa = @mahang;";
+                           UPDATE hanghoa SET so_luong_ton = so_luong_ton + @soluong
+                           WHERE ma_hanghoa = @mahang AND is_deleted = false;";
             NpgsqlParameter[] parameters = {
                 new NpgsqlParameter("@mapn", ct.MaPhieuNhap),
                 new NpgsqlParameter("@mahang", ct.MaHangHoa),
@@ -157,20 +158,32 @@ namespace QuanLyKhoHang.Repositories
         /// </summary>
         private void ThemChiTietTrongTransaction(NpgsqlConnection conn, NpgsqlTransaction transaction, ChiTietPhieuNhap ct)
         {
-            const string sql = @"INSERT INTO chitietphieunhap (ma_phieunhap, ma_hanghoa, so_luong, don_gia_nhap, thanh_tien)
-                                 VALUES (@mapn, @mahang, @soluong, @dongia, @thanhtien);
-                                 UPDATE hanghoa
-                                 SET so_luong_ton = so_luong_ton + @soluong
-                                 WHERE ma_hanghoa = @mahang;";
+            const string chiTietSql = @"INSERT INTO chitietphieunhap (ma_phieunhap, ma_hanghoa, so_luong, don_gia_nhap, thanh_tien)
+                                        VALUES (@mapn, @mahang, @soluong, @dongia, @thanhtien)";
 
-            using (var cmd = new NpgsqlCommand(sql, conn, transaction))
+            using (var chiTietCmd = new NpgsqlCommand(chiTietSql, conn, transaction))
             {
-                cmd.Parameters.AddWithValue("@mapn", ct.MaPhieuNhap);
-                cmd.Parameters.AddWithValue("@mahang", ct.MaHangHoa);
-                cmd.Parameters.AddWithValue("@soluong", ct.SoLuong);
-                cmd.Parameters.AddWithValue("@dongia", ct.DonGiaNhap);
-                cmd.Parameters.AddWithValue("@thanhtien", ct.ThanhTien);
-                cmd.ExecuteNonQuery();
+                chiTietCmd.Parameters.AddWithValue("@mapn", ct.MaPhieuNhap);
+                chiTietCmd.Parameters.AddWithValue("@mahang", ct.MaHangHoa);
+                chiTietCmd.Parameters.AddWithValue("@soluong", ct.SoLuong);
+                chiTietCmd.Parameters.AddWithValue("@dongia", ct.DonGiaNhap);
+                chiTietCmd.Parameters.AddWithValue("@thanhtien", ct.ThanhTien);
+                chiTietCmd.ExecuteNonQuery();
+            }
+
+            const string congTonSql = @"UPDATE hanghoa
+                                        SET so_luong_ton = so_luong_ton + @soluong
+                                        WHERE ma_hanghoa = @mahang AND is_deleted = false";
+
+            using (var congTonCmd = new NpgsqlCommand(congTonSql, conn, transaction))
+            {
+                congTonCmd.Parameters.AddWithValue("@mahang", ct.MaHangHoa);
+                congTonCmd.Parameters.AddWithValue("@soluong", ct.SoLuong);
+
+                if (congTonCmd.ExecuteNonQuery() != 1)
+                {
+                    throw new InvalidOperationException($"Hang hoa ma {ct.MaHangHoa} khong ton tai hoac da bi xoa.");
+                }
             }
         }
     }

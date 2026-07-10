@@ -35,9 +35,10 @@ public static class PhieuXuatEndpoints
             ApiResults.Safe(() => Results.Ok(service.GetThongTinPhieuXuatDtos(id))));
 
         // Tạo phiếu xuất, kiểm tra tồn kho, trừ tồn và thêm chi tiết trong transaction.
-        app.MapPost("/api/phieu-xuat", (LuuPhieuXuatRequest input, IPhieuXuatService service) => ApiResults.Safe(() =>
+        app.MapPost("/api/phieu-xuat", (LuuPhieuXuatRequest input, HttpContext context, IPhieuXuatService service, AuditLogService auditLog) => ApiResults.Safe(() =>
         {
             int maPhieu = service.LuuPhieuXuat(input);
+            auditLog.Record(context, "CREATE", "phieuxuat", maPhieu, input);
             return Results.Ok(new { message = "Da luu phieu xuat va cap nhat ton kho.", maPhieu });
         }));
 

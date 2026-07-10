@@ -28,9 +28,10 @@ public static class PhieuNhapEndpoints
             ApiResults.Safe(() => Results.Ok(service.GetChiTietDtosTheoMaPhieu(id))));
 
         // Tạo phiếu nhập, thêm chi tiết và cộng tồn kho trong transaction.
-        app.MapPost("/api/phieu-nhap", (LuuPhieuNhapRequest input, IPhieuNhapService service) => ApiResults.Safe(() =>
+        app.MapPost("/api/phieu-nhap", (LuuPhieuNhapRequest input, HttpContext context, IPhieuNhapService service, AuditLogService auditLog) => ApiResults.Safe(() =>
         {
             int maPhieu = service.LuuPhieuNhap(input);
+            auditLog.Record(context, "CREATE", "phieunhap", maPhieu, input);
             return Results.Ok(new { message = "Da luu phieu nhap va cap nhat ton kho.", maPhieu });
         }));
 

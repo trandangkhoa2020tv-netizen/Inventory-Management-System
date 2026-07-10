@@ -19,7 +19,7 @@ namespace QuanLyKhoHang.Repositories
         /// </summary>
         public DataTable GetAll()
         {
-            string sql = "SELECT ma_nhanvien AS \"Mã NV\", ten_nhanvien AS \"Tên Nhân Viên\", dia_chi_nv AS \"Địa Chỉ\", so_dien_thoai AS \"SĐT\", email AS \"Email\", chuc_vu AS \"Chức Vụ\", ghi_chu AS \"Ghi Chú\" FROM nhanvien ORDER BY ma_nhanvien DESC";
+            string sql = "SELECT ma_nhanvien AS \"Mã NV\", ten_nhanvien AS \"Tên Nhân Viên\", dia_chi_nv AS \"Địa Chỉ\", so_dien_thoai AS \"SĐT\", email AS \"Email\", chuc_vu AS \"Chức Vụ\", ghi_chu AS \"Ghi Chú\" FROM nhanvien WHERE is_deleted = false ORDER BY ma_nhanvien DESC";
             return _dbHelper.ExecuteQuery(sql);
         }
 
@@ -45,7 +45,7 @@ namespace QuanLyKhoHang.Repositories
         /// </summary>
         public int Sua(NhanVien nv)
         {
-            string sql = "UPDATE nhanvien SET ten_nhanvien = @ten, dia_chi_nv = @diachi, so_dien_thoai = @sdt, email = @email, chuc_vu = @chucvu, ghi_chu = @ghichu WHERE ma_nhanvien = @ma";
+            string sql = "UPDATE nhanvien SET ten_nhanvien = @ten, dia_chi_nv = @diachi, so_dien_thoai = @sdt, email = @email, chuc_vu = @chucvu, ghi_chu = @ghichu WHERE ma_nhanvien = @ma AND is_deleted = false";
             NpgsqlParameter[] parameters = {
                 new NpgsqlParameter("@ma", nv.MaNhanVien),
                 new NpgsqlParameter("@ten", nv.TenNhanVien),
@@ -70,23 +70,17 @@ namespace QuanLyKhoHang.Repositories
                 {
                     try
                     {
-                        if (HasRelatedRows(conn, transaction, "phieunhap", maNv) ||
-                            HasRelatedRows(conn, transaction, "phieuxuat", maNv))
+                        using (var disableAccountCmd = new NpgsqlCommand("UPDATE taikhoan SET trang_thai = false WHERE ma_nhanvien = @ma", conn, transaction))
                         {
-                            throw new InvalidOperationException("Khong the xoa nhan vien nay vi da co phieu nhap/xuat lien quan. Can giu nhan vien de bao toan lich su chung tu.");
-                        }
-
-                        using (var deleteAccountCmd = new NpgsqlCommand("DELETE FROM taikhoan WHERE ma_nhanvien = @ma", conn, transaction))
-                        {
-                            deleteAccountCmd.Parameters.AddWithValue("@ma", maNv);
-                            deleteAccountCmd.ExecuteNonQuery();
+                            disableAccountCmd.Parameters.AddWithValue("@ma", maNv);
+                            disableAccountCmd.ExecuteNonQuery();
                         }
 
                         int affectedRows;
-                        using (var deleteEmployeeCmd = new NpgsqlCommand("DELETE FROM nhanvien WHERE ma_nhanvien = @ma", conn, transaction))
+                        using (var softDeleteEmployeeCmd = new NpgsqlCommand("UPDATE nhanvien SET is_deleted = true WHERE ma_nhanvien = @ma AND is_deleted = false", conn, transaction))
                         {
-                            deleteEmployeeCmd.Parameters.AddWithValue("@ma", maNv);
-                            affectedRows = deleteEmployeeCmd.ExecuteNonQuery();
+                            softDeleteEmployeeCmd.Parameters.AddWithValue("@ma", maNv);
+                            affectedRows = softDeleteEmployeeCmd.ExecuteNonQuery();
                         }
 
                         transaction.Commit();
@@ -101,17 +95,5 @@ namespace QuanLyKhoHang.Repositories
             }
         }
 
-        /// <summary>
-        /// Kiểm tra nhân viên đã được dùng trong bảng chứng từ nhập/xuất hay chưa.
-        /// </summary>
-        private static bool HasRelatedRows(NpgsqlConnection conn, NpgsqlTransaction transaction, string tableName, int maNv)
-        {
-            string sql = $"SELECT EXISTS (SELECT 1 FROM {tableName} WHERE ma_nhanvien = @ma)";
-            using (var cmd = new NpgsqlCommand(sql, conn, transaction))
-            {
-                cmd.Parameters.AddWithValue("@ma", maNv);
-                return Convert.ToBoolean(cmd.ExecuteScalar());
-            }
-        }
     }
 }

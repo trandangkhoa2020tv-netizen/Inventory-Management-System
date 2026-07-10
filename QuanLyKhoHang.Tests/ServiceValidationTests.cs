@@ -83,6 +83,35 @@ public sealed class ServiceValidationTests
     }
 
     [Fact]
+    public void PhieuNhapService_ShouldRejectInvalidDetailQuantity()
+    {
+        PhieuNhapService service = new PhieuNhapService(new PhieuNhapRepository());
+
+        ApiValidationException ex = Assert.Throws<ApiValidationException>(() =>
+            service.LuuPhieuNhap(new LuuPhieuNhapRequest
+            {
+                PhieuNhap = new PhieuNhap
+                {
+                    MaNhaCungCap = 1,
+                    MaNhanVien = 1,
+                    TongTien = 1000
+                },
+                ChiTietList = new List<ChiTietPhieuNhap>
+                {
+                    new ChiTietPhieuNhap
+                    {
+                        MaHangHoa = 1,
+                        SoLuong = -5,
+                        DonGiaNhap = 1000,
+                        ThanhTien = -5000
+                    }
+                }
+            }));
+
+        Assert.Contains(ex.Errors, error => error.Contains("soLuong"));
+    }
+
+    [Fact]
     public void PhieuXuatService_ShouldRejectEmptyDetails()
     {
         PhieuXuatService service = new PhieuXuatService(new PhieuXuatRepository());
@@ -100,5 +129,34 @@ public sealed class ServiceValidationTests
             }));
 
         Assert.Contains(ex.Errors, error => error.Contains("it nhat mot mat hang"));
+    }
+
+    [Fact]
+    public void PhieuXuatService_ShouldRejectInvalidDetailQuantity()
+    {
+        PhieuXuatService service = new PhieuXuatService(new PhieuXuatRepository());
+
+        ApiValidationException ex = Assert.Throws<ApiValidationException>(() =>
+            service.LuuPhieuXuat(new LuuPhieuXuatRequest
+            {
+                PhieuXuat = new PhieuXuat
+                {
+                    MaKhachHang = 1,
+                    MaNhanVien = 1,
+                    TongTien = 1000
+                },
+                ChiTietList = new List<ChiTietPhieuXuat>
+                {
+                    new ChiTietPhieuXuat
+                    {
+                        MaHangHoa = 1,
+                        SoLuong = -5,
+                        DonGiaXuat = 1000,
+                        ThanhTien = -5000
+                    }
+                }
+            }));
+
+        Assert.Contains(ex.Errors, error => error.Contains("soLuong"));
     }
 }

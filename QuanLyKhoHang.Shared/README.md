@@ -1,52 +1,43 @@
 # QuanLyKhoHang.Shared
 
-Thu muc nay la project dung chung cho ca hai project chinh:
+`QuanLyKhoHang.Shared` la class library dung chung cho:
 
-- `QuanLyKhoHang.WinForms`: ung dung WinForms.
-- `QuanLyKhoHang.Api`: backend Web API.
+- `QuanLyKhoHang.WinForms`: ung dung desktop.
+- `QuanLyKhoHang.Api`: backend Minimal API.
 
-Muc dich cua project nay la tach cac model du lieu ra khoi WinForms. Nhu vay API khong con phu thuoc nguoc vao project giao dien, va ca hai ben cung dung mot bo class model giong nhau.
+Muc dich cua project nay la tach model du lieu ra khoi WinForms de API khong phu thuoc nguoc vao UI. Shared chi chua class du lieu dung chung; khong chua SQL, HTTP client, form, JWT service hay cau hinh bao mat.
 
-## Vai tro trong he thong
-
-```txt
-QuanLyKhoHang.Shared
-|
-+-- Models/        -> Model du lieu dung chung
-+-- README.md      -> Giai thich chuc nang thu muc
-+-- .gitignore     -> Bo qua file build/local cua project Shared
-\-- QuanLyKhoHang.Shared.csproj
-```
-
-Project nay khong xu ly database, khong goi API, khong chua giao dien va khong chua nghiep vu phuc tap. No chi nen chua class du lieu dung chung.
-
-## Vi sao can tach Shared?
-
-Truoc day model nam trong:
-
-```txt
-QuanLyKhoHang.WinForms/Models
-```
-
-Neu API lay model truc tiep tu folder do thi backend bi phu thuoc vao WinForms. Huong phu thuoc do khong tot, vi giao dien la lop ben ngoai, con API la lop xu ly rieng.
-
-Sau khi tach:
-
-```txt
-QuanLyKhoHang.Shared/Models
-```
-
-Ca WinForms va API cung reference project Shared:
+## Vi Tri Trong Luong He Thong
 
 ```txt
 QuanLyKhoHang.WinForms
-        \
-         -> QuanLyKhoHang.Shared
-        /
+        |
+        | ProjectReference
+        v
+QuanLyKhoHang.Shared/Models
+        ^
+        | ProjectReference
+        |
 QuanLyKhoHang.Api
 ```
 
-## Cau truc file
+Luong runtime moi:
+
+```txt
+WinForms Form
+->
+ApiClient
+->
+API Endpoint
+->
+Service/Repository
+->
+PostgreSQL
+```
+
+Shared chi cung cap model cho WinForms va API trong luong tren. Token JWT, API key, audit log, transaction va truy van database khong nam trong Shared.
+
+## Cau Truc File
 
 ```txt
 QuanLyKhoHang.Shared/
@@ -69,34 +60,35 @@ QuanLyKhoHang.Shared/
 \-- QuanLyKhoHang.Shared.csproj
 ```
 
-## Ghi chu tung file
+## Ghi Chu Tung File
 
 | File | Chuc nang |
 | --- | --- |
-| `.gitignore` | Bo qua file build/local nhu `bin/`, `obj/`, `.vs/`, `*.user`, `*.log`. |
-| `QuanLyKhoHang.Shared.csproj` | Cau hinh class library, target framework va nullable/implicit using. |
-| `Models/HangHoa.cs` | Model mat hang trong kho. Chua ma hang, ten hang, loai hang, nha cung cap, gia nhap, gia ban, so luong ton, don vi tinh va ghi chu. |
-| `Models/LoaiHang.cs` | Model nhom/loai hang hoa. Dung de phan loai hang hoa trong kho. |
-| `Models/NhaCungCap.cs` | Model nha cung cap. Dung cho nghiep vu nhap kho va thong tin nguon hang. |
-| `Models/KhachHang.cs` | Model khach hang. Dung cho nghiep vu xuat kho/ban hang. |
-| `Models/NhanVien.cs` | Model nhan vien. Dung cho quan ly nhan su va gan nguoi lap phieu. |
-| `Models/TaiKhoan.cs` | Model tai khoan dang nhap. Chua ten tai khoan, mat khau da luu va vai tro. |
-| `Models/PhieuNhap.cs` | Model thong tin chung cua phieu nhap kho. Chi tiet mat hang nam trong `ChiTietPhieuNhap`. |
-| `Models/ChiTietPhieuNhap.cs` | Model tung dong hang trong phieu nhap. Chua hang hoa, so luong, don gia va thanh tien. |
-| `Models/PhieuXuat.cs` | Model thong tin chung cua phieu xuat kho. Chi tiet mat hang nam trong `ChiTietPhieuXuat`. |
-| `Models/ChiTietPhieuXuat.cs` | Model tung dong hang trong phieu xuat. Chua hang hoa, so luong, don gia va thanh tien. |
-| `Models/UserSession.cs` | Bo nho phien dang nhap hien tai cua WinForms. Sau login, WinForms luu ten tai khoan va vai tro vao day de phan quyen menu. |
+| `QuanLyKhoHang.Shared.csproj` | Cau hinh class library target `net10.0`. |
+| `Models/HangHoa.cs` | Model mat hang trong kho. |
+| `Models/LoaiHang.cs` | Model nhom/loai hang hoa. |
+| `Models/NhaCungCap.cs` | Model nha cung cap. |
+| `Models/KhachHang.cs` | Model khach hang. |
+| `Models/NhanVien.cs` | Model nhan vien. |
+| `Models/TaiKhoan.cs` | Model tai khoan dang nhap; mat khau luu trong database duoi dang hash. |
+| `Models/PhieuNhap.cs` | Model thong tin chung cua phieu nhap kho. |
+| `Models/ChiTietPhieuNhap.cs` | Model tung dong hang trong phieu nhap. |
+| `Models/PhieuXuat.cs` | Model thong tin chung cua phieu xuat kho. |
+| `Models/ChiTietPhieuXuat.cs` | Model tung dong hang trong phieu xuat. |
+| `Models/UserSession.cs` | Bo nho phien dang nhap tren WinForms: ten tai khoan va vai tro. |
 
-## Nguyen tac su dung
+## Nguyen Tac Su Dung
 
-- WinForms duoc dung cac model nay de bind du lieu len form, grid va request API.
-- API duoc dung cac model nay de nhan du lieu tu request cu va truyen sang service/repository.
-- Khong dat code truy van SQL trong project Shared.
-- Khong dat code goi `HttpClient` trong project Shared.
-- Khong dat code WinForms, control, form hoac message box trong project Shared.
-- Neu can kieu request/response rieng cho API, dat trong `QuanLyKhoHang.Api/DTOs`, khong dat vao Shared tru khi ca WinForms va API cung can dung chung.
+- WinForms duoc dung model de bind du lieu len form, grid va tao request API.
+- API duoc dung model cho request cu va truyen sang service/repository khi phu hop.
+- Request/response rieng cho API dat trong `QuanLyKhoHang.Api/DTOs`.
+- `UserSession` chi dung cho UI desktop; backend phan quyen bang JWT trong `HttpContext.User`.
+- Khong dat code SQL trong Shared.
+- Khong dat code `HttpClient` trong Shared.
+- Khong dat code WinForms, control, form hoac message box trong Shared.
+- Khong dat secret, API key, JWT secret hay mat khau database trong Shared.
 
-## Khi nao them model moi?
+## Khi Nao Them Model Moi?
 
 Them model moi vao `Models/` khi database co bang hoac khai niem du lieu dung chung giua WinForms va API.
 
@@ -108,9 +100,10 @@ Models/DonViTinh.cs
 Models/PhanQuyen.cs
 ```
 
-Sau khi them model, nen cap nhat:
+Sau khi them model, can cap nhat:
 
 - README nay.
 - API DTO neu model co endpoint rieng.
 - Service validation neu model co rule nghiep vu.
+- ApiClient/Form neu WinForms can hien thi hoac gui model do.
 - Test neu model lien quan den luong quan trong.

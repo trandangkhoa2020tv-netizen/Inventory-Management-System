@@ -19,14 +19,43 @@ public static class KhachHangEndpoints
         app.MapGet("/api/v2/khach-hang", (IKhachHangService service) =>
             ApiResults.Safe(() => Results.Ok(service.GetDtos())));
 
-        app.MapPost("/api/khach-hang", (KhachHang input, IKhachHangService service) =>
-            ApiResults.Safe(() => ApiResults.Created(service.Them(input))));
+        app.MapPost("/api/khach-hang", (KhachHang input, HttpContext context, IKhachHangService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                int affectedRows = service.Them(input);
+                auditLog.Record(context, "CREATE", "khachhang", null, input);
+                return ApiResults.Created(affectedRows);
+            }));
 
-        app.MapPut("/api/khach-hang/{id:int}", (int id, KhachHang input, IKhachHangService service) =>
-            ApiResults.Safe(() => ApiResults.Updated(service.Sua(id, input))));
+        app.MapPut("/api/khach-hang/{id:int}", (int id, KhachHang input, HttpContext context, IKhachHangService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                int affectedRows = service.Sua(id, input);
+                if (affectedRows > 0)
+                {
+                    auditLog.Record(context, "UPDATE", "khachhang", id, input);
+                }
 
-        app.MapDelete("/api/khach-hang/{id:int}", (int id, IKhachHangService service) =>
-            ApiResults.Safe(() => ApiResults.Deleted(service.Xoa(id))));
+                return ApiResults.Updated(affectedRows);
+            }));
+
+        app.MapDelete("/api/khach-hang/{id:int}", (int id, HttpContext context, IKhachHangService service, AuditLogService auditLog) =>
+            ApiResults.Safe(() =>
+            {
+                IResult denied = ApiAuthorization.RequireAdmin(context);
+                if (denied != null)
+                {
+                    return denied;
+                }
+
+                int affectedRows = service.Xoa(id);
+                if (affectedRows > 0)
+                {
+                    auditLog.Record(context, "DELETE", "khachhang", id, new { maKhachHang = id });
+                }
+
+                return ApiResults.Deleted(affectedRows);
+            }));
 
         return app;
     }

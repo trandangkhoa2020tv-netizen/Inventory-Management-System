@@ -65,6 +65,10 @@ namespace QuanLyKhoHang.Forms
             cmsUser.Items[0].Text = $"Tài khoản: {UserSession.TenTaiKhoan}";
             cmsUser.Items[1].Text = $"Quyền hạn: {UserSession.VaiTro}";
 
+            menuDangXuat.Text = "Đăng xuất / Chuyển tài khoản";
+            menuTaiKhoan.Enabled = false;
+            menuChucVu.Enabled = false;
+
             btnHangHoa_Click(this, EventArgs.Empty);
         }
 
@@ -114,7 +118,8 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void btnUserMenu_Click(object sender, EventArgs e)
         {
-            cmsUser.Show(btnUserMenu, new System.Drawing.Point(0, btnUserMenu.Height));
+            int x = Math.Min(0, btnUserMenu.Width - cmsUser.Width);
+            cmsUser.Show(btnUserMenu, new System.Drawing.Point(x, btnUserMenu.Height));
         }
 
         /// <summary>

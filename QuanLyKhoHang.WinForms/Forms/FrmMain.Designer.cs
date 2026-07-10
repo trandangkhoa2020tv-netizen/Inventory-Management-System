@@ -322,22 +322,25 @@ namespace QuanLyKhoHang.Forms
             cmsUser.ImageScalingSize = new Size(20, 20);
             cmsUser.Items.AddRange(new ToolStripItem[] { menuTaiKhoan, menuChucVu, menuDangXuat });
             cmsUser.Name = "cmsUser";
-            cmsUser.Size = new Size(70, 70);
+            cmsUser.Size = new Size(240, 76);
             // 
             // menuTaiKhoan
             // 
             menuTaiKhoan.Name = "menuTaiKhoan";
-            menuTaiKhoan.Size = new Size(69, 22);
+            menuTaiKhoan.Size = new Size(239, 24);
+            menuTaiKhoan.Text = "Tai khoan";
             // 
             // menuChucVu
             // 
             menuChucVu.Name = "menuChucVu";
-            menuChucVu.Size = new Size(69, 22);
+            menuChucVu.Size = new Size(239, 24);
+            menuChucVu.Text = "Quyen han";
             // 
             // menuDangXuat
             // 
             menuDangXuat.Name = "menuDangXuat";
-            menuDangXuat.Size = new Size(69, 22);
+            menuDangXuat.Size = new Size(239, 24);
+            menuDangXuat.Text = "Đăng xuất / Chuyển tài khoản";
             menuDangXuat.Click += menuDangXuat_Click;
             // 
             // FrmMain
