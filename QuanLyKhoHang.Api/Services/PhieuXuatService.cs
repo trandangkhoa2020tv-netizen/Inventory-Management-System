@@ -155,6 +155,9 @@ public sealed class PhieuXuatService : IPhieuXuatService
         }
     }
 
+    /// <summary>
+    /// Tinh lai thanh tien tung dong va tong tien phieu xuat truoc khi luu.
+    /// </summary>
     private static void NormalizeTotals(LuuPhieuXuatRequest input)
     {
         decimal tongTien = 0;

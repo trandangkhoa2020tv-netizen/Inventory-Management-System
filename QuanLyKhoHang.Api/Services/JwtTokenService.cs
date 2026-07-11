@@ -138,18 +138,27 @@ public sealed class JwtTokenService
             || path.StartsWithSegments("/swagger");
     }
 
+    /// <summary>
+    /// Tao chu ky HMAC SHA-256 cho phan header va payload cua JWT.
+    /// </summary>
     private string Sign(string unsignedToken)
     {
         using HMACSHA256 hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_settings.SecretKey));
         return Base64UrlEncode(hmac.ComputeHash(Encoding.UTF8.GetBytes(unsignedToken)));
     }
 
+    /// <summary>
+    /// Kiem tra mot claim dang chuoi co ton tai va khop gia tri mong doi hay khong.
+    /// </summary>
     private static bool HasString(JsonElement payload, string propertyName, string expected)
     {
         return payload.TryGetProperty(propertyName, out JsonElement value)
             && string.Equals(value.GetString(), expected, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Doc mot claim dang chuoi tu payload, tra chuoi rong neu khong co.
+    /// </summary>
     private static string GetString(JsonElement payload, string propertyName)
     {
         return payload.TryGetProperty(propertyName, out JsonElement value)
@@ -157,6 +166,9 @@ public sealed class JwtTokenService
             : string.Empty;
     }
 
+    /// <summary>
+    /// So sanh hai chuoi chu ky theo constant-time de giam ro ri thoi gian.
+    /// </summary>
     private static bool ConstantTimeEquals(string expected, string actual)
     {
         byte[] expectedBytes = Encoding.UTF8.GetBytes(expected);
@@ -165,11 +177,17 @@ public sealed class JwtTokenService
             && CryptographicOperations.FixedTimeEquals(expectedBytes, actualBytes);
     }
 
+    /// <summary>
+    /// Ma hoa byte array sang Base64Url theo dinh dang JWT.
+    /// </summary>
     private static string Base64UrlEncode(byte[] bytes)
     {
         return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
+    /// <summary>
+    /// Giai ma chuoi Base64Url cua JWT ve byte array.
+    /// </summary>
     private static byte[] Base64UrlDecode(string value)
     {
         string base64 = value.Replace('-', '+').Replace('_', '/');

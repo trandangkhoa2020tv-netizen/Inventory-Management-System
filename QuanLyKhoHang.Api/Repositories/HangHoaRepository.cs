@@ -84,5 +84,8 @@ namespace QuanLyKhoHang.Repositories
             };
             return _dbHelper.ExecuteNonQuery(sql, parameters);
         }
+
+   
+        
     }
 }

@@ -13,6 +13,9 @@ namespace QuanLyKhoHang.Data
         private const string Staff123456Hash =
             "pbkdf2$100000$cWxraC1zdGFmZi1zYWx0LXYx$dS8VgTfJ0gRv1mu5WUKd36fm95MT4+wSG9lI5rlplZk=";
 
+        /// <summary>
+        /// Tao hoac cap nhat cac cot va bang bat buoc khi API khoi dong.
+        /// </summary>
         public static void EnsureRuntimeSchema()
         {
             using NpgsqlConnection connection = DbConnection.GetConnection();
@@ -109,6 +112,9 @@ namespace QuanLyKhoHang.Data
                 });
         }
 
+        /// <summary>
+        /// Cap nhat hash mat khau cho tai khoan mau neu database dang giu mat khau cu.
+        /// </summary>
         private static void UpdatePasswordIfCurrentValueMatches(
             NpgsqlConnection connection,
             string username,
@@ -127,6 +133,9 @@ namespace QuanLyKhoHang.Data
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Thuc thi mot lenh SQL khong tra du lieu tren ket noi dang mo.
+        /// </summary>
         private static void ExecuteNonQuery(NpgsqlConnection connection, string sql)
         {
             using NpgsqlCommand command = new NpgsqlCommand(sql, connection);

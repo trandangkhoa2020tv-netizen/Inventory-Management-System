@@ -5,6 +5,9 @@ namespace QuanLyKhoHang.Tests;
 
 public sealed class JwtTokenServiceTests
 {
+    /// <summary>
+    /// Kiem tra token moi tao co han su dung va validate duoc.
+    /// </summary>
     [Fact]
     public void CreateToken_ShouldReturnTokenThatCanBeValidated()
     {
@@ -17,6 +20,9 @@ public sealed class JwtTokenServiceTests
         Assert.True(service.IsValid(token));
     }
 
+    /// <summary>
+    /// Kiem tra service doc dung username va role tu token hop le.
+    /// </summary>
     [Fact]
     public void TryReadUser_ShouldReturnUsernameAndRole()
     {
@@ -29,6 +35,9 @@ public sealed class JwtTokenServiceTests
         Assert.Equal("Admin", role);
     }
 
+    /// <summary>
+    /// Kiem tra token sai dinh dang bi tu choi.
+    /// </summary>
     [Fact]
     public void IsValid_ShouldRejectInvalidToken()
     {
@@ -37,6 +46,9 @@ public sealed class JwtTokenServiceTests
         Assert.False(service.IsValid("invalid.token.value"));
     }
 
+    /// <summary>
+    /// Tao JwtTokenService voi cau hinh on dinh dung rieng cho unit test.
+    /// </summary>
     private static JwtTokenService CreateService()
     {
         return new JwtTokenService(new JwtSettings

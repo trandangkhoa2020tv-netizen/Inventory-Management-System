@@ -75,6 +75,9 @@ public static class ApiResults
             : Results.Ok(new { message = "Da xoa du lieu.", affectedRows });
     }
 
+    /// <summary>
+    /// Xac dinh loi PostgreSQL co phai la loi rang buoc du lieu co the tra ve 400 hay khong.
+    /// </summary>
     private static bool IsDataRuleViolation(PostgresException ex)
     {
         return ex.SqlState == PostgresErrorCodes.UniqueViolation
@@ -83,6 +86,9 @@ public static class ApiResults
             || ex.SqlState == PostgresErrorCodes.NotNullViolation;
     }
 
+    /// <summary>
+    /// Chuyen ma loi rang buoc PostgreSQL thanh thong bao ngan gon cho client.
+    /// </summary>
     private static string ToDataRuleMessage(PostgresException ex)
     {
         if (ex.SqlState == PostgresErrorCodes.UniqueViolation)

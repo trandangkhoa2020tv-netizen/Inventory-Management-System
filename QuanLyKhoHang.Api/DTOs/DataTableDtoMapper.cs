@@ -8,6 +8,9 @@ namespace QuanLyKhoHang.ApiServer.DTOs;
 /// </summary>
 public static class DataTableDtoMapper
 {
+    /// <summary>
+    /// Chuyen bang hang hoa sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<HangHoaDto> ToHangHoaDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new HangHoaDto
@@ -24,6 +27,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang loai hang sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<LoaiHangDto> ToLoaiHangDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new LoaiHangDto
@@ -34,6 +40,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang nha cung cap sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<NhaCungCapDto> ToNhaCungCapDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new NhaCungCapDto
@@ -47,6 +56,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang khach hang sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<KhachHangDto> ToKhachHangDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new KhachHangDto
@@ -60,6 +72,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang nhan vien sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<NhanVienDto> ToNhanVienDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new NhanVienDto
@@ -74,6 +89,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang phieu nhap sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<PhieuNhapDto> ToPhieuNhapDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new PhieuNhapDto
@@ -87,6 +105,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang chi tiet phieu nhap sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<ChiTietPhieuNhapDto> ToChiTietPhieuNhapDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new ChiTietPhieuNhapDto
@@ -98,6 +119,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang phieu xuat sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<PhieuXuatDto> ToPhieuXuatDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new PhieuXuatDto
@@ -111,6 +135,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang chi tiet phieu xuat sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<ChiTietPhieuXuatDto> ToChiTietPhieuXuatDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new ChiTietPhieuXuatDto
@@ -123,6 +150,9 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Chuyen bang thong tin phieu xuat sang danh sach DTO cho API v2.
+    /// </summary>
     public static List<ThongTinPhieuXuatDto> ToThongTinPhieuXuatDtos(DataTable table)
     {
         return table.AsEnumerable().Select(row => new ThongTinPhieuXuatDto
@@ -138,24 +168,36 @@ public static class DataTableDtoMapper
         }).ToList();
     }
 
+    /// <summary>
+    /// Doc gia tri chuoi tai mot cot, tra chuoi rong neu database tra DBNull.
+    /// </summary>
     private static string ToString(DataRow row, int index)
     {
         object value = row[index];
         return value == DBNull.Value ? string.Empty : Convert.ToString(value) ?? string.Empty;
     }
 
+    /// <summary>
+    /// Doc gia tri so nguyen tai mot cot, tra 0 neu database tra DBNull.
+    /// </summary>
     private static int ToInt(DataRow row, int index)
     {
         object value = row[index];
         return value == DBNull.Value ? 0 : Convert.ToInt32(value);
     }
 
+    /// <summary>
+    /// Doc gia tri decimal tai mot cot, tra 0 neu database tra DBNull.
+    /// </summary>
     private static decimal ToDecimal(DataRow row, int index)
     {
         object value = row[index];
         return value == DBNull.Value ? 0 : Convert.ToDecimal(value);
     }
 
+    /// <summary>
+    /// Doc gia tri thoi gian tai mot cot, tra DateTime.MinValue neu database tra DBNull.
+    /// </summary>
     private static DateTime ToDateTime(DataRow row, int index)
     {
         object value = row[index];

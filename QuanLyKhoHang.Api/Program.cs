@@ -127,12 +127,12 @@ builder.Services.AddRateLimiter(options =>
     builder.Services.AddScoped<INhaCungCapService, NhaCungCapService>();
     builder.Services.AddScoped<IKhachHangService, KhachHangService>();
     builder.Services.AddScoped<INhanVienService, NhanVienService>();
-builder.Services.AddScoped<IKhoService, KhoService>();
-builder.Services.AddScoped<IPhieuNhapService, PhieuNhapService>();
-builder.Services.AddScoped<IPhieuXuatService, PhieuXuatService>();
-builder.Services.AddScoped<AuditLogService>();
-builder.Services.AddSingleton(jwtSettings);
-builder.Services.AddSingleton<JwtTokenService>();
+    builder.Services.AddScoped<IKhoService, KhoService>();
+    builder.Services.AddScoped<IPhieuNhapService, PhieuNhapService>();
+    builder.Services.AddScoped<IPhieuXuatService, PhieuXuatService>();
+    builder.Services.AddScoped<AuditLogService>();
+    builder.Services.AddSingleton(jwtSettings);
+    builder.Services.AddSingleton<JwtTokenService>();
 
     WebApplication app = builder.Build();
 

@@ -170,6 +170,9 @@ namespace QuanLyKhoHang.Forms
             OpenChildForm(new FrmXuatKho(UserSession.VaiTro));
         }
 
+        /// <summary>
+        /// Xu ly khi nguoi dung bam vao label phien ban; hien tai chua co thao tac can thuc hien.
+        /// </summary>
         private void lblVersion_Click(object sender, EventArgs e)
         {
 

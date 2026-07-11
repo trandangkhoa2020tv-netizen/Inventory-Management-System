@@ -10,6 +10,9 @@ public static class ApiAuthorization
     public const string UserNameItemKey = "ApiUserName";
     public const string UserRoleItemKey = "ApiUserRole";
 
+    /// <summary>
+    /// Gan thong tin tai khoan da xac thuc vao HttpContext de endpoint va audit log su dung.
+    /// </summary>
     public static void SetAuthenticatedUser(HttpContext context, string username, string role)
     {
         context.Items[UserNameItemKey] = username;
@@ -24,11 +27,17 @@ public static class ApiAuthorization
         context.User = new ClaimsPrincipal(identity);
     }
 
+    /// <summary>
+    /// Yeu cau nguoi dung hien tai co vai tro Admin.
+    /// </summary>
     public static IResult RequireAdmin(HttpContext context)
     {
         return RequireRole(context, "Admin");
     }
 
+    /// <summary>
+    /// Kiem tra vai tro hien tai co nam trong danh sach duoc phep hay khong.
+    /// </summary>
     public static IResult RequireRole(HttpContext context, params string[] allowedRoles)
     {
         string role = GetRole(context);
@@ -48,6 +57,9 @@ public static class ApiAuthorization
         return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
 
+    /// <summary>
+    /// Lay vai tro tu ClaimsPrincipal, fallback sang Items neu middleware da luu tam.
+    /// </summary>
     private static string GetRole(HttpContext context)
     {
         if (context.User?.Identity?.IsAuthenticated == true)

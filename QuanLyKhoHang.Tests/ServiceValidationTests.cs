@@ -7,6 +7,9 @@ namespace QuanLyKhoHang.Tests;
 
 public sealed class ServiceValidationTests
 {
+    /// <summary>
+    /// Kiem tra AuthService tu choi request dang nhap thieu ten tai khoan va mat khau.
+    /// </summary>
     [Fact]
     public void AuthService_ShouldRejectEmptyLoginRequest()
     {
@@ -22,6 +25,9 @@ public sealed class ServiceValidationTests
         Assert.Contains("Vui long nhap ten tai khoan", ex.Message);
     }
 
+    /// <summary>
+    /// Kiem tra HangHoaService tu choi mat hang thieu ten.
+    /// </summary>
     [Fact]
     public void HangHoaService_ShouldRejectMissingName()
     {
@@ -42,6 +48,9 @@ public sealed class ServiceValidationTests
         Assert.Contains(ex.Errors, error => error.Contains("tenHangHoa"));
     }
 
+    /// <summary>
+    /// Kiem tra HangHoaService tu choi so luong ton am.
+    /// </summary>
     [Fact]
     public void HangHoaService_ShouldRejectNegativeStock()
     {
@@ -62,6 +71,9 @@ public sealed class ServiceValidationTests
         Assert.Contains(ex.Errors, error => error.Contains("soLuongTon"));
     }
 
+    /// <summary>
+    /// Kiem tra PhieuNhapService tu choi phieu nhap khong co dong chi tiet.
+    /// </summary>
     [Fact]
     public void PhieuNhapService_ShouldRejectEmptyDetails()
     {
@@ -82,6 +94,9 @@ public sealed class ServiceValidationTests
         Assert.Contains(ex.Errors, error => error.Contains("it nhat mot mat hang"));
     }
 
+    /// <summary>
+    /// Kiem tra PhieuNhapService tu choi dong chi tiet co so luong khong hop le.
+    /// </summary>
     [Fact]
     public void PhieuNhapService_ShouldRejectInvalidDetailQuantity()
     {
@@ -111,6 +126,9 @@ public sealed class ServiceValidationTests
         Assert.Contains(ex.Errors, error => error.Contains("soLuong"));
     }
 
+    /// <summary>
+    /// Kiem tra PhieuXuatService tu choi phieu xuat khong co dong chi tiet.
+    /// </summary>
     [Fact]
     public void PhieuXuatService_ShouldRejectEmptyDetails()
     {
@@ -131,6 +149,9 @@ public sealed class ServiceValidationTests
         Assert.Contains(ex.Errors, error => error.Contains("it nhat mot mat hang"));
     }
 
+    /// <summary>
+    /// Kiem tra PhieuXuatService tu choi dong chi tiet co so luong khong hop le.
+    /// </summary>
     [Fact]
     public void PhieuXuatService_ShouldRejectInvalidDetailQuantity()
     {

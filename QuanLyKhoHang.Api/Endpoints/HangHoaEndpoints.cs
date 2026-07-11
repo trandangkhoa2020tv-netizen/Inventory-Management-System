@@ -61,7 +61,7 @@ public static class HangHoaEndpoints
                 return ApiResults.Deleted(affectedRows);
             }))
             .RequireRateLimiting("DeleteProduct");
-
+        
         return app;
     }
 }
