@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: QuanLyKhoHang.Api/Dockerfile
+    container_name: quan-ly-kho-hang-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ApiSettings__Url: http://+:8080
+      QLKH_DB_HOST: postgres
+      QLKH_DB_PORT: 5432
+      QLKH_DB_NAME: quanlyhanghoa
+      QLKH_DB_USER: postgres
+      QLKH_DB_PASSWORD: "1234"
+      QUANLYKHOHANG_DISABLE_DESKTOP_LAUNCH: "1"
+    ports:
+      - "8088:8080"
+
+  postgres:
+    image: postgres:17
+    container_name: quan-ly-kho-hang-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: quanlyhanghoa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d quanlyhanghoa"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:

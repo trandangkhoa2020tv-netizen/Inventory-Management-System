@@ -21,6 +21,11 @@ namespace QuanLyKhoHang.ApiClients
                 return;
             }
 
+            if (!settings.CanAutoStartLocalApi())
+            {
+                throw CreateApiUnavailableException(settings.BaseUrl);
+            }
+
             ProcessStartInfo startInfo = CreateStartInfo();
             _startedProcess = Process.Start(startInfo);
 
@@ -38,7 +43,7 @@ namespace QuanLyKhoHang.ApiClients
                 }
             }
 
-            throw new InvalidOperationException("Khong khoi dong duoc backend QuanLyKhoHang.Api. Hay build project API va kiem tra cau hinh database.");
+            throw CreateApiUnavailableException(settings.BaseUrl);
         }
 
         /// <summary>
@@ -76,6 +81,11 @@ namespace QuanLyKhoHang.ApiClients
             {
                 return false;
             }
+        }
+
+        private static InvalidOperationException CreateApiUnavailableException(string baseUrl)
+        {
+            return new InvalidOperationException("Khong ket noi duoc API tai " + baseUrl + ". Hay kiem tra Docker/API server dang chay hoac cau hinh ApiBaseUrl.");
         }
 
         /// <summary>

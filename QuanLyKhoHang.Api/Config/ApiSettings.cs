@@ -8,7 +8,7 @@ public sealed class ApiSettings
     /// <summary>
     /// URL backend dùng để lắng nghe request HTTP.
     /// </summary>
-    public string Url { get; set; } = "http://localhost:5088";
+    public string Url { get; set; } = "http://localhost:8088";
 
     /// <summary>
     /// Bật/tắt yêu cầu API key cho các request gửi vào backend.

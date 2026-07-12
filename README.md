@@ -47,6 +47,7 @@ ApiServerLauncher.EnsureStarted()
 GET /api/health
 ->
 Neu API chua chay thi khoi dong QuanLyKhoHang.Api
+  - chi ap dung local dev voi ApiBaseUrl localhost:8088 va AutoStartLocalApi = true
 ->
 FrmDangNhap
 ```
@@ -96,6 +97,8 @@ Form load lai du lieu
 ```txt
 QuanLyKhoHang/
 |   .gitignore
+|   .dockerignore
+|   docker-compose.yml
 |   QuanLyKhoHang.sln
 |   README.md
 |
@@ -147,6 +150,7 @@ QuanLyKhoHang/
 |   |   appsettings.json
 |   |   appsettings.Production.json
 |   |   DataTableJson.cs
+|   |   Dockerfile
 |   |   InventoryApiQueries.cs
 |   |   Program.cs
 |   |   QuanLyKhoHang.Api.csproj
@@ -243,6 +247,53 @@ Thu muc build nhu `bin/`, `obj/`, `.vs/` la file sinh ra khi build va khong dua 
 | `QuanLyKhoHang.Shared` | Model dung chung cho WinForms va API. |
 | `QuanLyKhoHang.Tests` | Unit test cho validation service va JWT. |
 
+## Mo Hinh Docker
+
+Docker chi chay backend va database:
+
+```txt
+May Windows nguoi dung
+QuanLyKhoHang.WinForms.exe
+  -> HTTP/JSON
+Docker server
+  -> QuanLyKhoHang.Api container
+  -> PostgreSQL container
+```
+
+WinForms la ung dung desktop Windows nen khong dua vao Docker. Khi dung API Docker local, cau hinh client:
+
+```json
+{
+  "ApiBaseUrl": "http://localhost:8088",
+  "ApiKey": "",
+  "AutoStartLocalApi": false
+}
+```
+
+`QuanLyKhoHang.Shared` duoc build kem theo project nao reference no. `QuanLyKhoHang.Tests` chi dung de kiem thu.
+
+Port khi chay Docker local:
+
+```txt
+WinForms -> http://localhost:8088 -> API Docker
+API Docker -> postgres:5432 -> PostgreSQL container
+DBeaver/Windows -> localhost:5433 -> PostgreSQL container
+PostgreSQL local cu tren Windows -> localhost:5432
+```
+
+PostgreSQL Docker dung image `postgres:17` de cung major version voi PostgreSQL local. Trong `docker-compose.yml`, giu `QLKH_DB_HOST=postgres` va `QLKH_DB_PORT=5432` cho API Docker. Khong doi thanh `5433`, vi `5433` chi la port Windows dung de DBeaver ket noi vao container.
+
+Bang cong chuan:
+
+| Thanh phan | Dia chi |
+| --- | --- |
+| WinForms goi API | `http://localhost:8088` |
+| API Visual Studio/local | `http://localhost:8088` |
+| API Docker publish ra Windows | `localhost:8088` -> container `8080` |
+| PostgreSQL local Windows | `localhost:5432` |
+| PostgreSQL Docker cho DBeaver/Windows | `localhost:5433` -> container `5432` |
+| API Docker goi PostgreSQL Docker | `postgres:5432` |
+
 ## Cau Hinh Database
 
 File cau hinh database cua API:
@@ -263,7 +314,7 @@ Vi du cau hinh. Mat khau database trong README luon de trong de khong lo thong t
     "Password": ""
   },
   "ApiSettings": {
-    "Url": "http://localhost:5088",
+    "Url": "http://localhost:8088",
     "RequireApiKey": false,
     "ApiKey": "",
     "AllowedOrigins": []
@@ -277,6 +328,8 @@ Vi du cau hinh. Mat khau database trong README luon de trong de khong lo thong t
   }
 }
 ```
+
+`DatabaseSettings` tren la cau hinh khi chay API local/Visual Studio voi PostgreSQL local `localhost:5432`. Khi chay Docker, cac bien moi truong trong `docker-compose.yml` se ghi de thanh `QLKH_DB_HOST=postgres` va `QLKH_DB_PORT=5432`.
 
 Dat mat khau database bang file local hoac bien moi truong tren may chay that. Khong ghi mat khau database vao README, issue, commit message hoac tai lieu chia se.
 
@@ -309,7 +362,9 @@ Database mac dinh:
 Database: quanlyhanghoa
 Username: postgres
 Password:
-Port: 5432
+Port local Windows: 5432
+Port Docker tren Windows: 5433
+Port noi bo Docker: 5432
 ```
 
 Script SQL nam trong:
@@ -345,6 +400,39 @@ Sao luu database:
 ```
 
 Script backup doc `QLKH_DB_PASSWORD` tu bien moi truong; khong can ghi mat khau vao README.
+
+## Restore Database That Vao Docker
+
+Docker compose khong tu nap `create_tables.sql` va `sample_data.sql` vao PostgreSQL container. Khi can dung database that, backup database local `quanlyhanghoa` tu DBeaver thanh:
+
+```txt
+D:\QuanLyKhoHang\quanlyhanghoa.backup
+```
+
+Sau khi da co backup, tao lai PostgreSQL Docker trong bang:
+
+```powershell
+docker compose down -v
+docker compose up -d
+```
+
+Lenh `down -v` se xoa volume PostgreSQL Docker hien tai. Chi chay sau khi da co backup database that.
+
+Them connection DBeaver moi cho Docker:
+
+```txt
+Host: localhost
+Port: 5433
+Database: quanlyhanghoa
+Username: postgres
+Password: 1234
+```
+
+Restore file `D:\QuanLyKhoHang\quanlyhanghoa.backup` vao database Docker, roi kiem tra:
+
+```sql
+SELECT * FROM chitietphieunhap;
+```
 
 ## Bao Mat Va Phan Quyen
 
@@ -391,28 +479,57 @@ Chay API rieng:
 dotnet run --project QuanLyKhoHang.Api/QuanLyKhoHang.Api.csproj
 ```
 
+Chay API va PostgreSQL bang Docker:
+
+```powershell
+docker compose up -d --build
+```
+
+Khi chay Docker, API lang nghe tai:
+
+```txt
+http://localhost:8088
+```
+
+PostgreSQL Docker dung cho DBeaver tren Windows:
+
+```txt
+localhost:5433
+```
+
+PostgreSQL Docker trong container van lang nghe cong noi bo `5432`; `5433` chi la cong Windows publish ra ngoai.
+
 Mac dinh API lang nghe tai:
 
 ```txt
-http://localhost:5088
+http://localhost:8088
 ```
 
 Kiem tra API:
 
 ```http
-GET http://localhost:5088/api/health
+GET http://localhost:8088/api/health
 ```
 
 Swagger chi bat trong moi truong development:
 
 ```txt
-http://localhost:5088/swagger
+http://localhost:8088/swagger
 ```
 
 Chay test:
 
 ```powershell
 dotnet test QuanLyKhoHang.sln
+```
+
+Publish WinForms thanh file `.exe` cho Windows:
+
+```powershell
+dotnet publish QuanLyKhoHang.WinForms/QuanLyKhoHang.WinForms.csproj `
+  -c Release `
+  -r win-x64 `
+  --self-contained true
 ```
 
 ## API Chinh

@@ -3,20 +3,22 @@ using System.Text.Json;
 namespace QuanLyKhoHang.ApiClients
 {
     /// <summary>
-    /// Cấu hình kết nối từ ứng dụng WinForms tới backend API.
-    /// Giá trị được đọc từ file appsettings trong thư mục chạy ứng dụng.
+    /// Cau hinh ket noi tu WinForms toi backend API.
     /// </summary>
     public sealed class ApiClientSettings
     {
-        /// <summary>Địa chỉ gốc của API server.</summary>
-        public string BaseUrl { get; private set; } = "http://localhost:5088";
+        private const int LocalDevelopmentApiPort = 8088;
 
-        /// <summary>Khóa API gửi kèm request nếu backend bật xác thực bằng API key.</summary>
+        /// <summary>Dia chi goc cua API server.</summary>
+        public string BaseUrl { get; private set; } = "http://localhost:8088";
+
+        /// <summary>API key gui kem request neu backend bat xac thuc bang API key.</summary>
         public string ApiKey { get; private set; } = string.Empty;
 
-        /// <summary>
-        /// Đọc cấu hình API client; nếu thiếu file hoặc lỗi định dạng thì dùng cấu hình mặc định.
-        /// </summary>
+        /// <summary>Cho phep WinForms tu khoi dong API local khi dung port phat trien mac dinh.</summary>
+        public bool AutoStartLocalApi { get; private set; } = true;
+
+        /// <summary>Doc cau hinh tu appsettings, ho tro ca format moi va format cu.</summary>
         public static ApiClientSettings Load()
         {
             ApiClientSettings settings = new ApiClientSettings();
@@ -36,20 +38,13 @@ namespace QuanLyKhoHang.ApiClients
 
                 using FileStream stream = File.OpenRead(configPath);
                 using JsonDocument document = JsonDocument.Parse(stream);
-                if (!document.RootElement.TryGetProperty("ApiClientSettings", out JsonElement api))
+
+                if (document.RootElement.TryGetProperty("ApiClientSettings", out JsonElement api))
                 {
-                    return settings;
+                    ApplySettingsSection(settings, api);
                 }
 
-                if (api.TryGetProperty("BaseUrl", out JsonElement baseUrl))
-                {
-                    settings.BaseUrl = baseUrl.GetString() ?? settings.BaseUrl;
-                }
-
-                if (api.TryGetProperty("ApiKey", out JsonElement apiKey))
-                {
-                    settings.ApiKey = apiKey.GetString() ?? settings.ApiKey;
-                }
+                ApplyRootSettings(settings, document.RootElement);
             }
             catch
             {
@@ -57,6 +52,69 @@ namespace QuanLyKhoHang.ApiClients
             }
 
             return settings;
+        }
+
+        public bool CanAutoStartLocalApi()
+        {
+            if (!AutoStartLocalApi)
+            {
+                return false;
+            }
+
+            if (!Uri.TryCreate(BaseUrl, UriKind.Absolute, out Uri uri))
+            {
+                return false;
+            }
+
+            return uri.IsLoopback && uri.Port == LocalDevelopmentApiPort;
+        }
+
+        private static void ApplyRootSettings(ApiClientSettings settings, JsonElement root)
+        {
+            if (root.TryGetProperty("ApiBaseUrl", out JsonElement apiBaseUrl))
+            {
+                settings.BaseUrl = apiBaseUrl.GetString() ?? settings.BaseUrl;
+            }
+
+            if (root.TryGetProperty("ApiKey", out JsonElement apiKey))
+            {
+                settings.ApiKey = apiKey.GetString() ?? settings.ApiKey;
+            }
+
+            if (root.TryGetProperty("AutoStartLocalApi", out JsonElement autoStartLocalApi)
+                && IsBoolean(autoStartLocalApi))
+            {
+                settings.AutoStartLocalApi = autoStartLocalApi.GetBoolean();
+            }
+        }
+
+        private static void ApplySettingsSection(ApiClientSettings settings, JsonElement api)
+        {
+            if (api.TryGetProperty("BaseUrl", out JsonElement baseUrl))
+            {
+                settings.BaseUrl = baseUrl.GetString() ?? settings.BaseUrl;
+            }
+
+            if (api.TryGetProperty("ApiBaseUrl", out JsonElement apiBaseUrl))
+            {
+                settings.BaseUrl = apiBaseUrl.GetString() ?? settings.BaseUrl;
+            }
+
+            if (api.TryGetProperty("ApiKey", out JsonElement apiKey))
+            {
+                settings.ApiKey = apiKey.GetString() ?? settings.ApiKey;
+            }
+
+            if (api.TryGetProperty("AutoStartLocalApi", out JsonElement autoStartLocalApi)
+                && IsBoolean(autoStartLocalApi))
+            {
+                settings.AutoStartLocalApi = autoStartLocalApi.GetBoolean();
+            }
+        }
+
+        private static bool IsBoolean(JsonElement value)
+        {
+            return value.ValueKind == JsonValueKind.True || value.ValueKind == JsonValueKind.False;
         }
     }
 }

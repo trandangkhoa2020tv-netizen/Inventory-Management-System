@@ -5,7 +5,7 @@
 Project nay phu trach:
 
 - Hien thi man hinh nguoi dung.
-- Kiem tra API da chay chua va tu khoi dong backend khi can.
+- Kiem tra API da chay chua va tu khoi dong backend local khi cau hinh cho phep.
 - Dang nhap thong qua API va nhan JWT.
 - Luu thong tin phien dang nhap trong `UserSession`.
 - Goi backend API thong qua `ApiClients/`.
@@ -23,7 +23,7 @@ QuanLyKhoHang.WinForms
 ->
 ApiServerLauncher
   - GET /api/health
-  - tu khoi dong QuanLyKhoHang.Api neu can
+  - tu khoi dong QuanLyKhoHang.Api neu dung local dev localhost:8088
 ->
 FrmDangNhap
 ->
@@ -46,13 +46,8 @@ PostgreSQL
 
 ```txt
 QuanLyKhoHang.WinForms/
-|   .dockerignore
-|   .gitignore
-|   docker-compose.yml
-|   Dockerfile.build
 |   Program.cs
 |   QuanLyKhoHang.WinForms.csproj
-|   QuanLyKhoHang.WinForms.csproj.user
 |   README.md
 |
 +---ApiClients/
@@ -109,7 +104,7 @@ QuanLyKhoHang.WinForms/
 | --- | --- |
 | `Program.cs` | Diem chay dau tien. Khoi tao app, dam bao API dang chay, mo form dang nhap. |
 | `ApiClients/` | Lop trung gian goi HTTP API. Form khong goi `HttpClient` truc tiep. |
-| `Config/` | Cau hinh client nhu `BaseUrl` va `ApiKey`. |
+| `Config/` | Cau hinh client nhu `ApiBaseUrl`, `ApiKey` va `AutoStartLocalApi`. |
 | `Forms/` | Cac man hinh WinForms. |
 | `../QuanLyKhoHang.Shared/Models/` | Model du lieu dung chung qua ProjectReference. |
 | `Reports/` | Xuat Excel/PDF. |
@@ -129,9 +124,9 @@ ApiClients/
 
 | File | Chuc nang |
 | --- | --- |
-| `ApiClientSettings.cs` | Doc `Config/appsettings.json` de lay `BaseUrl` va `ApiKey`. |
+| `ApiClientSettings.cs` | Doc `Config/appsettings.json` de lay `ApiBaseUrl`, `ApiKey`; van ho tro cau hinh cu `ApiClientSettings.BaseUrl`. |
 | `ApiHttpClient.cs` | Wrapper dung chung cho GET/POST/PUT/DELETE, doc JSON ve DataTable, xu ly loi API, gan API key va Bearer token. |
-| `ApiServerLauncher.cs` | Goi `/api/health`; neu API chua chay thi tu khoi dong `QuanLyKhoHang.Api`. |
+| `ApiServerLauncher.cs` | Goi `/api/health`; chi tu khoi dong `QuanLyKhoHang.Api` khi dung local dev `localhost:8088` va `AutoStartLocalApi = true`. |
 | `DanhMucApiClients.cs` | Client cho hang hoa, loai hang, nha cung cap, khach hang, nhan vien. |
 | `KhoApiClients.cs` | Client cho ton kho, phieu nhap, phieu xuat va dang nhap. |
 
@@ -143,7 +138,7 @@ Form
 *ApiClient
 ->
 ApiHttpClient
-  - BaseUrl tu Config/appsettings.json
+  - ApiBaseUrl tu Config/appsettings.json
   - X-API-Key neu co
   - Bearer token sau login
 ->
@@ -162,17 +157,19 @@ Vi du:
 
 ```json
 {
-  "ApiClientSettings": {
-    "BaseUrl": "http://localhost:5088",
-    "ApiKey": ""
-  }
+  "ApiBaseUrl": "http://localhost:8088",
+  "ApiKey": "",
+  "AutoStartLocalApi": false
 }
 ```
 
 | Key | Y nghia |
 | --- | --- |
-| `BaseUrl` | Dia chi backend API. |
+| `ApiBaseUrl` | Dia chi backend API. Dung `http://localhost:8088` khi API chay bang Docker local hoac Visual Studio. |
 | `ApiKey` | API key gui len backend neu backend bat `ApiSettings.RequireApiKey`. De rong neu khong dung API key. |
+| `AutoStartLocalApi` | `true` de WinForms tu khoi dong API local `localhost:8088` khi phat trien; `false` khi goi API Docker/server. |
+
+WinForms khong ket noi PostgreSQL truc tiep. Neu dung API Docker, DBeaver ket noi database Docker bang `localhost:5433`, con API Docker van ket noi PostgreSQL noi bo bang `postgres:5432`.
 
 JWT khong nam trong file config WinForms. Token duoc lay tu `/api/auth/login` va gan vao `ApiHttpClient` trong bo nho khi ung dung dang chay.
 
@@ -295,6 +292,7 @@ ApiServerLauncher.EnsureStarted()
 GET /api/health
 ->
 Neu API chua chay thi tim DLL/project API va chay dotnet
+  - chi ap dung khi AutoStartLocalApi = true va ApiBaseUrl la localhost:8088
 ->
 Application.Run(new FrmDangNhap())
 ```
@@ -379,6 +377,36 @@ Tu root repository:
 
 ```powershell
 dotnet run --project QuanLyKhoHang.WinForms/QuanLyKhoHang.WinForms.csproj
+```
+
+## Publish WinForms
+
+WinForms chay ngoai Docker. Tao ban `.exe` Windows:
+
+```powershell
+dotnet publish QuanLyKhoHang.WinForms/QuanLyKhoHang.WinForms.csproj `
+  -c Release `
+  -r win-x64 `
+  --self-contained true
+```
+
+Neu API dang chay bang `docker compose up -d --build` tai root repository, dat cau hinh client:
+
+```json
+{
+  "ApiBaseUrl": "http://localhost:8088",
+  "ApiKey": "",
+  "AutoStartLocalApi": false
+}
+```
+
+Port dung khi publish:
+
+```txt
+WinForms -> http://localhost:8088
+API Docker -> postgres:5432
+DBeaver/Windows -> localhost:5433
+PostgreSQL local neu chay khong Docker -> localhost:5432
 ```
 
 Trong Visual Studio:

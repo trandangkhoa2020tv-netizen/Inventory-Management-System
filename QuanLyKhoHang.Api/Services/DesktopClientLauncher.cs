@@ -18,6 +18,11 @@ public static class DesktopClientLauncher
     /// </summary>
     public static void StartIfNeeded()
     {
+        if (Environment.GetEnvironmentVariable("QUANLYKHOHANG_DISABLE_DESKTOP_LAUNCH") == "1")
+        {
+            return;
+        }
+
         if (Environment.GetEnvironmentVariable("QUANLYKHOHANG_STARTED_BY_DESKTOP") == "1")
         {
             return;

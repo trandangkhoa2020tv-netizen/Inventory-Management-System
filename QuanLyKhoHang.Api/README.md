@@ -61,6 +61,7 @@ QuanLyKhoHang.Api/
 |   appsettings.json
 |   appsettings.Production.json
 |   DataTableJson.cs
+|   Dockerfile
 |   InventoryApiQueries.cs
 |   Program.cs
 |   QuanLyKhoHang.Api.csproj
@@ -177,7 +178,7 @@ Vi du cau hinh. Mat khau database va secret khong duoc ghi vao README; de rong t
     "Password": ""
   },
   "ApiSettings": {
-    "Url": "http://localhost:5088",
+    "Url": "http://localhost:8088",
     "RequireApiKey": false,
     "ApiKey": "",
     "AllowedOrigins": []
@@ -191,6 +192,8 @@ Vi du cau hinh. Mat khau database va secret khong duoc ghi vao README; de rong t
   }
 }
 ```
+
+Khi chay API local/Visual Studio, `DatabaseSettings` tro toi PostgreSQL local tren `localhost:5432`. Khi chay API trong Docker, `docker-compose.yml` ghi de database thanh `QLKH_DB_HOST=postgres` va `QLKH_DB_PORT=5432`; khong dung `5433` trong container.
 
 ### DatabaseSettings
 
@@ -580,22 +583,46 @@ Tu root repository:
 dotnet run --project QuanLyKhoHang.Api/QuanLyKhoHang.Api.csproj
 ```
 
+Chay API kem PostgreSQL bang Docker tu root repository:
+
+```powershell
+docker compose up -d --build
+```
+
+Trong Docker compose, API lang nghe tren host tai:
+
+```txt
+http://localhost:8088
+```
+
+PostgreSQL Docker dung image `postgres:17`. Docker publish PostgreSQL ra Windows tai `localhost:5433`, nhung API container van ket noi noi bo bang `postgres:5432`.
+
+Bang cong:
+
+| Muc dich | Dia chi |
+| --- | --- |
+| Client/WinForms goi API | `http://localhost:8088` |
+| API Docker trong container | `http://+:8080` |
+| DBeaver ket noi PostgreSQL Docker | `localhost:5433` |
+| API Docker ket noi PostgreSQL Docker | `postgres:5432` |
+| API local ket noi PostgreSQL local | `localhost:5432` |
+
 Kiem tra:
 
 ```http
-GET http://localhost:5088/api/health
+GET http://localhost:8088/api/health
 ```
 
 Mo Swagger UI trong Development:
 
 ```txt
-http://localhost:5088/swagger
+http://localhost:8088/swagger
 ```
 
 Lay OpenAPI JSON trong Development:
 
 ```txt
-http://localhost:5088/swagger/v1/swagger.json
+http://localhost:8088/swagger/v1/swagger.json
 ```
 
 ## Ghi Chu Phat Trien
