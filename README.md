@@ -425,7 +425,7 @@ Host: localhost
 Port: 5433
 Database: quanlyhanghoa
 Username: postgres
-Password: 1234
+Password: <gia-tri-QLKH_DB_PASSWORD-trong-.env>
 ```
 
 Restore file `D:\QuanLyKhoHang\quanlyhanghoa.backup` vao database Docker, roi kiem tra:

@@ -5,6 +5,10 @@ publish/
 *.user
 *.suo
 .env
+*.env
+*.backup
+*.dump
+backups/
 
 .buildcheck*/
 .objcheck/

@@ -1,5 +1,6 @@
 using Npgsql;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
@@ -13,7 +14,7 @@ namespace QuanLyKhoHang.Data
     {
         // Chuỗi kết nối dự phòng để chương trình vẫn có thể chạy khi thiếu file cấu hình.
         private const string DefaultConnectionString =
-            "Host=localhost;Port=5432;Database=quanlyhanghoa;Username=postgres;Password=1234";
+            "Host=localhost;Port=5432;Database=quanlyhanghoa;Username=postgres;Password=";
 
         // Chuỗi kết nối cuối cùng được tính một lần khi ứng dụng khởi động.
         public static string ConnectionString { get; } = BuildConnectionString();
@@ -57,7 +58,7 @@ namespace QuanLyKhoHang.Data
                 int port = 5432;
                 string database = "quanlyhanghoa";
                 string username = "postgres";
-                string password = "1234";
+                string password = string.Empty;
 
                 string configPath = Path.Combine(AppContext.BaseDirectory, "Config", "appsettings.json");
                 if (!File.Exists(configPath))
@@ -78,11 +79,13 @@ namespace QuanLyKhoHang.Data
                     password = GetString(db, "Password", password);
                 }
 
-                host = GetEnvironmentString("QLKH_DB_HOST", host);
-                port = GetEnvironmentInt("QLKH_DB_PORT", port);
-                database = GetEnvironmentString("QLKH_DB_NAME", database);
-                username = GetEnvironmentString("QLKH_DB_USER", username);
-                password = GetEnvironmentString("QLKH_DB_PASSWORD", password);
+                Dictionary<string, string> dotEnv = LoadDotEnv();
+
+                host = GetConfigurationString("QLKH_DB_HOST", host, dotEnv);
+                port = GetConfigurationInt("QLKH_DB_PORT", port, dotEnv);
+                database = GetConfigurationString("QLKH_DB_NAME", database, dotEnv);
+                username = GetConfigurationString("QLKH_DB_USER", username, dotEnv);
+                password = GetConfigurationString("QLKH_DB_PASSWORD", password, dotEnv);
 
                 return new NpgsqlConnectionStringBuilder
                 {
@@ -90,7 +93,8 @@ namespace QuanLyKhoHang.Data
                     Port = port,
                     Database = database,
                     Username = username,
-                    Password = password
+                    Password = password,
+                    GssEncryptionMode = GssEncryptionMode.Disable
                 }.ConnectionString;
             }
             catch
@@ -122,6 +126,87 @@ namespace QuanLyKhoHang.Data
         /// <summary>
         /// Lấy giá trị chuỗi từ biến môi trường; nếu không có thì giữ nguyên giá trị fallback.
         /// </summary>
+        private static string GetConfigurationString(
+            string variableName,
+            string fallback,
+            Dictionary<string, string> dotEnv)
+        {
+            string value = Environment.GetEnvironmentVariable(variableName);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
+            return dotEnv.TryGetValue(variableName, out value) && !string.IsNullOrWhiteSpace(value)
+                ? value
+                : fallback;
+        }
+
+        private static int GetConfigurationInt(
+            string variableName,
+            int fallback,
+            Dictionary<string, string> dotEnv)
+        {
+            string value = Environment.GetEnvironmentVariable(variableName);
+            if (string.IsNullOrWhiteSpace(value) && dotEnv.TryGetValue(variableName, out string dotEnvValue))
+            {
+                value = dotEnvValue;
+            }
+
+            return int.TryParse(value, out int result) ? result : fallback;
+        }
+
+        private static Dictionary<string, string> LoadDotEnv()
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            string envPath = FindDotEnvPath();
+            if (string.IsNullOrWhiteSpace(envPath))
+            {
+                return values;
+            }
+
+            foreach (string line in File.ReadAllLines(envPath))
+            {
+                string trimmed = line.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                int separatorIndex = trimmed.IndexOf('=');
+                if (separatorIndex <= 0)
+                {
+                    continue;
+                }
+
+                string key = trimmed.Substring(0, separatorIndex).Trim();
+                string value = trimmed.Substring(separatorIndex + 1).Trim().Trim('"');
+                if (!string.IsNullOrWhiteSpace(key))
+                {
+                    values[key] = value;
+                }
+            }
+
+            return values;
+        }
+
+        private static string FindDotEnvPath()
+        {
+            DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
+            while (directory != null)
+            {
+                string envPath = Path.Combine(directory.FullName, ".env");
+                if (File.Exists(envPath))
+                {
+                    return envPath;
+                }
+
+                directory = directory.Parent;
+            }
+
+            return string.Empty;
+        }
+
         private static string GetEnvironmentString(string variableName, string fallback)
         {
             string value = Environment.GetEnvironmentVariable(variableName);
