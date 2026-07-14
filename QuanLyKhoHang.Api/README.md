@@ -58,6 +58,7 @@ Route public khi `JwtSettings.RequireJwt = true`:
 
 ```txt
 QuanLyKhoHang.Api/
+|   .gitignore
 |   appsettings.json
 |   appsettings.Production.json
 |   DataTableJson.cs
@@ -142,6 +143,7 @@ Program.cs
 |-- Cau hinh CORS
 |-- Dang ky Repository vao DI
 |-- Dang ky Service vao DI
+|-- Dang ky InventoryApiQueries
 |-- Dang ky JwtTokenService va AuditLogService
 |-- Build app
 |-- EnsureRuntimeSchema, EnsureSampleAccountPasswords, EnsureSerialSequences
@@ -153,9 +155,21 @@ Program.cs
 |-- Chan endpoint nghiep vu neu RequireJwt = true ma token sai/thieu
 |-- UseRateLimiter
 |-- Map endpoint theo tung nhom
-|-- Dang ky DesktopClientLauncher
+|-- Dang ky DesktopClientLauncher neu khong bi disable bang bien moi truong
 |-- app.Run()
 ```
+
+## File Goc Cua Project
+
+| File | Chuc nang |
+| --- | --- |
+| `Program.cs` | Bootstrap Minimal API, middleware, DI, runtime database maintenance va map route. |
+| `InventoryApiQueries.cs` | Truy van ton kho thap cho `KhoService`. |
+| `DataTableJson.cs` | Chuyen `DataTable` thanh danh sach dictionary de route `/api/...` serialize JSON cho WinForms. |
+| `Dockerfile` | Build/publish API bang .NET SDK 10 va chay bang ASP.NET runtime 10 tai cong container `8080`. |
+| `.gitignore` | Bo qua output build, publish, `.env` va file database local trong project API. |
+| `appsettings.json` | Cau hinh development/local. |
+| `appsettings.Production.json` | Cau hinh production override, de secret rong va set qua moi truong chay that. |
 
 ## Cau Hinh
 
@@ -193,7 +207,7 @@ Vi du cau hinh. Mat khau database va secret khong duoc ghi vao README; de rong t
 }
 ```
 
-Khi chay API local/Visual Studio, `DatabaseSettings` tro toi PostgreSQL local tren `localhost:5432`. Khi chay API trong Docker, `docker-compose.yml` ghi de database thanh `QLKH_DB_HOST=postgres` va `QLKH_DB_PORT=5432`; khong dung `5433` trong container.
+Khi chay API local/Visual Studio, `DatabaseSettings` tro toi PostgreSQL local tren `localhost:5432`. Khi chay API trong Docker, `docker-compose.yml` ghi de database thanh `QLKH_DB_HOST=postgres` va `QLKH_DB_PORT=5432`; day la dia chi noi bo container, khong phu thuoc port publish tren Windows.
 
 ### DatabaseSettings
 
@@ -372,7 +386,7 @@ Services/
 | `ApiValidationException.cs` | Exception rieng cho loi validate gom danh sach loi. |
 | `AuditLogService.cs` | Ghi user, role, hanh dong, bang, id, noi dung va IP vao `auditlog`. |
 | `AuthService.cs` | Validate login va goi `TaiKhoanRepository`. |
-| `DesktopClientLauncher.cs` | Tu mo WinForms neu API duoc chay truc tiep. |
+| `DesktopClientLauncher.cs` | Tu mo WinForms neu API duoc chay truc tiep; bo qua khi `QUANLYKHOHANG_DISABLE_DESKTOP_LAUNCH=1` hoac API do desktop khoi dong. |
 | `JwtTokenService.cs` | Tao, ky, kiem tra va doc thong tin JWT. |
 | `*Service.cs` | Validate va xu ly nghiep vu cho tung module. |
 | `ValidationHelper.cs` | Ham validate dung chung. |
@@ -583,9 +597,11 @@ Tu root repository:
 dotnet run --project QuanLyKhoHang.Api/QuanLyKhoHang.Api.csproj
 ```
 
-Chay API kem PostgreSQL bang Docker tu root repository:
+Chay API kem PostgreSQL bang Docker tu root repository. Docker compose can bien `QLKH_DB_PASSWORD` trong `.env` hoac environment:
 
 ```powershell
+Copy-Item .env.example .env
+# Sua QLKH_DB_PASSWORD trong .env truoc khi chay docker compose
 docker compose up -d --build
 ```
 
@@ -595,7 +611,7 @@ Trong Docker compose, API lang nghe tren host tai:
 http://localhost:8088
 ```
 
-PostgreSQL Docker dung image `postgres:17`. Docker publish PostgreSQL ra Windows tai `localhost:5433`, nhung API container van ket noi noi bo bang `postgres:5432`.
+PostgreSQL Docker dung image `postgres:17`. Docker publish PostgreSQL ra Windows tai `localhost:5432`, va API container ket noi noi bo bang `postgres:5432`. Neu may dang co PostgreSQL local dung `localhost:5432`, can dung mot nguon database tai mot thoi diem hoac doi port publish trong `docker-compose.yml`.
 
 Bang cong:
 
@@ -603,7 +619,7 @@ Bang cong:
 | --- | --- |
 | Client/WinForms goi API | `http://localhost:8088` |
 | API Docker trong container | `http://+:8080` |
-| DBeaver ket noi PostgreSQL Docker | `localhost:5433` |
+| DBeaver ket noi PostgreSQL Docker | `localhost:5432` |
 | API Docker ket noi PostgreSQL Docker | `postgres:5432` |
 | API local ket noi PostgreSQL local | `localhost:5432` |
 

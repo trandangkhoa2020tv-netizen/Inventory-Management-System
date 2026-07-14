@@ -98,8 +98,10 @@ Form load lai du lieu
 QuanLyKhoHang/
 |   .gitignore
 |   .dockerignore
+|   .env.example
 |   docker-compose.yml
 |   QuanLyKhoHang.sln
+|   QuanLyKhoHang.slnLaunch
 |   README.md
 |
 +---.github/
@@ -109,6 +111,7 @@ QuanLyKhoHang/
 |           build.yml
 |
 +---QuanLyKhoHang.WinForms/
+|   |   .gitignore
 |   |   Program.cs
 |   |   QuanLyKhoHang.WinForms.csproj
 |   |   README.md
@@ -147,6 +150,7 @@ QuanLyKhoHang/
 |           sync_existing_database.sql
 |
 +---QuanLyKhoHang.Api/
+|   |   .gitignore
 |   |   appsettings.json
 |   |   appsettings.Production.json
 |   |   DataTableJson.cs
@@ -213,6 +217,7 @@ QuanLyKhoHang/
 |           ValidationHelper.cs
 |
 +---QuanLyKhoHang.Shared/
+|   |   .gitignore
 |   |   QuanLyKhoHang.Shared.csproj
 |   |   README.md
 |   |
@@ -230,6 +235,7 @@ QuanLyKhoHang/
 |           UserSession.cs
 |
 \---QuanLyKhoHang.Tests/
+        .gitignore
         JwtTokenServiceTests.cs
         ServiceValidationTests.cs
         QuanLyKhoHang.Tests.csproj
@@ -277,11 +283,11 @@ Port khi chay Docker local:
 ```txt
 WinForms -> http://localhost:8088 -> API Docker
 API Docker -> postgres:5432 -> PostgreSQL container
-DBeaver/Windows -> localhost:5433 -> PostgreSQL container
-PostgreSQL local cu tren Windows -> localhost:5432
+DBeaver/Windows -> localhost:5432 -> PostgreSQL container
+PostgreSQL local tren Windows cung dung localhost:5432 nen can dung 1 nguon database tai mot thoi diem hoac doi port publish trong docker-compose.yml
 ```
 
-PostgreSQL Docker dung image `postgres:17` de cung major version voi PostgreSQL local. Trong `docker-compose.yml`, giu `QLKH_DB_HOST=postgres` va `QLKH_DB_PORT=5432` cho API Docker. Khong doi thanh `5433`, vi `5433` chi la port Windows dung de DBeaver ket noi vao container.
+PostgreSQL Docker dung image `postgres:17`. Trong `docker-compose.yml`, giu `QLKH_DB_HOST=postgres` va `QLKH_DB_PORT=5432` cho API Docker. PostgreSQL container hien publish ra Windows tai `localhost:5432`; neu may dang chay PostgreSQL local tren port nay thi dung PostgreSQL local hoac doi port publish truoc khi `docker compose up`.
 
 Bang cong chuan:
 
@@ -291,7 +297,7 @@ Bang cong chuan:
 | API Visual Studio/local | `http://localhost:8088` |
 | API Docker publish ra Windows | `localhost:8088` -> container `8080` |
 | PostgreSQL local Windows | `localhost:5432` |
-| PostgreSQL Docker cho DBeaver/Windows | `localhost:5433` -> container `5432` |
+| PostgreSQL Docker cho DBeaver/Windows | `localhost:5432` -> container `5432` |
 | API Docker goi PostgreSQL Docker | `postgres:5432` |
 
 ## Cau Hinh Database
@@ -363,7 +369,7 @@ Database: quanlyhanghoa
 Username: postgres
 Password:
 Port local Windows: 5432
-Port Docker tren Windows: 5433
+Port Docker tren Windows: 5432
 Port noi bo Docker: 5432
 ```
 
@@ -409,6 +415,13 @@ Docker compose khong tu nap `create_tables.sql` va `sample_data.sql` vao Postgre
 D:\QuanLyKhoHang\quanlyhanghoa.backup
 ```
 
+Docker compose can bien `QLKH_DB_PASSWORD`. Tao file `.env` tu `.env.example` va dien mat khau truoc khi khoi dong:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
 Sau khi da co backup, tao lai PostgreSQL Docker trong bang:
 
 ```powershell
@@ -422,7 +435,7 @@ Them connection DBeaver moi cho Docker:
 
 ```txt
 Host: localhost
-Port: 5433
+Port: 5432
 Database: quanlyhanghoa
 Username: postgres
 Password: <gia-tri-QLKH_DB_PASSWORD-trong-.env>
@@ -482,6 +495,8 @@ dotnet run --project QuanLyKhoHang.Api/QuanLyKhoHang.Api.csproj
 Chay API va PostgreSQL bang Docker:
 
 ```powershell
+Copy-Item .env.example .env
+# Sua QLKH_DB_PASSWORD trong .env truoc khi chay lenh duoi
 docker compose up -d --build
 ```
 
@@ -494,10 +509,10 @@ http://localhost:8088
 PostgreSQL Docker dung cho DBeaver tren Windows:
 
 ```txt
-localhost:5433
+localhost:5432
 ```
 
-PostgreSQL Docker trong container van lang nghe cong noi bo `5432`; `5433` chi la cong Windows publish ra ngoai.
+PostgreSQL Docker trong container va tren Windows deu dang dung cong `5432` theo `docker-compose.yml`. Neu trung voi PostgreSQL local, doi port publish hoac dung mot database tai mot thoi diem.
 
 Mac dinh API lang nghe tai:
 
@@ -521,6 +536,22 @@ Chay test:
 
 ```powershell
 dotnet test QuanLyKhoHang.sln
+```
+
+Luong CI trong `.github/workflows/build.yml`:
+
+```txt
+push/pull_request
+->
+windows-latest
+->
+setup-dotnet 10.0.x
+->
+dotnet restore
+->
+dotnet build --configuration Release --no-restore
+->
+dotnet test --configuration Release --no-build
 ```
 
 Publish WinForms thanh file `.exe` cho Windows:

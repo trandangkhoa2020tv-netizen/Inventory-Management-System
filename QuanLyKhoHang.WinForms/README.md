@@ -46,6 +46,7 @@ PostgreSQL
 
 ```txt
 QuanLyKhoHang.WinForms/
+|   .gitignore
 |   Program.cs
 |   QuanLyKhoHang.WinForms.csproj
 |   README.md
@@ -110,6 +111,7 @@ QuanLyKhoHang.WinForms/
 | `Reports/` | Xuat Excel/PDF. |
 | `sql/` | Script tao, migrate, seed, sync va backup database. |
 | `QuanLyKhoHang.WinForms.csproj` | Cau hinh target `net10.0-windows`, WinForms, package export. |
+| `.gitignore` | Bo qua output build, publish, `.env`, file local va cac thu muc kiem tra sinh ra trong project desktop. |
 
 ## ApiClients
 
@@ -126,7 +128,7 @@ ApiClients/
 | --- | --- |
 | `ApiClientSettings.cs` | Doc `Config/appsettings.json` de lay `ApiBaseUrl`, `ApiKey`; van ho tro cau hinh cu `ApiClientSettings.BaseUrl`. |
 | `ApiHttpClient.cs` | Wrapper dung chung cho GET/POST/PUT/DELETE, doc JSON ve DataTable, xu ly loi API, gan API key va Bearer token. |
-| `ApiServerLauncher.cs` | Goi `/api/health`; chi tu khoi dong `QuanLyKhoHang.Api` khi dung local dev `localhost:8088` va `AutoStartLocalApi = true`. |
+| `ApiServerLauncher.cs` | Goi `/api/health`; chi tu khoi dong `QuanLyKhoHang.Api` khi dung local dev `localhost:8088` va `AutoStartLocalApi = true`; dung process do desktop khoi dong khi app thoat. |
 | `DanhMucApiClients.cs` | Client cho hang hoa, loai hang, nha cung cap, khach hang, nhan vien. |
 | `KhoApiClients.cs` | Client cho ton kho, phieu nhap, phieu xuat va dang nhap. |
 
@@ -169,7 +171,9 @@ Vi du:
 | `ApiKey` | API key gui len backend neu backend bat `ApiSettings.RequireApiKey`. De rong neu khong dung API key. |
 | `AutoStartLocalApi` | `true` de WinForms tu khoi dong API local `localhost:8088` khi phat trien; `false` khi goi API Docker/server. |
 
-WinForms khong ket noi PostgreSQL truc tiep. Neu dung API Docker, DBeaver ket noi database Docker bang `localhost:5433`, con API Docker van ket noi PostgreSQL noi bo bang `postgres:5432`.
+`Config/appsettings.json` trong repo hien co the bat `AutoStartLocalApi` cho luong dev local. `Config/appsettings.example.json` de `AutoStartLocalApi = false` cho Docker/server de WinForms khong tu tao process API.
+
+WinForms khong ket noi PostgreSQL truc tiep. Neu dung API Docker theo `docker-compose.yml` hien tai, DBeaver ket noi database Docker bang `localhost:5432`, con API Docker van ket noi PostgreSQL noi bo bang `postgres:5432`. Neu may dang co PostgreSQL local tren `localhost:5432`, can dung mot database tai mot thoi diem hoac doi port publish trong compose.
 
 JWT khong nam trong file config WinForms. Token duoc lay tu `/api/auth/login` va gan vao `ApiHttpClient` trong bo nho khi ung dung dang chay.
 
@@ -293,8 +297,11 @@ GET /api/health
 ->
 Neu API chua chay thi tim DLL/project API va chay dotnet
   - chi ap dung khi AutoStartLocalApi = true va ApiBaseUrl la localhost:8088
+  - set QUANLYKHOHANG_STARTED_BY_DESKTOP=1 de API khong mo nguoc WinForms
 ->
 Application.Run(new FrmDangNhap())
+->
+Khi WinForms thoat, StopIfStartedByApp() dung process API do desktop tu khoi dong
 ```
 
 ## Luong Dang Nhap
@@ -405,7 +412,7 @@ Port dung khi publish:
 ```txt
 WinForms -> http://localhost:8088
 API Docker -> postgres:5432
-DBeaver/Windows -> localhost:5433
+DBeaver/Windows -> localhost:5432 neu dung PostgreSQL Docker hien tai
 PostgreSQL local neu chay khong Docker -> localhost:5432
 ```
 

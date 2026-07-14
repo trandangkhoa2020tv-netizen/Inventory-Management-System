@@ -10,6 +10,23 @@ Muc dich cua project nay la kiem tra cac rule quan trong ma khong can thao tac t
 
 Test hien tai la unit test, khong can PostgreSQL that va khong can cau hinh mat khau database.
 
+Luong chay test hien tai:
+
+```txt
+dotnet test
+->
+xUnit
+->
+JwtTokenServiceTests
+  - tao JwtSettings rieng cho test
+  - tao/validate/doc token trong bo nho
+->
+ServiceValidationTests
+  - tao service voi repository that
+  - gui input sai
+  - service validate va throw truoc khi repository cham PostgreSQL
+```
+
 ## Vai Tro Trong He Thong
 
 ```txt
@@ -55,6 +72,8 @@ dotnet test QuanLyKhoHang.sln --no-restore
 | `ServiceValidationTests.cs` | Kiem tra rule validate o service ma khong can database that. |
 | `JwtTokenServiceTests.cs` | Kiem tra JWT tao ra hop le, token sai bi tu choi, token doc duoc username/role. |
 | `.gitignore` | Bo qua `bin/`, `obj/`, `TestResults/`, coverage, `.vs/`, `*.user`, `*.log`. |
+
+`QuanLyKhoHang.Tests.csproj` hien target `net10.0`, bat nullable, dung `xunit`, `xunit.runner.visualstudio`, `Microsoft.NET.Test.Sdk` va `coverlet.collector`.
 
 ## Test Trong ServiceValidationTests.cs
 

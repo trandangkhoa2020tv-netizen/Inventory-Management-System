@@ -21,7 +21,7 @@ QuanLyKhoHang.Shared/Models
 QuanLyKhoHang.Api
 ```
 
-Luong runtime moi:
+Luong runtime hien tai:
 
 ```txt
 WinForms Form
@@ -35,7 +35,7 @@ Service/Repository
 PostgreSQL
 ```
 
-Shared chi cung cap model cho WinForms va API trong luong tren. Token JWT, API key, audit log, transaction va truy van database khong nam trong Shared.
+Shared chi cung cap model cho WinForms va API trong luong tren. Token JWT, API key, audit log, transaction, DTO response, JSON `DataTable` va truy van database khong nam trong Shared.
 
 ## Cau Truc File
 
@@ -65,6 +65,7 @@ QuanLyKhoHang.Shared/
 | File | Chuc nang |
 | --- | --- |
 | `QuanLyKhoHang.Shared.csproj` | Cau hinh class library target `net10.0`. |
+| `.gitignore` | Bo qua output build, IDE file va log local cua project Shared. |
 | `Models/HangHoa.cs` | Model mat hang trong kho. |
 | `Models/LoaiHang.cs` | Model nhom/loai hang hoa. |
 | `Models/NhaCungCap.cs` | Model nha cung cap. |
@@ -80,8 +81,9 @@ QuanLyKhoHang.Shared/
 ## Nguyen Tac Su Dung
 
 - WinForms duoc dung model de bind du lieu len form, grid va tao request API.
-- API duoc dung model cho request cu va truyen sang service/repository khi phu hop.
-- Request/response rieng cho API dat trong `QuanLyKhoHang.Api/DTOs`.
+- API duoc dung model cho request `/api/...` hien tai va truyen sang service/repository khi phu hop.
+- Request/response typed object cho `/api/v2/...` dat trong `QuanLyKhoHang.Api/DTOs`.
+- JSON tu `DataTable` cho WinForms duoc chuyen doi trong `QuanLyKhoHang.Api/DataTableJson.cs`, khong dat trong Shared.
 - `UserSession` chi dung cho UI desktop; backend phan quyen bang JWT trong `HttpContext.User`.
 - Khong dat code SQL trong Shared.
 - Khong dat code `HttpClient` trong Shared.
