@@ -24,13 +24,27 @@ namespace QuanLyKhoHang.Forms
         private readonly string _vaiTro;
 
         /// <summary>
+        /// Constructor không tham số để WinForms Designer có thể khởi tạo form.
+        /// </summary>
+        public FrmHangHoa() : this(string.Empty)
+        {
+        }
+
+        /// <summary>
         /// Khởi tạo form hàng hóa và nhận vai trò người dùng để phân quyền thao tác.
         /// </summary>
         public FrmHangHoa(string vaiTro)
         {
-            InitializeComponent();
-            UiTheme.Apply(this);
             _vaiTro = vaiTro;
+            InitializeComponent();
+
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
+            UiTheme.Apply(this);
+            UiTheme.AddSearchButton(txtTimKiem, () => txtTimKiem_TextChanged(this, EventArgs.Empty));
         }
 
         /// <summary>
@@ -38,9 +52,25 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void FrmHangHoa_Load(object sender, EventArgs e)
         {
-            LoadDataGrid();
-            LoadComboBoxes();
-            btnXoa.Enabled = _vaiTro != "NhanVien"; /// nhan vien không được xóa hàng hóa chi co admin moi co quyen xoa
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
+            try
+            {
+                LoadDataGrid();
+                LoadComboBoxes();
+                btnXoa.Enabled = !string.Equals(_vaiTro, "NhanVien", StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Không thể tải dữ liệu hàng hóa. Vui lòng kiểm tra kết nối API/database.\nChi tiết: " + ex.Message,
+                    "Không thể tải dữ liệu",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
         }
 
         /// <summary>
@@ -48,10 +78,21 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void LoadDataGrid()
         {
-            dgvHangHoa.DataSource = _hangHoaRepo.GetAll();
-            if (dgvHangHoa.Columns.Count > 0)
+            try
             {
-                dgvHangHoa.Columns[0].Width = 70;
+                dgvHangHoa.DataSource = _hangHoaRepo.GetAll();
+                if (dgvHangHoa.Columns.Count > 0)
+                {
+                    dgvHangHoa.Columns[0].Width = 70;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Không thể tải danh sách hàng hóa.\nChi tiết: " + ex.Message,
+                    "Không thể tải dữ liệu",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
             }
         }
 
@@ -86,15 +127,22 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void LoadComboBoxes()
         {
-            DataTable dtLoai = _loaiHangRepo.GetAll();
-            cbLoaiHang.DataSource = dtLoai;
-            cbLoaiHang.DisplayMember = dtLoai.Columns[1].ColumnName;
-            cbLoaiHang.ValueMember = dtLoai.Columns[0].ColumnName;
+            try
+            {
+                DataTable dtLoai = _loaiHangRepo.GetAll();
+                UiTheme.BindComboBox(cbLoaiHang, dtLoai, 1, 0);
 
-            DataTable dtNcc = _nccRepo.GetAll();
-            cbNhaCungCap.DataSource = dtNcc;
-            cbNhaCungCap.DisplayMember = dtNcc.Columns[1].ColumnName;
-            cbNhaCungCap.ValueMember = dtNcc.Columns[0].ColumnName;
+                DataTable dtNcc = _nccRepo.GetAll();
+                UiTheme.BindComboBox(cbNhaCungCap, dtNcc, 1, 0);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Không thể tải loại hàng/nhà cung cấp.\nChi tiết: " + ex.Message,
+                    "Không thể tải dữ liệu",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
         }
 
         /// <summary>
@@ -218,7 +266,12 @@ namespace QuanLyKhoHang.Forms
                 return;
             }
 
-            string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''");
+            if (dt.Columns.Count < 4)
+            {
+                return;
+            }
+
+            string tuKhoa = UiTheme.EscapeRowFilterValue(txtTimKiem.Text.Trim());
             if (string.IsNullOrEmpty(tuKhoa))
             {
                 dt.DefaultView.RowFilter = string.Empty;

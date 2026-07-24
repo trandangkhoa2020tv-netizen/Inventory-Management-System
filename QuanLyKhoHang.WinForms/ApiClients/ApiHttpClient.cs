@@ -38,6 +38,20 @@ namespace QuanLyKhoHang.ApiClients
         }
 
         /// <summary>
+        /// Gửi request GET và đọc đối tượng JSON trả về theo kiểu dữ liệu mong muốn.
+        /// </summary>
+        public static TResponse GetJson<TResponse>(string path)
+        {
+            return SendAsync(async () =>
+            {
+                using HttpResponseMessage response = await Client.GetAsync(path).ConfigureAwait(false);
+                await EnsureSuccess(response).ConfigureAwait(false);
+                TResponse result = await response.Content.ReadFromJsonAsync<TResponse>().ConfigureAwait(false);
+                return result;
+            });
+        }
+
+        /// <summary>
         /// Gửi request POST có body JSON và đọc kết quả JSON trả về theo kiểu dữ liệu mong muốn.
         /// </summary>
         public static TResponse PostForJson<TRequest, TResponse>(string path, TRequest body)

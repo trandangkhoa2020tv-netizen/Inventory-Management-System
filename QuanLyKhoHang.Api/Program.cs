@@ -118,6 +118,7 @@ builder.Services.AddRateLimiter(options =>
     builder.Services.AddScoped<PhieuNhapRepository>();
     builder.Services.AddScoped<PhieuXuatRepository>();
     builder.Services.AddScoped<TaiKhoanRepository>();
+    builder.Services.AddScoped<DashboardRepository>();
     builder.Services.AddScoped<InventoryApiQueries>();
 
     // Đăng ký service: tầng xử lý nghiệp vụ và validate trước khi gọi repository.
@@ -130,6 +131,7 @@ builder.Services.AddRateLimiter(options =>
     builder.Services.AddScoped<IKhoService, KhoService>();
     builder.Services.AddScoped<IPhieuNhapService, PhieuNhapService>();
     builder.Services.AddScoped<IPhieuXuatService, PhieuXuatService>();
+    builder.Services.AddScoped<IDashboardService, DashboardService>();
     builder.Services.AddScoped<AuditLogService>();
     builder.Services.AddSingleton(jwtSettings);
     builder.Services.AddSingleton<JwtTokenService>();
@@ -225,6 +227,7 @@ app.UseRateLimiter();
     app.MapKhoEndpoints();
     app.MapPhieuNhapEndpoints();
     app.MapPhieuXuatEndpoints();
+    app.MapDashboardEndpoints();
 
     // Nếu chạy API trực tiếp, tự mở WinForms để người dùng thấy giao diện desktop.
     app.Lifetime.ApplicationStarted.Register(DesktopClientLauncher.StartIfNeeded);

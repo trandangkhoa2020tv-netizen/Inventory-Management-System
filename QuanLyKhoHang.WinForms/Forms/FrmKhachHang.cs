@@ -17,13 +17,27 @@ namespace QuanLyKhoHang.Forms
         private readonly string _vaiTro;
 
         /// <summary>
+        /// Constructor không tham số để WinForms Designer có thể khởi tạo form.
+        /// </summary>
+        public FrmKhachHang() : this(string.Empty)
+        {
+        }
+
+        /// <summary>
         /// Khởi tạo form khách hàng và nhận vai trò người dùng để giới hạn quyền xóa.
         /// </summary>
         public FrmKhachHang(string vaiTro)
         {
-            InitializeComponent();
-            UiTheme.Apply(this);
             _vaiTro = vaiTro;
+            InitializeComponent();
+
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
+            UiTheme.Apply(this);
+            UiTheme.AddSearchButton(txtTimKiem, () => txtTimKiem_TextChanged(this, EventArgs.Empty));
         }
 
         /// <summary>
@@ -31,8 +45,13 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void FrmKhachHang_Load(object sender, EventArgs e)
         {
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
             LoadData();
-            btnXoa.Enabled = _vaiTro != "NhanVien";
+            btnXoa.Enabled = !string.Equals(_vaiTro, "NhanVien", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -40,7 +59,18 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void LoadData()
         {
-            dgvKhachHang.DataSource = _khachHangRepo.GetAll();
+            try
+            {
+                dgvKhachHang.DataSource = _khachHangRepo.GetAll();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Không thể tải danh sách khách hàng.\nChi tiết: " + ex.Message,
+                    "Không thể tải dữ liệu",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
         }
 
         /// <summary>
@@ -156,7 +186,12 @@ namespace QuanLyKhoHang.Forms
                 return;
             }
 
-            string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''");
+            if (dt.Columns.Count < 6)
+            {
+                return;
+            }
+
+            string tuKhoa = UiTheme.EscapeRowFilterValue(txtTimKiem.Text.Trim());
             if (string.IsNullOrEmpty(tuKhoa))
             {
                 dt.DefaultView.RowFilter = string.Empty;

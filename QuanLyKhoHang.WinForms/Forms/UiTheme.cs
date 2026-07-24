@@ -1,4 +1,6 @@
+using System.Data;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 
 namespace QuanLyKhoHang.Forms
@@ -25,12 +27,95 @@ namespace QuanLyKhoHang.Forms
         {
             form.BackColor = PageBackColor;
             form.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
-            form.Padding = new Padding(16);
+            // Cac form nay duoc nhung vao pnlContent; padding o day lam cat mat
+            // cac control co bo cuc co dinh khi cua so nho hon 1200px.
+            form.Padding = new Padding(0);
 
             foreach (Control control in form.Controls)
             {
                 ApplyControl(control);
             }
+        }
+
+        /// <summary>
+        /// Them nut tim kiem hien thi ngay ben phai o nhap tu khoa.
+        /// </summary>
+        public static void AddSearchButton(TextBox searchTextBox, Action searchAction)
+        {
+            if (searchTextBox?.Parent == null || searchAction == null)
+            {
+                return;
+            }
+
+            if (searchTextBox.Parent.Controls["btnTimKiem"] != null)
+            {
+                return;
+            }
+
+            Button searchButton = new Button
+            {
+                Name = "btnTimKiem",
+                Location = new Point(searchTextBox.Right + 10, Math.Max(0, searchTextBox.Top - 1)),
+                Size = new Size(90, 35),
+                Anchor = searchTextBox.Anchor
+            };
+
+            ApplyButton(searchButton);
+            searchButton.Click += (_, _) =>
+            {
+                searchAction();
+                searchTextBox.Focus();
+            };
+
+            searchTextBox.Parent.Controls.Add(searchButton);
+            searchButton.BringToFront();
+        }
+
+        /// <summary>
+        /// Đặt cụm ô nhập và nút tìm kiếm cạnh nút thêm hàng trên các form lập phiếu.
+        /// Nếu vùng hiển thị quá hẹp, cụm tìm kiếm được giữ ở hàng trên để không bị cắt.
+        /// </summary>
+        public static void PlaceSearchControlsBesideAddButton(Panel parent, TextBox searchTextBox, Button addButton)
+        {
+            if (parent == null || searchTextBox == null || addButton?.Parent == null ||
+                parent.Controls["btnTimKiem"] is not Button searchButton)
+            {
+                return;
+            }
+
+            Point fallbackTextLocation = searchTextBox.Location;
+
+            void PlaceControls()
+            {
+                Point addLocation = parent.PointToClient(addButton.Parent.PointToScreen(addButton.Location));
+                int preferredTextX = addLocation.X + addButton.Width + 10;
+                int preferredTextY = addLocation.Y + Math.Max(0, (addButton.Height - searchTextBox.Height) / 2);
+                int preferredButtonX = preferredTextX + searchTextBox.Width + 10;
+                int preferredButtonY = addLocation.Y + Math.Max(0, (addButton.Height - searchButton.Height) / 2);
+                int maxX = Math.Max(0, parent.ClientSize.Width - searchButton.Width - 10);
+                int fallbackTextMaxX = Math.Max(0, parent.ClientSize.Width - searchTextBox.Width - 10);
+                int fallbackTextX = Math.Min(Math.Max(0, fallbackTextLocation.X), fallbackTextMaxX);
+                int fallbackButtonX = Math.Min(Math.Max(0, fallbackTextX + searchTextBox.Width + 10), maxX);
+
+                if (preferredButtonX + searchButton.Width <= parent.ClientSize.Width - 10)
+                {
+                    searchTextBox.Location = new Point(preferredTextX, preferredTextY);
+                    searchButton.Location = new Point(preferredButtonX, preferredButtonY);
+                }
+                else
+                {
+                    searchTextBox.Location = new Point(fallbackTextX, Math.Max(0, fallbackTextLocation.Y));
+                    searchButton.Location = new Point(fallbackButtonX, Math.Max(0, searchTextBox.Top - 1));
+                }
+
+                searchTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                searchButton.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                searchTextBox.BringToFront();
+                searchButton.BringToFront();
+            }
+
+            PlaceControls();
+            parent.Resize += (_, _) => PlaceControls();
         }
 
         /// <summary>
@@ -108,16 +193,14 @@ namespace QuanLyKhoHang.Forms
             label.ForeColor = TextColor;
             label.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
 
-            if (label.Name == "lblTitle")
+            if (label.Name.StartsWith("lblTitle", StringComparison.OrdinalIgnoreCase))
             {
                 label.ForeColor = TitleColor;
-                label.Font = new Font("Segoe UI", 17F, FontStyle.Bold);
+                label.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
             }
             else if (label.Name == "lblTimKiem")
             {
-                label.Text = "Tìm kiếm:";
-                label.ForeColor = TitleColor;
-                label.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+                label.Visible = false;
             }
             else if (label.Name == "lblLichSuTitle")
             {
@@ -142,6 +225,16 @@ namespace QuanLyKhoHang.Forms
             textBox.BackColor = Color.White;
             textBox.ForeColor = TextColor;
             textBox.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+
+            if (string.Equals(textBox.Name, "txtTimKiem", StringComparison.OrdinalIgnoreCase))
+            {
+                textBox.PlaceholderText = "Nhập từ khóa tìm kiếm...";
+            }
+
+            if (textBox.Name is "txtGiaNhap" or "txtGiaBan" or "txtSoLuong" or "txtDonGia")
+            {
+                textBox.TextAlign = HorizontalAlignment.Right;
+            }
         }
 
         /// <summary>
@@ -153,6 +246,8 @@ namespace QuanLyKhoHang.Forms
             comboBox.BackColor = Color.White;
             comboBox.ForeColor = TextColor;
             comboBox.Font = new Font("Segoe UI", 9.5F, FontStyle.Regular);
+            comboBox.IntegralHeight = false;
+            comboBox.DropDownHeight = 320;
         }
 
         /// <summary>
@@ -162,44 +257,53 @@ namespace QuanLyKhoHang.Forms
         {
             button.FlatStyle = FlatStyle.Flat;
             button.FlatAppearance.BorderColor = InputBorderColor;
+            button.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
             button.Cursor = Cursors.Hand;
             button.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
 
-            switch (button.Name)
+            string action = GetButtonAction(button.Name);
+            switch (action)
             {
-                case "btnThem":
+                case "add":
                     button.Text = "+ Thêm mới";
                     SetSolidButton(button, Color.FromArgb(37, 99, 235));
                     break;
 
-                case "btnSua":
+                case "edit":
                     SetSolidButton(button, Color.FromArgb(245, 158, 11));
                     break;
 
-                case "btnXoa":
+                case "delete":
                     SetSolidButton(button, Color.FromArgb(220, 38, 38));
                     break;
 
-                case "btnLamMoi":
+                case "refresh":
                     button.Text = "Làm mới";
                     button.BackColor = Color.White;
                     button.ForeColor = Color.FromArgb(51, 65, 85);
                     button.FlatAppearance.BorderSize = 1;
                     break;
 
-                case "btnThemMon":
+                case "search":
+                    button.Text = "Tìm kiếm";
                     SetSolidButton(button, Color.FromArgb(37, 99, 235));
                     break;
 
-                case "btnLuuPhieu":
+                case "add-item":
+                    button.Text = "+ Thêm hàng";
+                    SetSolidButton(button, Color.FromArgb(37, 99, 235));
+                    break;
+
+                case "save":
                     SetSolidButton(button, Color.FromArgb(22, 163, 74));
                     break;
 
-                case "btnExcel":
+                case "excel":
                     SetSolidButton(button, Color.FromArgb(21, 128, 61));
                     break;
 
-                case "btnPdf":
+                case "pdf":
                     SetSolidButton(button, Color.FromArgb(185, 28, 28));
                     break;
 
@@ -215,6 +319,66 @@ namespace QuanLyKhoHang.Forms
         }
 
         /// <summary>
+        /// Chuẩn hóa tên nút thành nhóm thao tác để các màn hình dùng tên control khác nhau
+        /// vẫn nhận cùng một kiểu hiển thị.
+        /// </summary>
+        private static string GetButtonAction(string buttonName)
+        {
+            string name = buttonName ?? string.Empty;
+
+            if (name.Equals("btnThemMon", StringComparison.OrdinalIgnoreCase))
+            {
+                return "add-item";
+            }
+
+            if (name.Equals("btnTimKiem", StringComparison.OrdinalIgnoreCase))
+            {
+                return "search";
+            }
+
+            if (name.Equals("btnLuuPhieu", StringComparison.OrdinalIgnoreCase))
+            {
+                return "save";
+            }
+
+            if (name.Equals("btnExcel", StringComparison.OrdinalIgnoreCase))
+            {
+                return "excel";
+            }
+
+            if (name.Equals("btnPdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return "pdf";
+            }
+
+            if (name.Equals("btnThem", StringComparison.OrdinalIgnoreCase) ||
+                name.StartsWith("btnDanhMucThem", StringComparison.OrdinalIgnoreCase))
+            {
+                return "add";
+            }
+
+            if (name.Equals("btnSua", StringComparison.OrdinalIgnoreCase) ||
+                name.StartsWith("btnDanhMucSua", StringComparison.OrdinalIgnoreCase))
+            {
+                return "edit";
+            }
+
+            if (name.Equals("btnXoa", StringComparison.OrdinalIgnoreCase) ||
+                name.StartsWith("btnDanhMucXoa", StringComparison.OrdinalIgnoreCase))
+            {
+                return "delete";
+            }
+
+            if (name.Equals("btnLamMoi", StringComparison.OrdinalIgnoreCase) ||
+                name.StartsWith("btnDanhMucLamMoi", StringComparison.OrdinalIgnoreCase))
+            {
+                return "refresh";
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
         /// Áp dụng kiểu nút màu đặc với chữ trắng cho các thao tác chính.
         /// </summary>
         private static void SetSolidButton(Button button, Color backColor)
@@ -222,6 +386,8 @@ namespace QuanLyKhoHang.Forms
             button.BackColor = backColor;
             button.ForeColor = Color.White;
             button.FlatAppearance.BorderSize = 0;
+            button.FlatAppearance.MouseOverBackColor = ControlPaint.Light(backColor, 0.08F);
+            button.FlatAppearance.MouseDownBackColor = ControlPaint.Dark(backColor, 0.08F);
         }
 
         /// <summary>
@@ -239,9 +405,14 @@ namespace QuanLyKhoHang.Forms
             grid.RowTemplate.Height = 34;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            grid.MultiSelect = false;
             grid.AllowUserToAddRows = false;
+            grid.AllowUserToDeleteRows = false;
             grid.AllowUserToResizeRows = false;
             grid.ReadOnly = true;
+            grid.EditMode = DataGridViewEditMode.EditProgrammatically;
+            grid.ScrollBars = ScrollBars.Both;
+            grid.DefaultCellStyle.NullValue = string.Empty;
 
             grid.ColumnHeadersDefaultCellStyle.BackColor = HeaderBackColor;
             grid.ColumnHeadersDefaultCellStyle.ForeColor = TextColor;
@@ -262,6 +433,85 @@ namespace QuanLyKhoHang.Forms
             grid.AlternatingRowsDefaultCellStyle.SelectionBackColor = SelectionBackColor;
             grid.AlternatingRowsDefaultCellStyle.SelectionForeColor = Color.White;
             grid.AlternatingRowsDefaultCellStyle.Padding = new Padding(4, 0, 4, 0);
+        }
+
+        /// <summary>
+        /// Đặt tiêu đề tiếng Việt cho các cột tự sinh từ DataTable.
+        /// </summary>
+        public static void SetGridHeaders(DataGridView grid, params string[] headers)
+        {
+            if (grid == null || headers == null)
+            {
+                return;
+            }
+
+            int count = Math.Min(grid.Columns.Count, headers.Length);
+            for (int index = 0; index < count; index++)
+            {
+                grid.Columns[index].HeaderText = headers[index];
+            }
+        }
+
+        /// <summary>
+        /// Escape gia tri nguoi dung nhap truoc khi dua vao DataView.RowFilter.
+        /// Neu khong escape, cac ky tu nhu [, ], % hoac * co the lam loi tim kiem.
+        /// </summary>
+        public static string EscapeRowFilterValue(string value)
+        {
+            StringBuilder escaped = new StringBuilder();
+            foreach (char character in value ?? string.Empty)
+            {
+                switch (character)
+                {
+                    case '\'':
+                        escaped.Append("''");
+                        break;
+                    case '[':
+                        escaped.Append("[[]");
+                        break;
+                    case ']':
+                        escaped.Append("[]]");
+                        break;
+                    case '%':
+                        escaped.Append("[%]");
+                        break;
+                    case '*':
+                        escaped.Append("[*]");
+                        break;
+                    default:
+                        escaped.Append(character);
+                        break;
+                }
+            }
+
+            return escaped.ToString();
+        }
+
+        /// <summary>
+        /// Gan DataTable vao ComboBox an toan, ke ca khi API tra ve bang rong/khong co cot.
+        /// </summary>
+        public static bool BindComboBox(
+            ComboBox comboBox,
+            DataTable dataSource,
+            int displayColumnIndex,
+            int valueColumnIndex)
+        {
+            comboBox.DataSource = null;
+            comboBox.DisplayMember = string.Empty;
+            comboBox.ValueMember = string.Empty;
+            comboBox.Enabled = false;
+
+            if (dataSource == null
+                || dataSource.Columns.Count <= Math.Max(displayColumnIndex, valueColumnIndex))
+            {
+                return false;
+            }
+
+            comboBox.DataSource = dataSource;
+            comboBox.DisplayMember = dataSource.Columns[displayColumnIndex].ColumnName;
+            comboBox.ValueMember = dataSource.Columns[valueColumnIndex].ColumnName;
+            comboBox.Enabled = dataSource.Rows.Count > 0;
+            return comboBox.Enabled;
         }
     }
 }

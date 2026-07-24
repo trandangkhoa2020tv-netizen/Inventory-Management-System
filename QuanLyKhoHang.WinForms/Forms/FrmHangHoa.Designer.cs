@@ -72,6 +72,7 @@ namespace QuanLyKhoHang.Forms
             // pnlTopControls (Định vị thanh nhập liệu bám đỉnh cố định)
             this.pnlTopControls.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTopControls.Height = 230;
+            this.pnlTopControls.Name = "pnlTopControls";
             this.pnlTopControls.BackColor = System.Drawing.Color.WhiteSmoke;
             this.pnlTopControls.Controls.AddRange(new System.Windows.Forms.Control[] {
                 this.lblTitle, this.txtTenHang, this.cbLoaiHang, this.cbNhaCungCap,
@@ -84,7 +85,8 @@ namespace QuanLyKhoHang.Forms
 
             // lblTitle
             this.lblTitle.Text = "QUẢN LÝ DANH MỤC HÀNG HÓA";
-            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold);
             this.lblTitle.Location = new System.Drawing.Point(20, 12);
             this.lblTitle.AutoSize = true;
             this.lblTitle.ForeColor = System.Drawing.Color.DarkBlue;
@@ -127,8 +129,11 @@ namespace QuanLyKhoHang.Forms
             this.cbNhaCungCap.Location = new System.Drawing.Point(130, 132); this.cbNhaCungCap.Size = new System.Drawing.Size(220, 27); this.cbNhaCungCap.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             
             this.txtGiaNhap.Location = new System.Drawing.Point(480, 52); this.txtGiaNhap.Size = new System.Drawing.Size(170, 27);
+            this.txtGiaNhap.Name = "txtGiaNhap";
             this.txtGiaBan.Location = new System.Drawing.Point(480, 92); this.txtGiaBan.Size = new System.Drawing.Size(170, 27);
+            this.txtGiaBan.Name = "txtGiaBan";
             this.txtSoLuong.Location = new System.Drawing.Point(480, 132); this.txtSoLuong.Size = new System.Drawing.Size(170, 27);
+            this.txtSoLuong.Name = "txtSoLuong";
             
             // Giữ kích thước cố định để ô Đơn vị tính và Ghi chú không kéo dài theo màn hình.
             this.txtDVT.Location = new System.Drawing.Point(770, 52); this.txtDVT.Size = new System.Drawing.Size(180, 27);
@@ -139,21 +144,25 @@ namespace QuanLyKhoHang.Forms
             // ĐÃ SỬA: ĐƯA CỤM NÚT BẤM VỀ PHONG CÁCH CỔ ĐIỂN GIỐNG KHÁCH HÀNG BAN ĐẦU
 
             this.btnThem.Text = "Thêm"; 
+            this.btnThem.Name = "btnThem";
             this.btnThem.Location = new System.Drawing.Point(130, 180); 
             this.btnThem.Size = new System.Drawing.Size(95, 35); 
             this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
 
             this.btnSua.Text = "Sửa"; 
+            this.btnSua.Name = "btnSua";
             this.btnSua.Location = new System.Drawing.Point(240, 180); 
             this.btnSua.Size = new System.Drawing.Size(95, 35); 
             this.btnSua.Click += new System.EventHandler(this.btnSua_Click);
 
             this.btnXoa.Text = "Xóa"; 
+            this.btnXoa.Name = "btnXoa";
             this.btnXoa.Location = new System.Drawing.Point(350, 180); 
             this.btnXoa.Size = new System.Drawing.Size(95, 35); 
             this.btnXoa.Click += new System.EventHandler(this.btnXoa_Click);
 
             this.btnLamMoi.Text = "Làm Mới"; 
+            this.btnLamMoi.Name = "btnLamMoi";
             this.btnLamMoi.Location = new System.Drawing.Point(460, 180); 
             this.btnLamMoi.Size = new System.Drawing.Size(95, 35); 
             this.btnLamMoi.Click += new System.EventHandler(this.btnLamMoi_Click);
@@ -164,18 +173,23 @@ namespace QuanLyKhoHang.Forms
             // 2. Dán đoạn cấu hình này vào trong InitializeComponent(), ngay trên đoạn cấu hình dgvHangHoa:
            // 1. Cấu hình Nhãn "Tìm kiếm nhanh:"
             this.lblTimKiem.Text = "Tìm kiếm nhanh:";
+            this.lblTimKiem.Name = "lblTimKiem";
+            this.lblTimKiem.Visible = false;
             this.lblTimKiem.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
             this.lblTimKiem.ForeColor = System.Drawing.Color.DarkBlue;
             this.lblTimKiem.AutoSize = true;
             // Tọa độ mới: Cách cụm nút bấm bên trái một khoảng vừa vặn, không bị đè chữ
             this.lblTimKiem.Location = new System.Drawing.Point(565, 186); 
+            this.lblTimKiem.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left;
 
             // 2. Cấu hình Ô TextBox txtTimKiem
             this.txtTimKiem = new System.Windows.Forms.TextBox();
+            this.txtTimKiem.Name = "txtTimKiem";
             this.txtTimKiem.Font = new System.Drawing.Font("Segoe UI", 10F);
             // Tọa độ mới: Nằm ngay sau nhãn chữ, thẳng hàng với hàng nút bấm
-            this.txtTimKiem.Location = new System.Drawing.Point(705, 182);
-            this.txtTimKiem.Size = new System.Drawing.Size(245, 27);
+            this.txtTimKiem.Location = new System.Drawing.Point(620, 182);
+            this.txtTimKiem.Size = new System.Drawing.Size(180, 27);
+            this.txtTimKiem.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left;
             this.txtTimKiem.TextChanged += new System.EventHandler(this.txtTimKiem_TextChanged);
 
             // ======================================================================
@@ -184,6 +198,7 @@ namespace QuanLyKhoHang.Forms
             // ======================================================================
             // dgvHangHoa (Ép bảng lưới bung rộng chiếm 100% không gian trống còn lại bên dưới)
             this.dgvHangHoa.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvHangHoa.Name = "dgvHangHoa";
             this.dgvHangHoa.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvHangHoa.AllowUserToAddRows = false;
             this.dgvHangHoa.ReadOnly = true;
@@ -198,6 +213,7 @@ namespace QuanLyKhoHang.Forms
             this.ClientSize = new System.Drawing.Size(1000, 600);
             this.Controls.Add(this.dgvHangHoa);
             this.Controls.Add(this.pnlTopControls); 
+            this.Name = "FrmHangHoa";
             this.Text = "Quản Lý Hàng Hóa";
             this.Load += new System.EventHandler(this.FrmHangHoa_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvHangHoa)).EndInit();

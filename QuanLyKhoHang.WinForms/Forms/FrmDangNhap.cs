@@ -20,6 +20,12 @@ namespace QuanLyKhoHang.Forms
         public FrmDangNhap()
         {
             InitializeComponent();
+
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
             ApplyLoginTheme();
             _authApiClient = new AuthApiClient();
         }
@@ -79,7 +85,8 @@ namespace QuanLyKhoHang.Forms
         private void btnLogin_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
-            string password = txtPassword.Text.Trim();
+            // Mat khau la du lieu nguyen ven; khong cat khoang trang dau/cuoi.
+            string password = txtPassword.Text;
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {

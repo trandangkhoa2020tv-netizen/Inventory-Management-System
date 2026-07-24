@@ -8,6 +8,7 @@ namespace QuanLyKhoHang.Forms
         private System.Windows.Forms.Panel pnlBrand;
         private System.Windows.Forms.Label lblBrandIcon;
         private System.Windows.Forms.Label lblBrandText;
+        private System.Windows.Forms.Button btnToggleMenu;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Panel pnlSidebarFooter;
         private System.Windows.Forms.Label lblVersion;
@@ -20,8 +21,12 @@ namespace QuanLyKhoHang.Forms
         private System.Windows.Forms.Button btnNhanVien;
         private System.Windows.Forms.Button btnNhapKho;
         private System.Windows.Forms.Button btnXuatKho;
+        private System.Windows.Forms.Button btnDanhMuc;
+        private System.Windows.Forms.Button btnThongKe;
         private System.Windows.Forms.Button btnUserMenu;
         private System.Windows.Forms.ContextMenuStrip cmsUser;
+        private System.Windows.Forms.Timer sidebarTimer;
+        private System.Windows.Forms.ToolTip sidebarToolTip;
 
         protected override void Dispose(bool disposing)
         {
@@ -48,16 +53,21 @@ namespace QuanLyKhoHang.Forms
             btnNhanVien = new Button();
             btnNhapKho = new Button();
             btnXuatKho = new Button();
+            btnDanhMuc = new Button();
+            btnThongKe = new Button();
             pnlSidebarFooter = new Panel();
             lblVersion = new Label();
             pnlBrand = new Panel();
             lblBrandIcon = new Label();
             lblBrandText = new Label();
+            btnToggleMenu = new Button();
             pnlSidebarLine = new Panel();
             cmsUser = new ContextMenuStrip(components);
             menuTaiKhoan = new ToolStripMenuItem();
             menuChucVu = new ToolStripMenuItem();
             menuDangXuat = new ToolStripMenuItem();
+            sidebarTimer = new System.Windows.Forms.Timer(components);
+            sidebarToolTip = new ToolTip(components);
             pnlShell.SuspendLayout();
             pnlHeader.SuspendLayout();
             pnlSidebar.SuspendLayout();
@@ -146,6 +156,8 @@ namespace QuanLyKhoHang.Forms
             flowLayoutPanel1.Controls.Add(btnNhanVien);
             flowLayoutPanel1.Controls.Add(btnNhapKho);
             flowLayoutPanel1.Controls.Add(btnXuatKho);
+            flowLayoutPanel1.Controls.Add(btnDanhMuc);
+            flowLayoutPanel1.Controls.Add(btnThongKe);
             flowLayoutPanel1.Dock = DockStyle.Fill;
             flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanel1.Location = new Point(0, 120);
@@ -249,6 +261,44 @@ namespace QuanLyKhoHang.Forms
             btnXuatKho.TextAlign = ContentAlignment.MiddleLeft;
             btnXuatKho.UseVisualStyleBackColor = false;
             btnXuatKho.Click += btnXuatKho_Click;
+            //
+            // btnDanhMuc
+            //
+            btnDanhMuc.BackColor = Color.White;
+            btnDanhMuc.Cursor = Cursors.Hand;
+            btnDanhMuc.FlatAppearance.BorderSize = 0;
+            btnDanhMuc.FlatStyle = FlatStyle.Flat;
+            btnDanhMuc.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnDanhMuc.ForeColor = Color.FromArgb(43, 54, 73);
+            btnDanhMuc.Location = new Point(20, 278);
+            btnDanhMuc.Margin = new Padding(0, 0, 0, 10);
+            btnDanhMuc.Name = "btnDanhMuc";
+            btnDanhMuc.Padding = new Padding(22, 0, 0, 0);
+            btnDanhMuc.Size = new Size(220, 44);
+            btnDanhMuc.TabIndex = 5;
+            btnDanhMuc.Text = "Danh Mục";
+            btnDanhMuc.TextAlign = ContentAlignment.MiddleLeft;
+            btnDanhMuc.UseVisualStyleBackColor = false;
+            btnDanhMuc.Click += btnDanhMuc_Click;
+            //
+            // btnThongKe
+            //
+            btnThongKe.BackColor = Color.White;
+            btnThongKe.Cursor = Cursors.Hand;
+            btnThongKe.FlatAppearance.BorderSize = 0;
+            btnThongKe.FlatStyle = FlatStyle.Flat;
+            btnThongKe.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnThongKe.ForeColor = Color.FromArgb(43, 54, 73);
+            btnThongKe.Location = new Point(20, 332);
+            btnThongKe.Margin = new Padding(0, 0, 0, 10);
+            btnThongKe.Name = "btnThongKe";
+            btnThongKe.Padding = new Padding(22, 0, 0, 0);
+            btnThongKe.Size = new Size(220, 44);
+            btnThongKe.TabIndex = 6;
+            btnThongKe.Text = "Thống Kê";
+            btnThongKe.TextAlign = ContentAlignment.MiddleLeft;
+            btnThongKe.UseVisualStyleBackColor = false;
+            btnThongKe.Click += btnThongKe_Click;
             // 
             // pnlSidebarFooter
             // 
@@ -279,6 +329,7 @@ namespace QuanLyKhoHang.Forms
             pnlBrand.BackColor = Color.White;
             pnlBrand.Controls.Add(lblBrandIcon);
             pnlBrand.Controls.Add(lblBrandText);
+            pnlBrand.Controls.Add(btnToggleMenu);
             pnlBrand.Dock = DockStyle.Top;
             pnlBrand.Location = new Point(0, 0);
             pnlBrand.Name = "pnlBrand";
@@ -290,7 +341,7 @@ namespace QuanLyKhoHang.Forms
             lblBrandIcon.BackColor = Color.FromArgb(30, 112, 235);
             lblBrandIcon.Font = new Font("Segoe UI", 13F, FontStyle.Bold);
             lblBrandIcon.ForeColor = Color.White;
-            lblBrandIcon.Location = new Point(24, 38);
+            lblBrandIcon.Location = new Point(24, 12);
             lblBrandIcon.Name = "lblBrandIcon";
             lblBrandIcon.Size = new Size(48, 48);
             lblBrandIcon.TabIndex = 0;
@@ -301,12 +352,33 @@ namespace QuanLyKhoHang.Forms
             // 
             lblBrandText.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             lblBrandText.ForeColor = Color.FromArgb(30, 112, 235);
-            lblBrandText.Location = new Point(84, 35);
+            lblBrandText.Location = new Point(84, 16);
             lblBrandText.Name = "lblBrandText";
             lblBrandText.Size = new Size(160, 62);
             lblBrandText.TabIndex = 1;
             lblBrandText.Text = "Quản Lý\r\nKho Hàng";
             lblBrandText.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // btnToggleMenu
+            // 
+            btnToggleMenu.AccessibleDescription = "Thu gọn hoặc mở rộng thanh menu bên trái";
+            btnToggleMenu.AccessibleName = "Thu gọn menu";
+            btnToggleMenu.BackColor = Color.FromArgb(239, 246, 255);
+            btnToggleMenu.Cursor = Cursors.Hand;
+            btnToggleMenu.FlatAppearance.BorderColor = Color.FromArgb(30, 112, 235);
+            btnToggleMenu.FlatAppearance.BorderSize = 1;
+            btnToggleMenu.FlatAppearance.MouseDownBackColor = Color.FromArgb(219, 234, 254);
+            btnToggleMenu.FlatAppearance.MouseOverBackColor = Color.FromArgb(239, 246, 255);
+            btnToggleMenu.FlatStyle = FlatStyle.Flat;
+            btnToggleMenu.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            btnToggleMenu.ForeColor = Color.FromArgb(30, 112, 235);
+            btnToggleMenu.Location = new Point(19, 74);
+            btnToggleMenu.Name = "btnToggleMenu";
+            btnToggleMenu.Size = new Size(40, 40);
+            btnToggleMenu.TabIndex = 2;
+            btnToggleMenu.Text = string.Empty;
+            btnToggleMenu.UseVisualStyleBackColor = false;
+            btnToggleMenu.Click += btnToggleMenu_Click;
             // 
             // pnlSidebarLine
             // 
@@ -342,6 +414,10 @@ namespace QuanLyKhoHang.Forms
             menuDangXuat.Size = new Size(239, 24);
             menuDangXuat.Text = "Đăng xuất / Chuyển tài khoản";
             menuDangXuat.Click += menuDangXuat_Click;
+            // 
+            // sidebarTimer
+            // 
+            sidebarTimer.Interval = 15;
             // 
             // FrmMain
             // 

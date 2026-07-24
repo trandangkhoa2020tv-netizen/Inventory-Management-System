@@ -130,6 +130,8 @@ namespace QuanLyKhoHang.ApiClients
                 CreateNoWindow = true,
                 Environment =
                 {
+                    // API duoc tu khoi dong boi WinForms chi danh cho local dev.
+                    ["ASPNETCORE_ENVIRONMENT"] = "Development",
                     ["QUANLYKHOHANG_STARTED_BY_DESKTOP"] = "1"
                 }
             };

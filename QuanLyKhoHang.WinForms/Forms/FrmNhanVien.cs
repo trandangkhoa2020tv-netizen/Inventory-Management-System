@@ -21,7 +21,14 @@ namespace QuanLyKhoHang.Forms
         public FrmNhanVien()
         {
             InitializeComponent();
+
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
             UiTheme.Apply(this);
+            UiTheme.AddSearchButton(txtTimKiem, () => txtTimKiem_TextChanged(this, EventArgs.Empty));
         }
 
         /// <summary>
@@ -29,6 +36,11 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void FrmNhanVien_Load(object sender, EventArgs e)
         {
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
             LoadData();
         }
 
@@ -37,7 +49,18 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void LoadData()
         {
-            dgvNhanVien.DataSource = _nhanVienRepo.GetAll();
+            try
+            {
+                dgvNhanVien.DataSource = _nhanVienRepo.GetAll();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Không thể tải danh sách nhân viên.\nChi tiết: " + ex.Message,
+                    "Không thể tải dữ liệu",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
         }
 
         /// <summary>
@@ -154,7 +177,12 @@ namespace QuanLyKhoHang.Forms
                 return;
             }
 
-            string tuKhoa = txtTimKiem.Text.Trim().Replace("'", "''");
+            if (dt.Columns.Count < 6)
+            {
+                return;
+            }
+
+            string tuKhoa = UiTheme.EscapeRowFilterValue(txtTimKiem.Text.Trim());
             if (string.IsNullOrEmpty(tuKhoa))
             {
                 dt.DefaultView.RowFilter = string.Empty;

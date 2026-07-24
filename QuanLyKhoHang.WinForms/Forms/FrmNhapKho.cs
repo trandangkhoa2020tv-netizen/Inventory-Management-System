@@ -29,13 +29,28 @@ namespace QuanLyKhoHang.Forms
         private int _maPhieuDuocChon;
 
         /// <summary>
+        /// Constructor không tham số để WinForms Designer có thể khởi tạo form.
+        /// </summary>
+        public FrmNhapKho() : this(string.Empty)
+        {
+        }
+
+        /// <summary>
         /// Khởi tạo form nhập kho và nhận vai trò người dùng để phục vụ phân quyền.
         /// </summary>
         public FrmNhapKho(string vaiTro)
         {
-            InitializeComponent();
-            UiTheme.Apply(this);
             _vaiTro = vaiTro;
+            InitializeComponent();
+
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
+
+            UiTheme.Apply(this);
+            UiTheme.AddSearchButton(txtTimKiem, () => txtTimKiem_TextChanged(this, EventArgs.Empty));
+            UiTheme.PlaceSearchControlsBesideAddButton(pnlTop, txtTimKiem, btnThemMon);
         }
 
         /// <summary>
@@ -43,24 +58,29 @@ namespace QuanLyKhoHang.Forms
         /// </summary>
         private void FrmNhapKho_Load(object sender, EventArgs e)
         {
-            BindCombo(cbNCC, _nccRepo.GetAll(), 1, 0);
-            BindCombo(cbNhanVien, _nvRepo.GetAll(), 1, 0);
-            BindCombo(cbHangHoa, _hhRepo.GetAll(), 1, 0);
+            if (DesignTimeHelper.IsDesignMode)
+            {
+                return;
+            }
 
             _dtChiTietLocal = TaoBangChiTietTam();
             dgvChiTiet.DataSource = _dtChiTietLocal;
-            HienThiLichSuPhieu();
-        }
 
-        /// <summary>
-        /// Gắn DataTable vào ComboBox theo chỉ số cột hiển thị và cột giá trị.
-        /// Dùng chỉ số cột để tránh phụ thuộc vào tên cột tiếng Việt.
-        /// </summary>
-        private static void BindCombo(ComboBox comboBox, DataTable dataSource, int displayColumnIndex, int valueColumnIndex)
-        {
-            comboBox.DataSource = dataSource;
-            comboBox.DisplayMember = dataSource.Columns[displayColumnIndex].ColumnName;
-            comboBox.ValueMember = dataSource.Columns[valueColumnIndex].ColumnName;
+            try
+            {
+                UiTheme.BindComboBox(cbNCC, _nccRepo.GetAll(), 1, 0);
+                UiTheme.BindComboBox(cbNhanVien, _nvRepo.GetAll(), 1, 0);
+                UiTheme.BindComboBox(cbHangHoa, _hhRepo.GetAll(), 1, 0);
+                HienThiLichSuPhieu();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Không thể tải dữ liệu lập phiếu. Vui lòng kiểm tra kết nối API/database.\nChi tiết: " + ex.Message,
+                    "Không thể tải dữ liệu",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
         }
 
         /// <summary>
@@ -243,7 +263,12 @@ namespace QuanLyKhoHang.Forms
                 return string.Empty;
             }
 
-            string value = keyword.Replace("'", "''");
+            if (table.Columns.Count < 3)
+            {
+                return string.Empty;
+            }
+
+            string value = UiTheme.EscapeRowFilterValue(keyword);
             string maPhieu = table.Columns[0].ColumnName;
             string doiTac = table.Columns[1].ColumnName;
             string nhanVien = table.Columns[2].ColumnName;
